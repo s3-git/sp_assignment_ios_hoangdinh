@@ -29,8 +29,8 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         // Use this method to release any resources that were specific to the discarded scenes, as they will not return.
     }
 
-    // MARK: - Private Methods
-    private func configureAppAppearance() {
+    // MARK: - Public Methods
+    func configureAppAppearance() {
         // Configure navigation bar appearance
         let appearance = UINavigationBarAppearance()
         appearance.configureWithOpaqueBackground()

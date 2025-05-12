@@ -9,7 +9,6 @@ final class CityCell: UITableViewCell {
     private lazy var cityLabel: UILabel = {
         let label = UILabel()
         label.font = ThemeManager.Fonts.body
-        label.textColor = ThemeManager.shared.textColor
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
@@ -17,7 +16,6 @@ final class CityCell: UITableViewCell {
     private lazy var countryLabel: UILabel = {
         let label = UILabel()
         label.font = ThemeManager.Fonts.caption
-        label.textColor = ThemeManager.shared.textColor
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
@@ -34,7 +32,6 @@ final class CityCell: UITableViewCell {
 
     // MARK: - Private Methods
     private func setupUI() {
-        backgroundColor = ThemeManager.shared.backgroundColor
         selectionStyle = .none
 
         // Add subviews
@@ -60,6 +57,9 @@ final class CityCell: UITableViewCell {
     func configure(with city: SearchResult) {
         cityLabel.text = city.areaName?.first?.value
         countryLabel.text = city.country?.first?.value
+        backgroundColor = ThemeManager.shared.backgroundColor
+        countryLabel.textColor = ThemeManager.shared.textColor
+        cityLabel.textColor = ThemeManager.shared.textColor
     }
 
     override func prepareForReuse() {

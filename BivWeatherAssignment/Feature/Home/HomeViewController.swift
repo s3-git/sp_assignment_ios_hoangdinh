@@ -7,13 +7,24 @@ final class HomeViewController: BaseViewController {
     private let viewModel: HomeViewModel
     private var cancellables = Set<AnyCancellable>()
 
+    private lazy var themeButton: UIBarButtonItem = {
+        let button = UIBarButtonItem(
+            image: UIImage(systemName: "moon.fill"),
+            style: .plain,
+            target: self,
+            action: #selector(toggleTheme)
+        )
+        button.accessibilityIdentifier = "themeButton"
+        return button
+    }()
+
     // MARK: - UI Components
     private lazy var searchBar: UISearchBar = {
         let searchBar = UISearchBar()
-        searchBar.placeholder = "Search cities..."
         searchBar.delegate = self
         searchBar.translatesAutoresizingMaskIntoConstraints = false
         searchBar.accessibilityIdentifier = "searchBar"
+        searchBar.searchTextField.font = ThemeManager.Fonts.caption
         return searchBar
     }()
 
@@ -29,7 +40,6 @@ final class HomeViewController: BaseViewController {
     private lazy var emptyLabel: UILabel = {
         let label = UILabel()
         label.text = "No data available"
-        label.textColor = .gray
         label.textAlignment = .center
         label.translatesAutoresizingMaskIntoConstraints = false
         label.accessibilityIdentifier = "emptyLabel"
@@ -38,7 +48,6 @@ final class HomeViewController: BaseViewController {
 
     private lazy var emptyView: UIView = {
         let view = UIView()
-        view.backgroundColor = .white
         view.translatesAutoresizingMaskIntoConstraints = false
         view.accessibilityIdentifier = "emptyView"
 
@@ -63,6 +72,8 @@ final class HomeViewController: BaseViewController {
         setupUI()
         setupBindings()
         initData()
+        navigationItem.rightBarButtonItem = themeButton
+        updateThemeButtonImage()
         for view in self.view.subviews {
             print("\(view.accessibilityIdentifier) : \(view.isHidden)")
         }
@@ -76,7 +87,6 @@ final class HomeViewController: BaseViewController {
     // MARK: - Private Methods
     private func setupUI() {
         title = "Weather"
-        view.backgroundColor = ThemeManager.shared.backgroundColor
         // Add subviews
         emptyView.isHidden = true
         view.addSubview(searchBar)
@@ -121,11 +131,29 @@ final class HomeViewController: BaseViewController {
     }
 
     private func applyTheme() {
+        emptyView.backgroundColor = ThemeManager.shared.backgroundColor
         view.backgroundColor = ThemeManager.shared.backgroundColor
         searchBar.barTintColor = ThemeManager.shared.backgroundColor
-        searchBar.tintColor = ThemeManager.shared.accent
+        searchBar.tintColor = ThemeManager.shared.textColor
+        searchBar.searchTextField.textColor = ThemeManager.shared.textColor
+        searchBar.backgroundColor = ThemeManager.shared.backgroundColor
         tableView.backgroundColor = ThemeManager.shared.backgroundColor
+        emptyLabel.textColor = ThemeManager.shared.textColor
         tableView.reloadData()
+        updateThemeButtonImage()
+        searchBar.searchTextField.attributedPlaceholder = NSAttributedString(string: "Search cities...", attributes: [NSAttributedString.Key.foregroundColor: ThemeManager.shared.textColor])
+
+    }
+
+    @objc private func toggleTheme() {
+        ThemeManager.shared.toggleDarkMode()
+        applyTheme()
+    }
+
+    private func updateThemeButtonImage() {
+        let isDark = ThemeManager.shared.isDarkMode
+        themeButton.image = UIImage(systemName: isDark ? "sun.max.fill" : "moon.fill")
+        themeButton.tintColor = ThemeManager.shared.accent
     }
 
     // MARK: - Request
@@ -146,6 +174,8 @@ extension HomeViewController: UITableViewDataSource {
         }
 
         let city = viewModel.cities[indexPath.row]
+        cell.backgroundColor = ThemeManager.shared.backgroundColor
+
         cell.configure(with: city)
         return cell
     }
