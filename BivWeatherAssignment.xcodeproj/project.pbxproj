@@ -111,6 +111,18 @@
 		7328A0062DD1E918000E5622 /* CityView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7328A0002DD1E918000E5622 /* CityView.swift */; };
 		7328A0072DD1E918000E5622 /* CityViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7328A0012DD1E918000E5622 /* CityViewModel.swift */; };
 		7328A00A2DD1F07A000E5622 /* AppCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7328A0082DD1F07A000E5622 /* AppCoordinator.swift */; };
+		7328A00C2DD21084000E5622 /* RecentCitiesService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7328A00B2DD21084000E5622 /* RecentCitiesService.swift */; };
+		7328A00D2DD21084000E5622 /* RecentCitiesService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7328A00B2DD21084000E5622 /* RecentCitiesService.swift */; };
+		7328A00E2DD21084000E5622 /* RecentCitiesService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7328A00B2DD21084000E5622 /* RecentCitiesService.swift */; };
+		7328A0102DD2108E000E5622 /* RecentCitiesServicesProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7328A00F2DD21088000E5622 /* RecentCitiesServicesProtocol.swift */; };
+		7328A0112DD2108E000E5622 /* RecentCitiesServicesProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7328A00F2DD21088000E5622 /* RecentCitiesServicesProtocol.swift */; };
+		7328A0122DD2108E000E5622 /* RecentCitiesServicesProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7328A00F2DD21088000E5622 /* RecentCitiesServicesProtocol.swift */; };
+		7328A0162DD21317000E5622 /* ErrorHandlingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7328A0142DD21317000E5622 /* ErrorHandlingService.swift */; };
+		7328A0172DD21317000E5622 /* AppError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7328A0132DD21317000E5622 /* AppError.swift */; };
+		7328A0182DD21317000E5622 /* ErrorHandlingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7328A0142DD21317000E5622 /* ErrorHandlingService.swift */; };
+		7328A0192DD21317000E5622 /* AppError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7328A0132DD21317000E5622 /* AppError.swift */; };
+		7328A01A2DD21317000E5622 /* ErrorHandlingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7328A0142DD21317000E5622 /* ErrorHandlingService.swift */; };
+		7328A01B2DD21317000E5622 /* AppError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7328A0132DD21317000E5622 /* AppError.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -175,6 +187,10 @@
 		7328A0002DD1E918000E5622 /* CityView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CityView.swift; sourceTree = "<group>"; };
 		7328A0012DD1E918000E5622 /* CityViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CityViewModel.swift; sourceTree = "<group>"; };
 		7328A0082DD1F07A000E5622 /* AppCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppCoordinator.swift; sourceTree = "<group>"; };
+		7328A00B2DD21084000E5622 /* RecentCitiesService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecentCitiesService.swift; sourceTree = "<group>"; };
+		7328A00F2DD21088000E5622 /* RecentCitiesServicesProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecentCitiesServicesProtocol.swift; sourceTree = "<group>"; };
+		7328A0132DD21317000E5622 /* AppError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppError.swift; sourceTree = "<group>"; };
+		7328A0142DD21317000E5622 /* ErrorHandlingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorHandlingService.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -398,6 +414,7 @@
 		73289FC82DD19D55000E5622 /* Services */ = {
 			isa = PBXGroup;
 			children = (
+				7328A00B2DD21084000E5622 /* RecentCitiesService.swift */,
 				73289FC72DD19D55000E5622 /* WeatherService.swift */,
 			);
 			path = Services;
@@ -406,6 +423,7 @@
 		73289FC92DD19D55000E5622 /* Core */ = {
 			isa = PBXGroup;
 			children = (
+				7328A0152DD21317000E5622 /* Error */,
 				73289FDD2DD1A1A9000E5622 /* Network */,
 				73289FC22DD19D55000E5622 /* Environment */,
 			);
@@ -444,6 +462,7 @@
 		73289FEC2DD1A992000E5622 /* Interface */ = {
 			isa = PBXGroup;
 			children = (
+				7328A00F2DD21088000E5622 /* RecentCitiesServicesProtocol.swift */,
 				73289FED2DD1A997000E5622 /* WeatherServicesProtocol.swift */,
 			);
 			path = Interface;
@@ -482,6 +501,15 @@
 				7328A0082DD1F07A000E5622 /* AppCoordinator.swift */,
 			);
 			path = Coordinator;
+			sourceTree = "<group>";
+		};
+		7328A0152DD21317000E5622 /* Error */ = {
+			isa = PBXGroup;
+			children = (
+				7328A0132DD21317000E5622 /* AppError.swift */,
+				7328A0142DD21317000E5622 /* ErrorHandlingService.swift */,
+			);
+			path = Error;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -631,6 +659,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				73289FFE2DD1B99B000E5622 /* WeatherSearchRequestParameters.swift in Sources */,
+				7328A0112DD2108E000E5622 /* RecentCitiesServicesProtocol.swift in Sources */,
 				73289FF22DD1B30D000E5622 /* SearchModel.swift in Sources */,
 				73289E3C2DCDD625000E5622 /* AppDelegate.swift in Sources */,
 				73289E3D2DCDD625000E5622 /* SceneDelegate.swift in Sources */,
@@ -650,10 +679,13 @@
 				73289F9F2DCE14E1000E5622 /* AnalyticsManager.swift in Sources */,
 				73289FDB2DD19DE1000E5622 /* BaseViewController.swift in Sources */,
 				73289FA02DCE14E1000E5622 /* BaseViewModel.swift in Sources */,
+				7328A0162DD21317000E5622 /* ErrorHandlingService.swift in Sources */,
+				7328A0172DD21317000E5622 /* AppError.swift in Sources */,
 				7328A00A2DD1F07A000E5622 /* AppCoordinator.swift in Sources */,
 				73289FA12DCE14E1000E5622 /* PermissionsManager.swift in Sources */,
 				73289FD42DD19D55000E5622 /* Environment.swift in Sources */,
 				73289FD52DD19D55000E5622 /* WeatherModel.swift in Sources */,
+				7328A00D2DD21084000E5622 /* RecentCitiesService.swift in Sources */,
 				73289FD62DD19D55000E5622 /* WeatherService.swift in Sources */,
 				73289FD72DD19D55000E5622 /* WeatherRouter.swift in Sources */,
 				73289FF92DD1B939000E5622 /* WeatherRequestParameters.swift in Sources */,
@@ -678,6 +710,7 @@
 				73289FA92DCE14E1000E5622 /* LocationManager.swift in Sources */,
 				73289FAA2DCE14E1000E5622 /* Logger.swift in Sources */,
 				73289FF82DD1B939000E5622 /* WeatherRequestParameters.swift in Sources */,
+				7328A0102DD2108E000E5622 /* RecentCitiesServicesProtocol.swift in Sources */,
 				73289FAE2DCE14E1000E5622 /* ThemeManager.swift in Sources */,
 				73289FF42DD1B30D000E5622 /* SearchModel.swift in Sources */,
 				73289FB02DCE14E1000E5622 /* CacheManager.swift in Sources */,
@@ -689,8 +722,11 @@
 				73289FD02DD19D55000E5622 /* Environment.swift in Sources */,
 				73289FD12DD19D55000E5622 /* WeatherModel.swift in Sources */,
 				73289FD22DD19D55000E5622 /* WeatherService.swift in Sources */,
+				7328A01A2DD21317000E5622 /* ErrorHandlingService.swift in Sources */,
+				7328A01B2DD21317000E5622 /* AppError.swift in Sources */,
 				73289FD32DD19D55000E5622 /* WeatherRouter.swift in Sources */,
 				73289FFD2DD1B99B000E5622 /* WeatherSearchRequestParameters.swift in Sources */,
+				7328A00C2DD21084000E5622 /* RecentCitiesService.swift in Sources */,
 				73289FB62DCE14E1000E5622 /* BaseViewModel.swift in Sources */,
 				73289FB72DCE14E1000E5622 /* PermissionsManager.swift in Sources */,
 				73289FB82DCE14E1000E5622 /* WeatherComponents.swift in Sources */,
@@ -709,10 +745,13 @@
 				73289FFC2DD1B99B000E5622 /* WeatherSearchRequestParameters.swift in Sources */,
 				73289FF32DD1B30D000E5622 /* SearchModel.swift in Sources */,
 				73289E2F2DCDD625000E5622 /* BivWeatherAssignmentUITests.swift in Sources */,
+				7328A0182DD21317000E5622 /* ErrorHandlingService.swift in Sources */,
+				7328A0192DD21317000E5622 /* AppError.swift in Sources */,
 				73289E302DCDD625000E5622 /* BivWeatherAssignmentUITestsLaunchTests.swift in Sources */,
 				73289F7C2DCE14E1000E5622 /* AppConstants.swift in Sources */,
 				73289F7D2DCE14E1000E5622 /* BaseView.swift in Sources */,
 				73289F7E2DCE14E1000E5622 /* NetworkReachabilityManager.swift in Sources */,
+				7328A00E2DD21084000E5622 /* RecentCitiesService.swift in Sources */,
 				73289FF02DD1A9A2000E5622 /* WeatherServicesProtocol.swift in Sources */,
 				73289F7F2DCE14E1000E5622 /* LocationManager.swift in Sources */,
 				73289F802DCE14E1000E5622 /* Logger.swift in Sources */,
@@ -733,6 +772,7 @@
 				73289FCE2DD19D55000E5622 /* WeatherRouter.swift in Sources */,
 				73289FFA2DD1B939000E5622 /* WeatherRequestParameters.swift in Sources */,
 				73289FE92DD1A92A000E5622 /* HomeViewModel.swift in Sources */,
+				7328A0122DD2108E000E5622 /* RecentCitiesServicesProtocol.swift in Sources */,
 				73289FE62DD1A795000E5622 /* CityCell.swift in Sources */,
 				73289FE72DD1A795000E5622 /* HomeViewController.swift in Sources */,
 				73289F8E2DCE14E1000E5622 /* WeatherComponents.swift in Sources */,

@@ -25,6 +25,7 @@ final class HomeViewController: BaseViewController {
         searchBar.translatesAutoresizingMaskIntoConstraints = false
         searchBar.accessibilityIdentifier = "searchBar"
         searchBar.searchTextField.font = ThemeManager.Fonts.caption
+        searchBar.placeholder = "Search cities..."
         return searchBar
     }()
 
@@ -37,10 +38,12 @@ final class HomeViewController: BaseViewController {
         tableView.accessibilityIdentifier = "tableView"
         return tableView
     }()
+
     private lazy var emptyLabel: UILabel = {
         let label = UILabel()
-        label.text = "No data available"
+        label.text = "No cities viewed yet"
         label.textAlignment = .center
+        label.font = ThemeManager.Fonts.body
         label.translatesAutoresizingMaskIntoConstraints = false
         label.accessibilityIdentifier = "emptyLabel"
         return label
@@ -50,9 +53,7 @@ final class HomeViewController: BaseViewController {
         let view = UIView()
         view.translatesAutoresizingMaskIntoConstraints = false
         view.accessibilityIdentifier = "emptyView"
-
         view.addSubview(emptyLabel)
-
         return view
     }()
 
@@ -74,9 +75,6 @@ final class HomeViewController: BaseViewController {
         initData()
         navigationItem.rightBarButtonItem = themeButton
         updateThemeButtonImage()
-        for view in self.view.subviews {
-            print("\(view.accessibilityIdentifier) : \(view.isHidden)")
-        }
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -87,47 +85,68 @@ final class HomeViewController: BaseViewController {
     // MARK: - Private Methods
     private func setupUI() {
         title = "Weather"
-        // Add subviews
-        emptyView.isHidden = true
         view.addSubview(searchBar)
         view.addSubview(tableView)
         view.addSubview(emptyView)
-        // Setup constraints
+
         NSLayoutConstraint.activate([
             searchBar.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-            searchBar.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: AppConstants.UserInterface.padding),
-            searchBar.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -AppConstants.UserInterface.padding),
+            searchBar.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            searchBar.trailingAnchor.constraint(equalTo: view.trailingAnchor),
 
             tableView.topAnchor.constraint(equalTo: searchBar.bottomAnchor),
-            tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: AppConstants.UserInterface.padding),
-            tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -AppConstants.UserInterface.padding),
+            tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
-            emptyView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: AppConstants.UserInterface.padding),
-            emptyView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -AppConstants.UserInterface.padding),
+
+            emptyView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            emptyView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             emptyView.topAnchor.constraint(equalTo: searchBar.bottomAnchor),
             emptyView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+
             emptyLabel.centerXAnchor.constraint(equalTo: emptyView.centerXAnchor),
             emptyLabel.centerYAnchor.constraint(equalTo: emptyView.centerYAnchor)
         ])
     }
-    private func showEmpty(_ show: Bool) {
-    }
+
     private func setupBindings() {
-        // Bind view model states
+        // Bind cities
         viewModel.$cities
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] city in
-                self?.emptyView.isHidden = !city.isEmpty
-                self?.tableView.reloadData()
+            .sink { [weak self] _ in
+                self?.updateTableViewState()
             }
             .store(in: &cancellables)
 
+        // Bind recent cities
+        viewModel.$recentCities
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                self?.updateTableViewState()
+            }
+            .store(in: &cancellables)
+
+        // Bind showing recent cities
+        viewModel.$showingRecentCities
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                self?.updateTableViewState()
+            }
+            .store(in: &cancellables)
+
+        // Bind view model state
         viewModel.$state
             .receive(on: DispatchQueue.main)
             .sink { [weak self] state in
                 self?.handleState(state: state)
             }
             .store(in: &cancellables)
+    }
+
+    private func updateTableViewState() {
+        let hasData = viewModel.showingRecentCities ? !viewModel.recentCities.isEmpty : !viewModel.cities.isEmpty
+        emptyView.isHidden = hasData
+        tableView.reloadData()
     }
 
     private func applyTheme() {
@@ -141,8 +160,10 @@ final class HomeViewController: BaseViewController {
         emptyLabel.textColor = ThemeManager.shared.textColor
         tableView.reloadData()
         updateThemeButtonImage()
-        searchBar.searchTextField.attributedPlaceholder = NSAttributedString(string: "Search cities...", attributes: [NSAttributedString.Key.foregroundColor: ThemeManager.shared.textColor])
-
+        searchBar.searchTextField.attributedPlaceholder = NSAttributedString(
+            string: "Search cities...",
+            attributes: [NSAttributedString.Key.foregroundColor: ThemeManager.shared.textColor]
+        )
     }
 
     @objc private func toggleTheme() {
@@ -156,7 +177,6 @@ final class HomeViewController: BaseViewController {
         themeButton.tintColor = ThemeManager.shared.accent
     }
 
-    // MARK: - Request
     private func initData() {
         self.handleState(state: .loading)
     }
@@ -165,7 +185,7 @@ final class HomeViewController: BaseViewController {
 // MARK: - UITableViewDataSource
 extension HomeViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return viewModel.cities.count
+        return viewModel.showingRecentCities ? viewModel.recentCities.count : viewModel.cities.count
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -173,11 +193,14 @@ extension HomeViewController: UITableViewDataSource {
             return UITableViewCell()
         }
 
-        let city = viewModel.cities[indexPath.row]
-        cell.backgroundColor = ThemeManager.shared.backgroundColor
-
+        let city = viewModel.showingRecentCities ? viewModel.recentCities[indexPath.row] : viewModel.cities[indexPath.row]
         cell.configure(with: city)
+        cell.backgroundColor = ThemeManager.shared.backgroundColor
         return cell
+    }
+
+    func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+        return viewModel.showingRecentCities ? "Recent Cities" : "Search Results"
     }
 }
 
@@ -185,7 +208,7 @@ extension HomeViewController: UITableViewDataSource {
 extension HomeViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
-        let city = viewModel.cities[indexPath.row]
+        let city = viewModel.showingRecentCities ? viewModel.recentCities[indexPath.row] : viewModel.cities[indexPath.row]
         viewModel.didSelectCity(city)
     }
 }

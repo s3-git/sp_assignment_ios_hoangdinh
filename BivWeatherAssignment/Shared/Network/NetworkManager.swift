@@ -79,6 +79,7 @@ enum NetworkError: Error {
     case httpError(Int)
     case networkError(Error)
     case decodingError(Error)
+    case custom(Error)
 }
 
 enum HTTPMethod: String {

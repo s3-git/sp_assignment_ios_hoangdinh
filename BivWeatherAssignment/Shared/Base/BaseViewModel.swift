@@ -32,9 +32,14 @@ class BaseViewModel: ObservableObject, BaseViewModelType {
 
     var cancellables = Set<AnyCancellable>()
 
+    // MARK: - Dependencies
+    private let errorHandler: ErrorHandlingServiceProtocol
+
     // MARK: - Initialization
-    init(initialState: ViewState) {
+    init(initialState: ViewState = .initial,
+         errorHandler: ErrorHandlingServiceProtocol = ErrorHandlingService()) {
         self.state = initialState
+        self.errorHandler = errorHandler
         setupBindings()
     }
 
@@ -46,8 +51,23 @@ class BaseViewModel: ObservableObject, BaseViewModelType {
 
     /// Handle errors in a consistent way
     func handleError(_ error: Error) {
-        self.state = .error(error.localizedDescription)
-        Logger.shared.error(error.localizedDescription)
+        let errorMessage = errorHandler.handle(error)
+        let recoverySuggestion = errorHandler.getRecoverySuggestion(for: error)
+
+        // Update state with error and recovery suggestion
+        if let suggestion = recoverySuggestion {
+            self.state = .error("\(errorMessage)\n\n\(suggestion)")
+        } else {
+            self.state = .error(errorMessage)
+        }
+
+        // Log error
+        errorHandler.logError(error)
+
+        // If error is recoverable, attempt recovery after delay
+        if errorHandler.isRecoverable(error) {
+            attemptRecovery(from: error)
+        }
     }
 
     /// Store cancellable
@@ -58,6 +78,26 @@ class BaseViewModel: ObservableObject, BaseViewModelType {
     /// Cancel all subscriptions
     func cancelAllSubscriptions() {
         cancellables.removeAll()
+    }
+
+    // MARK: - Private Methods
+    private func attemptRecovery(from error: Error) {
+        // Wait for 3 seconds before attempting recovery
+        DispatchQueue.main.asyncAfter(deadline: .now() + 3) { [weak self] in
+            guard let self = self else { return }
+
+            // Only attempt recovery if still in error state
+            if case .error = self.state {
+                self.state = .initial
+                self.retryLastOperation()
+            }
+        }
+    }
+
+    /// Override this method in subclasses to implement retry logic
+    func retryLastOperation() {
+        // Default implementation does nothing
+        // Override in subclasses to implement specific retry logic
     }
 
     // MARK: - Deinitialization
