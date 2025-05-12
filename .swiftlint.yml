@@ -1,8 +1,7 @@
 # swiftlint.yml
 
 included:
-  - WeatherApp
-  - WeatherAppTests
+  - BivWeatherAssignment
 
 excluded:
   - Pods
@@ -10,6 +9,8 @@ excluded:
   - Generated
   - .build
   - DerivedData
+  - *.xcodeproj
+  - *.xcworkspace
 
 analyzer_rules:
   - unused_import
@@ -48,7 +49,6 @@ line_length:
 # Custom rules for comments
 custom_rules:
   mark_usage:
-    included: ".*\\.swift"
     name: "MARK Usage"
     regex: "^(?!.*//\\s?MARK:).*(func\\s|class\\s|struct\\s|enum\\s)"
     message: "Use // MARK: to organize code sections."
@@ -65,14 +65,12 @@ custom_rules:
       - ".*Mock\\.swift$"
 
   fixme_todo_format:
-    included: ".*\\.swift"
     name: "TODO / FIXME Format"
     regex: ".*(TODO|FIXME)[^:]"
     message: "TODO or FIXME should be followed by a colon (`TODO:`)."
     severity: warning
 
   doc_comment_required:
-    included: ".*\\.swift"
     name: "Doc Comment Required"
     regex: "^\\s*(public|open)\\s+(class|func|var|let|struct|enum)\\b(?![^\\n]*///)"
     message: "Public declarations should be documented using triple-slash `///` comments."

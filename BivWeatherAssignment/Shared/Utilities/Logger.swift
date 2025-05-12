@@ -6,7 +6,7 @@ class Logger {
     // MARK: - Properties
     static let shared = Logger()
     private let logger: OSLog
-    
+
     // MARK: - Log Levels
     enum Level: String {
         case debug = "🔍"
@@ -15,47 +15,47 @@ class Logger {
         case error = "❌"
         case critical = "💥"
     }
-    
+
     // MARK: - Initialization
     private init() {
         logger = OSLog(subsystem: Bundle.main.bundleIdentifier ?? "com.bivweather", category: "App")
     }
-    
+
     // MARK: - Public Methods
     /// Log debug message
     func debug(_ message: String, file: String = #file, function: String = #function, line: Int = #line) {
         log(message, level: .debug, file: file, function: function, line: line)
     }
-    
+
     /// Log info message
     func info(_ message: String, file: String = #file, function: String = #function, line: Int = #line) {
         log(message, level: .info, file: file, function: function, line: line)
     }
-    
+
     /// Log warning message
     func warning(_ message: String, file: String = #file, function: String = #function, line: Int = #line) {
         log(message, level: .warning, file: file, function: function, line: line)
     }
-    
+
     /// Log error message
     func error(_ message: String, file: String = #file, function: String = #function, line: Int = #line) {
         log(message, level: .error, file: file, function: function, line: line)
     }
-    
+
     /// Log critical message
     func critical(_ message: String, file: String = #file, function: String = #function, line: Int = #line) {
         log(message, level: .critical, file: file, function: function, line: line)
     }
-    
+
     // MARK: - Private Methods
     private func log(_ message: String, level: Level, file: String, function: String, line: Int) {
         let fileName = (file as NSString).lastPathComponent
         let logMessage = "\(level.rawValue) [\(fileName):\(line)] \(function): \(message)"
-        
+
         #if DEBUG
         print(logMessage)
         #endif
-        
+
         os_log("%{public}@", log: logger, type: level.osLogType, logMessage)
     }
 }
@@ -90,7 +90,7 @@ extension Logger {
         Body: \(String(data: request.httpBody ?? Data(), encoding: .utf8) ?? "nil")
         """)
     }
-    
+
     /// Log network response
     func logResponse(_ response: HTTPURLResponse, data: Data?) {
         debug("""
@@ -100,7 +100,7 @@ extension Logger {
         Body: \(String(data: data ?? Data(), encoding: .utf8) ?? "nil")
         """)
     }
-    
+
     /// Log error
     func logError(_ error: Error) {
         self.error("""
@@ -110,4 +110,4 @@ extension Logger {
         User Info: \((error as NSError).userInfo)
         """)
     }
-} 
+}

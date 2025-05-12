@@ -2,9 +2,9 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-    <key>API_KEY</key>
-    <string>YOUR_API_KEY_HERE</string>
-    <key>BASE_URL</key>
-    <string>https://api.worldweatheronline.com/premium/v1</string>
+	<key>API_KEY</key>
+	<string>912f884e51f64c66b5643355251205</string>
+	<key>BASE_URL</key>
+	<string>https://api.worldweatheronline.com/premium/v1</string>
 </dict>
-</plist> 
+</plist>

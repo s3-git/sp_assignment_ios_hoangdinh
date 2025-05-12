@@ -8,30 +8,18 @@ class ThemeManager: ObservableObject {
             UserDefaults.standard.set(isDarkMode, forKey: "isDarkMode")
         }
     }
-    
+
     // MARK: - Properties
     static let shared = ThemeManager()
-    
-    // MARK: - Colors
-    struct Colors {
-        static let primary = Color("Primary")
-        static let secondary = Color("Secondary")
-        static let accent = Color("Accent")
-        static let background = Color("Background")
-        static let text = Color("Text")
-        static let error = Color("Error")
-        static let success = Color("Success")
-        static let warning = Color("Warning")
-    }
-    
+
     // MARK: - Fonts
     struct Fonts {
-        static let title = Font.system(size: 28, weight: .bold)
-        static let headline = Font.system(size: 20, weight: .semibold)
-        static let body = Font.system(size: 16, weight: .regular)
-        static let caption = Font.system(size: 14, weight: .regular)
+        static let title = UIFont.systemFont(ofSize: 28, weight: .bold)
+        static let headline = UIFont.systemFont(ofSize: 20, weight: .semibold)
+        static let body = UIFont.systemFont(ofSize: 16, weight: .regular)
+        static let caption = UIFont.systemFont(ofSize: 14, weight: .regular)
     }
-    
+
     // MARK: - Spacing
     struct Spacing {
         static let small: CGFloat = 8
@@ -39,31 +27,49 @@ class ThemeManager: ObservableObject {
         static let large: CGFloat = 24
         static let extraLarge: CGFloat = 32
     }
-    
+
     // MARK: - Initialization
     private init() {
         self.isDarkMode = UserDefaults.standard.bool(forKey: "isDarkMode")
     }
-    
+
     // MARK: - Public Methods
     /// Toggle dark mode
     func toggleDarkMode() {
         isDarkMode.toggle()
     }
-    
+
     /// Get color scheme
     var colorScheme: ColorScheme {
         isDarkMode ? .dark : .light
     }
-    
+
     /// Get background color
-    var backgroundColor: Color {
-        isDarkMode ? Colors.background : .white
+    var backgroundColor: UIColor {
+        isDarkMode ? UIColor(named: "Background") ?? UIColor.systemBackground : .white
     }
-    
+
     /// Get text color
-    var textColor: Color {
-        isDarkMode ? .white : Colors.text
+    var textColor: UIColor {
+        isDarkMode ? .white : UIColor(named: "Text") ?? UIColor.label
+    }
+    var primary: UIColor {
+        isDarkMode ? UIColor(named: "Primary") ?? UIColor.systemBlue  : .white
+    }
+    var secondary: UIColor {
+        isDarkMode ? UIColor(named: "Secondary") ?? UIColor.systemGray  : .white
+    }
+    var accent: UIColor {
+        isDarkMode ? UIColor(named: "Accent") ?? UIColor.systemTeal  : .white
+    }
+    var error: UIColor {
+        isDarkMode ? UIColor(named: "Error") ?? UIColor.systemRed  : .white
+    }
+    var success: UIColor {
+        isDarkMode ? UIColor(named: "Success") ?? UIColor.systemGreen  : .white
+    }
+    var warning: UIColor {
+        isDarkMode ? UIColor(named: "Warning") ?? UIColor.systemOrange  : .white
     }
 }
 
@@ -73,8 +79,15 @@ extension View {
     func applyTheme() -> some View {
         self
             .preferredColorScheme(ThemeManager.shared.colorScheme)
-            .background(ThemeManager.shared.backgroundColor)
-            .foregroundColor(ThemeManager.shared.textColor)
+            .background(ThemeManager.shared.backgroundColor.toColor)
+            .foregroundColor(ThemeManager.shared.textColor.toColor)
     }
-} 
+}
 
+// MARK: - UIColor Extension
+extension UIColor {
+    /// Convert UIColor to SwiftUI Color
+    var toColor: Color {
+        return Color(self)
+    }
+}

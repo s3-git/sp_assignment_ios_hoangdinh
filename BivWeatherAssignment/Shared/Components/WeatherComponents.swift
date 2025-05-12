@@ -6,7 +6,7 @@ struct WeatherCard: View {
     let description: String
     let humidity: String
     let iconURL: URL?
-    
+
     var body: some View {
         VStack(spacing: 16) {
             if let iconURL = iconURL {
@@ -19,14 +19,14 @@ struct WeatherCard: View {
                 }
                 .frame(width: 100, height: 100)
             }
-            
+
             Text(temperature)
                 .font(.system(size: 48, weight: .bold))
-            
+
             Text(description)
                 .font(.title2)
                 .foregroundColor(.secondary)
-            
+
             HStack {
                 Image(systemName: "humidity")
                 Text(humidity)
@@ -46,17 +46,17 @@ struct EmptyStateView: View {
     let title: String
     let message: String
     let systemImage: String
-    
+
     var body: some View {
         VStack(spacing: 16) {
             Image(systemName: systemImage)
                 .font(.system(size: 48))
                 .foregroundColor(.secondary)
-            
+
             Text(title)
                 .font(.title2)
                 .fontWeight(.bold)
-            
+
             Text(message)
                 .font(.body)
                 .foregroundColor(.secondary)
@@ -70,12 +70,12 @@ struct EmptyStateView: View {
 // MARK: - Loading View
 struct LoadingView: View {
     let message: String
-    
+
     var body: some View {
         VStack(spacing: 16) {
             ProgressView()
                 .scaleEffect(1.5)
-            
+
             Text(message)
                 .font(.subheadline)
                 .foregroundColor(.secondary)
@@ -91,18 +91,18 @@ struct LoadingView: View {
 struct ErrorView: View {
     let error: Error
     let retryAction: () -> Void
-    
+
     var body: some View {
         VStack(spacing: 16) {
             Image(systemName: "exclamationmark.triangle")
                 .font(.system(size: 48))
                 .foregroundColor(.red)
-            
+
             Text(error.localizedDescription)
                 .font(.body)
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)
-            
+
             Button(action: retryAction) {
                 Text("Retry")
                     .font(.headline)
@@ -131,17 +131,17 @@ struct WeatherComponents_Previews: PreviewProvider {
                 iconURL: nil
             )
             .previewLayout(.sizeThatFits)
-            
+
             EmptyStateView(
                 title: "No Cities",
                 message: "Search for a city to see its weather",
                 systemImage: "magnifyingglass"
             )
             .previewLayout(.sizeThatFits)
-            
+
             LoadingView(message: "Loading weather data...")
                 .previewLayout(.sizeThatFits)
-            
+
             ErrorView(
                 error: NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "Failed to load weather data"]),
                 retryAction: {}
@@ -149,4 +149,4 @@ struct WeatherComponents_Previews: PreviewProvider {
             .previewLayout(.sizeThatFits)
         }
     }
-} 
+}

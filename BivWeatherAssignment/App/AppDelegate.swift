@@ -34,25 +34,25 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         // Configure navigation bar appearance
         let appearance = UINavigationBarAppearance()
         appearance.configureWithOpaqueBackground()
-        appearance.backgroundColor = ThemeManager.Colors.background.uiColor
-        appearance.titleTextAttributes = [.foregroundColor: ThemeManager.Colors.text]
-        appearance.largeTitleTextAttributes = [.foregroundColor: ThemeManager.Colors.text]
-        
+        appearance.backgroundColor = ThemeManager.shared.backgroundColor
+        appearance.titleTextAttributes = [.foregroundColor: ThemeManager.shared.textColor]
+        appearance.largeTitleTextAttributes = [.foregroundColor: ThemeManager.shared.textColor]
+
         UINavigationBar.appearance().standardAppearance = appearance
         UINavigationBar.appearance().scrollEdgeAppearance = appearance
         UINavigationBar.appearance().compactAppearance = appearance
-        UINavigationBar.appearance().tintColor = ThemeManager.Colors.accent.uiColor
-        
+        UINavigationBar.appearance().tintColor = ThemeManager.shared.accent
+
         // Configure search bar appearance
         let searchBarAppearance = UISearchBar.appearance()
-        searchBarAppearance.tintColor = ThemeManager.Colors.accent.uiColor
-        searchBarAppearance.barTintColor = ThemeManager.Colors.background.uiColor
-        
+        searchBarAppearance.tintColor = ThemeManager.shared.accent
+        searchBarAppearance.barTintColor = ThemeManager.shared.backgroundColor
+
         // Configure table view appearance
-        UITableView.appearance().backgroundColor = ThemeManager.Colors.background.uiColor
-        UITableViewCell.appearance().backgroundColor = ThemeManager.Colors.background.uiColor
-        
+        UITableView.appearance().backgroundColor = ThemeManager.shared.backgroundColor
+        UITableViewCell.appearance().backgroundColor = ThemeManager.shared.backgroundColor
+
         // Configure label appearance
-        UILabel.appearance().textColor = ThemeManager.Colors.text.uiColor
+        UILabel.appearance().textColor = ThemeManager.shared.textColor
     }
 }

@@ -9,25 +9,25 @@ class PermissionsManager: NSObject {
     // MARK: - Published Properties
     @Published var locationPermission: CLAuthorizationStatus = .notDetermined
     @Published var notificationPermission: UNAuthorizationStatus = .notDetermined
-    
+
     // MARK: - Properties
     static let shared = PermissionsManager()
     private let locationManager = CLLocationManager()
     private var cancellables = Set<AnyCancellable>()
-    
+
     // MARK: - Initialization
     private override init() {
         super.init()
         setupLocationManager()
         checkNotificationPermission()
     }
-    
+
     // MARK: - Private Methods
     private func setupLocationManager() {
         locationManager.delegate = self
         locationPermission = locationManager.authorizationStatus
     }
-    
+
     private func checkNotificationPermission() {
         UNUserNotificationCenter.current().getNotificationSettings { [weak self] settings in
             DispatchQueue.main.async {
@@ -35,13 +35,13 @@ class PermissionsManager: NSObject {
             }
         }
     }
-    
+
     // MARK: - Public Methods
     /// Request location permission
     func requestLocationPermission() {
         locationManager.requestWhenInUseAuthorization()
     }
-    
+
     /// Request notification permission
     func requestNotificationPermission() {
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { [weak self] granted, _ in
@@ -54,17 +54,17 @@ class PermissionsManager: NSObject {
             }
         }
     }
-    
+
     /// Check if location permission is granted
     var isLocationPermissionGranted: Bool {
         locationPermission == .authorizedWhenInUse || locationPermission == .authorizedAlways
     }
-    
+
     /// Check if notification permission is granted
     var isNotificationPermissionGranted: Bool {
         notificationPermission == .authorized
     }
-    
+
     /// Open app settings
     func openSettings() {
         guard let settingsUrl = URL(string: UIApplication.openSettingsURLString) else { return }
@@ -79,4 +79,4 @@ extension PermissionsManager: CLLocationManagerDelegate {
     func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
         locationPermission = manager.authorizationStatus
     }
-} 
+}

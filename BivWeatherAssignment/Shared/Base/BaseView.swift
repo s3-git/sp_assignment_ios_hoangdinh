@@ -2,16 +2,16 @@ import SwiftUI
 
 /// Represents the different states a view can be in
 enum ViewState: Equatable {
+    case initial
     case loading
     case error(String)
-    case empty
     case success
-    
+
     static func == (lhs: ViewState, rhs: ViewState) -> Bool {
         switch (lhs, rhs) {
         case (.loading, .loading),
-             (.empty, .empty),
-             (.success, .success):
+             (.success, .success),
+                (.initial, .initial):
             return true
         case (.error(let lhsMessage), .error(let rhsMessage)):
             return lhsMessage == rhsMessage
@@ -26,12 +26,12 @@ struct BaseView<Content: View>: View {
     // MARK: - Properties
     let content: Content
     @State private var viewState: ViewState = .success
-    
+
     // MARK: - Initialization
     init(@ViewBuilder content: () -> Content) {
         self.content = content()
     }
-    
+
     // MARK: - Body
     var body: some View {
         content
@@ -46,11 +46,8 @@ struct BaseView<Content: View>: View {
                             .multilineTextAlignment(.center)
                             .padding()
                     }
-                case .empty:
-                    Text("No data available")
-                        .foregroundColor(.gray)
-                case .success:
-                    EmptyView()
+                    default:
+                        EmptyView()
                 }
             }
             .onChange(of: viewState) { newState in
@@ -62,23 +59,18 @@ struct BaseView<Content: View>: View {
                 }
             }
     }
-    
+
     // MARK: - Public Methods
     /// Show loading state
     func showLoading() {
         viewState = .loading
     }
-    
+
     /// Show error state
     func showError(_ error: Error) {
         viewState = .error(error.localizedDescription)
     }
-    
-    /// Show empty state
-    func showEmpty() {
-        viewState = .empty
-    }
-    
+
     /// Show success state
     func showSuccess() {
         viewState = .success
@@ -92,4 +84,4 @@ struct BaseView_Previews: PreviewProvider {
             Text("Hello, World!")
         }
     }
-} 
+}

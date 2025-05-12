@@ -1,74 +1,60 @@
 import Foundation
 
-/// Base cache manager for handling data persistence
+/// Cache manager for handling request caching with expiration
 class CacheManager {
     // MARK: - Properties
     static let shared = CacheManager()
-    private let fileManager = FileManager.default
-    private let cacheDirectory: URL
-    
-    // MARK: - Initialization
-    private init() {
-        let urls = fileManager.urls(for: .cachesDirectory, in: .userDomainMask)
-        cacheDirectory = urls[0].appendingPathComponent("BivWeather")
-        createCacheDirectoryIfNeeded()
-    }
-    
-    // MARK: - Private Methods
-    private func createCacheDirectoryIfNeeded() {
-        guard !fileManager.fileExists(atPath: cacheDirectory.path) else { return }
-        try? fileManager.createDirectory(at: cacheDirectory, withIntermediateDirectories: true)
-    }
-    
-    // MARK: - Public Methods
-    /// Save data to cache
-    /// - Parameters:
-    ///   - data: The data to save
-    ///   - key: The key to save the data under
-    func save<T: Encodable>(_ data: T, forKey key: String) throws {
-        let url = cacheDirectory.appendingPathComponent(key)
-        let data = try JSONEncoder().encode(data)
-        try data.write(to: url)
-    }
-    
-    /// Load data from cache
-    /// - Parameters:
-    ///   - key: The key to load the data from
-    ///   - type: The type to decode the data into
-    /// - Returns: The decoded data
-    func load<T: Decodable>(forKey key: String, type: T.Type) throws -> T {
-        let url = cacheDirectory.appendingPathComponent(key)
-        let data = try Data(contentsOf: url)
-        return try JSONDecoder().decode(T.self, from: data)
-    }
-    
-    /// Remove data from cache
-    /// - Parameter key: The key to remove the data for
-    func remove(forKey key: String) throws {
-        let url = cacheDirectory.appendingPathComponent(key)
-        try fileManager.removeItem(at: url)
-    }
-    
-    /// Clear all cached data
-    func clearAll() throws {
-        let contents = try fileManager.contentsOfDirectory(at: cacheDirectory, includingPropertiesForKeys: nil)
-        try contents.forEach { url in
-            try fileManager.removeItem(at: url)
+    private let requestCache: NSCache<NSString, CachedResponse>
+
+    // MARK: - Types
+    final class CachedResponse {
+        let data: Data
+        let timestamp: Date
+        let expirationTime: TimeInterval
+
+        init(data: Data, timestamp: Date, expirationTime: TimeInterval) {
+            self.data = data
+            self.timestamp = timestamp
+            self.expirationTime = expirationTime
         }
     }
-    
-    /// Check if data exists in cache
-    /// - Parameter key: The key to check
-    /// - Returns: Whether the data exists
-    func exists(forKey key: String) -> Bool {
-        let url = cacheDirectory.appendingPathComponent(key)
-        return fileManager.fileExists(atPath: url.path)
+
+    // MARK: - Initialization
+    private init() {
+        requestCache = NSCache<NSString, CachedResponse>()
+        requestCache.countLimit = 100 // Limit cache to 100 items
     }
-    
-    /// Get the URL for a cached file
-    /// - Parameter key: The key to get the URL for
-    /// - Returns: The URL for the cached file
-    func url(forKey key: String) -> URL {
-        cacheDirectory.appendingPathComponent(key)
+
+    // MARK: - Request Cache Methods
+    /// Cache a network response
+    /// - Parameters:
+    ///   - data: The response data to cache
+    ///   - key: The cache key
+    ///   - expirationTime: Time in seconds until the cache expires
+    func cacheResponse(_ data: Data, forKey key: String, expirationTime: TimeInterval) {
+        let cachedResponse = CachedResponse(data: data, timestamp: Date(), expirationTime: expirationTime)
+        requestCache.setObject(cachedResponse, forKey: key as NSString)
     }
-} 
+
+    /// Get a cached response if it exists and hasn't expired
+    /// - Parameter key: The cache key
+    /// - Returns: The cached data if valid, nil otherwise
+    func getCachedResponse(forKey key: String) -> Data? {
+        guard let cachedResponse = requestCache.object(forKey: key as NSString) else { return nil }
+
+        let now = Date()
+        let expirationDate = cachedResponse.timestamp.addingTimeInterval(cachedResponse.expirationTime)
+
+        guard now < expirationDate else {
+            requestCache.removeObject(forKey: key as NSString)
+            return nil
+        }
+
+        return cachedResponse.data
+    }
+
+    /// Clear all cached responses
+    func clearRequestCache() {
+        requestCache.removeAllObjects()
+    }
+}

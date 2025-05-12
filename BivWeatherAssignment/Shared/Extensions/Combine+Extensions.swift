@@ -33,7 +33,7 @@ extension Publisher {
             }
         )
     }
-    
+
     /// Convert to async/await
     func async() async throws -> Output {
         try await withCheckedThrowingContinuation { continuation in
@@ -84,4 +84,4 @@ extension PassthroughSubject {
             send(value)
         }
     }
-} 
+}
