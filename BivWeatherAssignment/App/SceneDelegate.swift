@@ -6,11 +6,13 @@
 //
 
 import UIKit
+import SwiftUI
 
-final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
+class SceneDelegate: UIResponder, UIWindowSceneDelegate {
   // MARK: - Properties
 
   var window: UIWindow?
+  private var coordinator: AppCoordinator?
 
   // MARK: - Initialization
 
@@ -26,25 +28,20 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
   ) {
     guard let windowScene = (scene as? UIWindowScene) else { return }
 
-    // Create window with windowScene
+    // Create window
     let window = UIWindow(windowScene: windowScene)
+    self.window = window
 
-    // Create navigation controller with HomeViewController as  root
-    let homeController = HomeViewController(viewModel: HomeViewModel())
-    let navigationController = UINavigationController(rootViewController: homeController)
+    // Setup coordinator
+    let navigationController = UINavigationController()
+    coordinator = AppCoordinator(navigationController: navigationController)
 
-    // Configure navigation bar appearance
-    let appearance = UINavigationBarAppearance()
-    appearance.configureWithOpaqueBackground()
-    appearance.backgroundColor = .systemBackground
-    navigationController.navigationBar.standardAppearance = appearance
-    navigationController.navigationBar.scrollEdgeAppearance = appearance
+    // Start app
+    coordinator?.start()
 
-    // Set root view controller
+    // Set root and make visible
     window.rootViewController = navigationController
     window.makeKeyAndVisible()
-
-    self.window = window
   }
 
   func sceneDidDisconnect(_ scene: UIScene) {

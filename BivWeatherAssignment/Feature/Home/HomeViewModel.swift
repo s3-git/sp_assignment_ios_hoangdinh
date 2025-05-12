@@ -7,11 +7,13 @@
 
 import Foundation
 import Combine
+import SwiftUI
 
 /// ViewModel for Home screen
 final class HomeViewModel: BaseViewModel {
     // MARK: - Dependencies
     private let weatherService: WeatherServiceProtocol
+    weak var coordinator: Coordinator?
 
     // MARK: - Private Properties
     private let searchSubject = PassthroughSubject<String, Never>()
@@ -39,7 +41,7 @@ final class HomeViewModel: BaseViewModel {
     @Published var cities: [SearchResult]
 
     func didSelectCity(_ city: SearchResult) {
-        citySelectionSubject.send(city)
+        coordinator?.showCityDetail(for: city)
     }
 
     // MARK: - Private Methods
@@ -65,39 +67,6 @@ final class HomeViewModel: BaseViewModel {
                 receiveValue: { [weak self] _, cities in
                     self?.cities = cities
                     self?.state = .success
-                },
-                receiveCompletion: { [weak self] _, completion in
-                    if case .failure(let error) = completion {
-                        self?.handleError(error)
-                    }
-                }
-            )
-            .store(in: &cancellables)
-
-        // City selection binding
-        citySelectionSubject
-            .handleEvents(receiveOutput: { [weak self] _ in
-                self?.state = .loading
-            })
-            .flatMap { [weak self] city -> AnyPublisher<WeatherData, NetworkError> in
-                guard let self = self else {
-                    return Fail(error: NetworkError.networkError(URLError(.unknown)))
-                        .eraseToAnyPublisher()
-                }
-                guard let lat = city.latitude, let lng = city.longitude else {
-                    return Fail(error: NetworkError.networkError(URLError(.unknown)))
-                        .eraseToAnyPublisher()
-                }
-                let getWeatherQuery = WeatherRequestParameters(query: lat + "," + lng)
-
-                return self.weatherService.getWeather(query: getWeatherQuery)
-            }
-            .receive(on: DispatchQueue.main)
-            .sink(
-                weak: self,
-                receiveValue: { [weak self] _, _ in
-                    self?.state = .success
-
                 },
                 receiveCompletion: { [weak self] _, completion in
                     if case .failure(let error) = completion {

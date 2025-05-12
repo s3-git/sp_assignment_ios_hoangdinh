@@ -17,6 +17,12 @@ class BaseViewController: UIViewController {
 
         return indicator
     }()
+    private lazy var backgroundImage: UIImageView = {
+        let uiImageView = UIImageView(image: UIImage(named: AppConstants.Assets.imgBackground))
+        uiImageView.translatesAutoresizingMaskIntoConstraints = false
+        uiImageView.accessibilityIdentifier = "backgroundImage"
+        return uiImageView
+    }()
 
     private lazy var errorLabel: UILabel = {
         let label = UILabel()
@@ -36,19 +42,26 @@ class BaseViewController: UIViewController {
 
         view.addSubview(loadingIndicator)
         view.addSubview(errorLabel)
-
+        view.addSubview(backgroundImage)
         NSLayoutConstraint.activate([
-
+            backgroundImage.topAnchor.constraint(equalTo: view.topAnchor),
+            backgroundImage.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            backgroundImage.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            backgroundImage.bottomAnchor.constraint(equalTo: view.bottomAnchor),
             loadingIndicator.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             loadingIndicator.centerYAnchor.constraint(equalTo: view.centerYAnchor),
 
             errorLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             errorLabel.centerYAnchor.constraint(equalTo: view.centerYAnchor),
             errorLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
-            errorLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20)
+            errorLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
+
+
+
 
         ])
-
+        view.sendSubviewToBack(backgroundImage)
+        
         // Ensure loadingIndicator and emptyLabel always overlay on top
 
         updateViewState()

@@ -51,7 +51,9 @@ enum AppConstants {
     }
 
     // MARK: - Keys
-    enum Keys {
-        static let apiKey = "API_KEY"
+    enum Assets {
+        static let imgBackground = "img_background"
+        static let icCenter = "ic_center"
+        static let imgBackgroundCell = "img_background_cell"
     }
 }

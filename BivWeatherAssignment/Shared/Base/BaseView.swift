@@ -34,30 +34,40 @@ struct BaseView<Content: View>: View {
 
     // MARK: - Body
     var body: some View {
-        content
-            .overlay {
-                switch viewState {
-                case .loading:
-                    ProgressView()
-                case .error(let message):
-                    VStack {
-                        Text(message)
-                            .foregroundColor(.red)
-                            .multilineTextAlignment(.center)
-                            .padding()
+        ZStack {
+            Image(AppConstants.Assets.imgBackground)
+                .resizable()
+                .aspectRatio(contentMode: .fill)
+                .frame(minWidth: 0, maxWidth: .infinity)
+                .edgesIgnoringSafeArea(.all)
+            
+            ScrollView(showsIndicators:false) {
+                content
+                    .overlay {
+                        switch viewState {
+                            case .loading:
+                                ProgressView()
+                            case .error(let message):
+                                VStack {
+                                    Text(message)
+                                        .foregroundColor(.red)
+                                        .multilineTextAlignment(.center)
+                                        .padding()
+                                }
+                            default:
+                                EmptyView()
+                        }
                     }
-                    default:
-                        EmptyView()
+            }
+        }
+        .onChange(of: viewState) { newState in
+            if case .error = newState {
+                // Auto-dismiss error after 3 seconds
+                DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+                    viewState = .success
                 }
             }
-            .onChange(of: viewState) { newState in
-                if case .error = newState {
-                    // Auto-dismiss error after 3 seconds
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
-                        viewState = .success
-                    }
-                }
-            }
+        }
     }
 
     // MARK: - Public Methods

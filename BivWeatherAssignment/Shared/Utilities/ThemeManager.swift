@@ -40,7 +40,7 @@ class ThemeManager: ObservableObject {
     func toggleDarkMode() {
         isDarkMode.toggle()
         appDelegate?.configureAppAppearance()
-        
+
     }
 
     /// Get color scheme
@@ -50,42 +50,42 @@ class ThemeManager: ObservableObject {
 
     /// Get background color
     var backgroundColor: UIColor {
-        isDarkMode ? .black : .white
+        .clear
     }
 
     /// Get text color with high contrast
     var textColor: UIColor {
-        isDarkMode ? .white : .black
+        .white
     }
 
     /// Primary brand color with good contrast in both modes
     var primary: UIColor {
-        isDarkMode ? UIColor(hex: 0x00CCFF) : UIColor(hex: 0x0066CC)
+        isDarkMode ? UIColor(hex: "#00CCFF") : UIColor(hex: "#0066CC")
     }
 
     /// Secondary color with sufficient contrast
     var secondary: UIColor {
-        isDarkMode ? UIColor(hex: 0xB3B3B3) : UIColor(hex: 0x4D4D4D)
+        isDarkMode ? UIColor(hex: "#B3B3B3") : UIColor(hex: "#4D4D4D")
     }
 
     /// Accent color that pops in both modes
     var accent: UIColor {
-        isDarkMode ? UIColor(hex: 0xFF8000) : UIColor(hex: 0xCC0099)
+        isDarkMode ? UIColor(hex: "#FF8000") : UIColor(hex: "#CC0099")
     }
 
     /// Error color with high visibility
     var error: UIColor {
-        isDarkMode ? UIColor(hex: 0xFF4D4D) : UIColor(hex: 0xCC0000)
+        isDarkMode ? UIColor(hex: "#FF4D4D") : UIColor(hex: "#CC0000")
     }
 
     /// Success color that's clear in both modes
     var success: UIColor {
-        isDarkMode ? UIColor(hex: 0x4DE64D) : UIColor(hex: 0x009900)
+        isDarkMode ? UIColor(hex: "#4DE64D") : UIColor(hex: "#009900")
     }
 
     /// Warning color with good visibility
     var warning: UIColor {
-        isDarkMode ? UIColor(hex: 0xFFCC00) : UIColor(hex: 0xCC6600)
+        isDarkMode ? UIColor(hex: "#FFCC00") : UIColor(hex: "#CC6600")
     }
 }
 
@@ -107,41 +107,28 @@ extension UIColor {
         return Color(self)
     }
 
-    /// Initialize color with hex value
-    /// - Parameter hex: Hex color value (e.g. 0xFF0000 for red)
-    convenience init(hex: Int) {
-        let red = CGFloat((hex >> 16) & 0xFF) / 255.0
-        let green = CGFloat((hex >> 8) & 0xFF) / 255.0
-        let blue = CGFloat(hex & 0xFF) / 255.0
-        self.init(red: red, green: green, blue: blue, alpha: 1.0)
-    }
-
     /// Initialize color with hex string
-    /// - Parameter hexString: Hex color string (e.g. "#FF0000" or "FF0000" for red)
-    convenience init?(hexString: String) {
-        let hex = hexString.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
-        var int = UInt64()
-        Scanner(string: hex).scanHexInt64(&int)
-        let a, r, g, b: UInt64
-        switch hex.count {
-        case 3: // RGB (12-bit)
-            (a, r, g, b) = (255, (int >> 8) * 17, (int >> 4 & 0xF) * 17, (int & 0xF) * 17)
-        case 6: // RGB (24-bit)
-            (a, r, g, b) = (255, int >> 16, int >> 8 & 0xFF, int & 0xFF)
-        case 8: // ARGB (32-bit)
-            (a, r, g, b) = (int >> 24, int >> 16 & 0xFF, int >> 8 & 0xFF, int & 0xFF)
-        default:
-            return nil
-        }
-        self.init(red: CGFloat(r) / 255, green: CGFloat(g) / 255, blue: CGFloat(b) / 255, alpha: CGFloat(a) / 255)
+    /// - Parameter hex: Hex color string (e.g. "#FF0000")
+    convenience init(hex: String) {
+        var hexSanitized = hex.trimmingCharacters(in: .whitespacesAndNewlines)
+        hexSanitized = hexSanitized.replacingOccurrences(of: "#", with: "")
+
+        var rgb: UInt64 = 0
+        Scanner(string: hexSanitized).scanHexInt64(&rgb)
+
+        let red = CGFloat((rgb & 0xFF0000) >> 16) / 255.0
+        let green = CGFloat((rgb & 0x00FF00) >> 8) / 255.0
+        let blue = CGFloat(rgb & 0x0000FF) / 255.0
+
+        self.init(red: red, green: green, blue: blue, alpha: 1.0)
     }
 
     /// Convert color to hex string
     var hexString: String {
         let components = self.cgColor.components
-        let r = components?[0] ?? 0
-        let g = components?[1] ?? 0
-        let b = components?[2] ?? 0
-        return String(format: "#%02X%02X%02X", Int(r * 255), Int(g * 255), Int(b * 255))
+        let red = components?[0] ?? 0
+        let green = components?[1] ?? 0
+        let blue = components?[2] ?? 0
+        return String(format: "#%02X%02X%02X", Int(red * 255), Int(green * 255), Int(blue * 255))
     }
 }
