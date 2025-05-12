@@ -41,8 +41,8 @@ type_body_length:
   error: 350
 
 line_length:
-  warning: 120
-  error: 150
+  warning: 180
+  error: 200
   ignores_comments: true
   ignores_urls: true
 

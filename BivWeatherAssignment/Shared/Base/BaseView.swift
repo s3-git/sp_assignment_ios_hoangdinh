@@ -40,8 +40,8 @@ struct BaseView<Content: View>: View {
                 .aspectRatio(contentMode: .fill)
                 .frame(minWidth: 0, maxWidth: .infinity)
                 .edgesIgnoringSafeArea(.all)
-            
-            ScrollView(showsIndicators:false) {
+
+            ScrollView(showsIndicators: false) {
                 content
                     .overlay {
                         switch viewState {

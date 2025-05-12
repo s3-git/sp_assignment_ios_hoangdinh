@@ -24,14 +24,14 @@ struct CityView: View {
 }
 /// presenter view protocol
 protocol WeatherPresenterProtocol {
-    var areaName:String { get }
-    var weatherDesc:String { get }
-    var regionName:String { get }
-    var countryName:String { get }
-    var localTime:String { get }
-    var imageURL:String { get }
-    var temperature:String { get }
-    var humidity:String { get }
+    var areaName: String { get }
+    var weatherDesc: String { get }
+    var regionName: String { get }
+    var countryName: String { get }
+    var localTime: String { get }
+    var imageURL: String { get }
+    var temperature: String { get }
+    var humidity: String { get }
 }
 /// View for displaying weather content
 private struct WeatherContentView: View {
@@ -55,7 +55,6 @@ private struct WeatherContentView: View {
 
                 .multilineTextAlignment(.trailing)
 
-            
             // Weather Image
             if let weatherIconURL = URL(string: weatherData.imageURL) {
                 AsyncImage(url: weatherIconURL) { image in
@@ -66,14 +65,14 @@ private struct WeatherContentView: View {
                     ProgressView()
                 }
                 .frame(width: 80, height: 80)
-                
+
             }
             Text(weatherData.weatherDesc)
                 .font(Font(ThemeManager.Fonts.headline))
                 .foregroundStyle(ThemeManager.shared.textColor.toColor)
-            
+
                 .multilineTextAlignment(.trailing)
-            
+
             Text("Local time is \(weatherData.localTime)")
                 .font(Font(ThemeManager.Fonts.caption))
                 .foregroundStyle(ThemeManager.shared.textColor.toColor)
@@ -89,7 +88,7 @@ private struct WeatherContentView: View {
                 HStack {
                     Image(systemName: "humidity")
                     Text(weatherData.humidity)
-                    
+
                         .font(Font(ThemeManager.Fonts.caption))
                         .foregroundStyle(ThemeManager.shared.textColor.toColor)
 
@@ -101,4 +100,3 @@ private struct WeatherContentView: View {
         .padding()
     }
 }
-

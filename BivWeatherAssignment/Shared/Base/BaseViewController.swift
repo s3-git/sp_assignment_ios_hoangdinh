@@ -54,14 +54,11 @@ class BaseViewController: UIViewController {
             errorLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             errorLabel.centerYAnchor.constraint(equalTo: view.centerYAnchor),
             errorLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
-            errorLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
-
-
-
+            errorLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20)
 
         ])
         view.sendSubviewToBack(backgroundImage)
-        
+
         // Ensure loadingIndicator and emptyLabel always overlay on top
 
         updateViewState()

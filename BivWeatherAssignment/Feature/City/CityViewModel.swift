@@ -2,46 +2,42 @@ import Foundation
 import Combine
 import SwiftUI
 
+extension WeatherData: WeatherPresenterProtocol {
 
-
-extension WeatherData :WeatherPresenterProtocol {
-    
     var areaName: String {
         self.nearestArea?.first?.areaName?.first?.value ?? "Unknow Area"
     }
-    
+
     var weatherDesc: String {
         self.currentCondition?.first?.weatherDesc?.first?.value ?? "Unknow Weather"
     }
-    
+
     var regionName: String {
         self.nearestArea?.first?.region?.first?.value ?? "Unknow Region"
     }
-    
+
     var countryName: String {
         self.nearestArea?.first?.country?.first?.value ?? "Unknow Country"
 
     }
-    
+
     var localTime: String {
         self.timeZone?.first?.localtime ?? "Unknow TimeZone"
 
     }
-    
+
     var imageURL: String {
         self.currentCondition?.first?.weatherIconURL?.first?.value ?? ""
     }
-    
+
     var temperature: String {
         "\(self.currentCondition?.first?.tempC ?? "Unknow")°C,\(self.currentCondition?.first?.tempF ?? "Unknow")°F"
     }
-    
+
     var humidity: String {
         "\(self.currentCondition?.first?.humidity ?? "Unknow")%"
     }
-    
-    
-    
+
 }
 /// ViewModel for managing city weather data
 final class CityViewModel: BaseViewModel {
