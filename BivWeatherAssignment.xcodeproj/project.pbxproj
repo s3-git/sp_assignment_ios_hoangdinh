@@ -369,12 +369,20 @@
 		73289FC92DD19D55000E5622 /* Core */ = {
 			isa = PBXGroup;
 			children = (
+				73289FDD2DD1A1A9000E5622 /* Network */,
 				73289FC22DD19D55000E5622 /* Environment */,
+			);
+			path = Core;
+			sourceTree = "<group>";
+		};
+		73289FDD2DD1A1A9000E5622 /* Network */ = {
+			isa = PBXGroup;
+			children = (
 				73289FC42DD19D55000E5622 /* Model */,
 				73289FC62DD19D55000E5622 /* Router */,
 				73289FC82DD19D55000E5622 /* Services */,
 			);
-			path = Core;
+			path = Network;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
