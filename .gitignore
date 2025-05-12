@@ -90,4 +90,5 @@ fastlane/test_output
 iOSInjectionProject/
 
 # Sensitive Information
-Info.plist 
+Info.plist
+Environment.plist 
