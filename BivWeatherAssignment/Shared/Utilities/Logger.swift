@@ -52,9 +52,9 @@ class Logger {
         let fileName = (file as NSString).lastPathComponent
         let logMessage = "\(level.rawValue) [\(fileName):\(line)] \(function): \(message)"
 
-        #if DEBUG
-        print(logMessage)
-        #endif
+//        #if DEBUG
+//        print(logMessage)
+//        #endif
 
         os_log("%{public}@", log: logger, type: level.osLogType, logMessage)
     }

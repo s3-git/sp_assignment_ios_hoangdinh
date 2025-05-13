@@ -9,6 +9,6 @@ import Combine
 
 protocol WeatherServiceProtocol {
     func searchCities(query: WeatherSearchRequestParameters) -> AnyPublisher<[SearchResult], NetworkError>
-    func getWeather(query: WeatherRequestParameters) -> AnyPublisher<WeatherData, NetworkError>
+    func getWeather(query: WeatherRequestParameters, forceRefresh: Bool) -> AnyPublisher<WeatherData, NetworkError>
     func clearAllCaches()
 }

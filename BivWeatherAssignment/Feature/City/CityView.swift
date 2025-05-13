@@ -14,116 +14,163 @@ struct CityView: View {
     var body: some View {
         BaseView {
             if let weatherData = $viewModel.weatherData.wrappedValue {
-                WeatherContentView(weatherData: weatherData).background(ThemeManager.shared.backgroundColor.toColor)
+                WeatherContentView(weatherData: weatherData, onRefresh: {
+                    viewModel.fetchWeatherData(forceRefresh: true)
+                })
+                    .padding(.top, viewModel.navBarHeight)
             }
-        }.padding()
+        }.safeAreaPadding(.all)
         .onAppear {
             viewModel.fetchWeatherData()
         }
     }
 }
+
 /// View for displaying weather content
 struct WeatherContentView: View {
     // MARK: - Properties
     private let weatherData: WeatherPresenterProtocol
+    @State private var isRefreshing = false
+    var onRefresh: () -> Void
 
     // MARK: - Initialization
-    init(weatherData: WeatherPresenterProtocol) {
+    init(weatherData: WeatherPresenterProtocol, onRefresh: @escaping () -> Void) {
         self.weatherData = weatherData
+        self.onRefresh = onRefresh
     }
 
     var body: some View {
-        VStack(spacing: 24) {
-            // MARK: - Location Header
-            VStack(spacing: 8) {
+        ScrollView(.vertical, showsIndicators: false) {
+            VStack(spacing: 16) {
+                // MARK: - Location and Weather Overview
+                locationAndWeatherView
+                    .padding(.top)
+                
+                // MARK: - Temperature and Wind
+                HStack(spacing: 16) {
+                    temperatureCard
+                    windCard
+                }
+                
+                // MARK: - Atmospheric and Additional Info
+                atmosphericCard
+                additionalInfoCard
+                
+                // MARK: - Hourly Forecast
+                if !weatherData.forecastDays.isEmpty {
+                    hourlyForecastCard
+                }
+            }
+        }
+        .refreshable {
+            // Perform refresh
+            isRefreshing = true
+            onRefresh()
+            // Add slight delay for better UX
+            try? await Task.sleep(nanoseconds: 500_000_000) // 0.5 seconds
+            isRefreshing = false
+        }
+    }
+    
+    // MARK: - Location and Weather View
+    private var locationAndWeatherView: some View {
+        VStack(spacing: 12) {
+            // Location Info
+            HStack {
+                Image(systemName: "mappin.circle.fill")
+                    .font(.system(size: 20))
+                    .foregroundStyle(ThemeManager.shared.textColor.toColor)
+                
                 Text(weatherData.areaName)
                     .font(Font(ThemeManager.Fonts.title))
-                    .foregroundStyle(ThemeManager.shared.textColor.toColor)
-
-                HStack(spacing: 4) {
-                    Text(weatherData.regionName)
-                    Text("•")
-                    Text(weatherData.countryName)
-                }
-                .font(Font(ThemeManager.Fonts.body))
-                .foregroundStyle(ThemeManager.shared.textColor.toColor.opacity(0.8))
+                    .fontWeight(.bold)
             }
-            .padding(.top)
-
-            // MARK: - Weather Icon and Description
-            VStack(spacing: 16) {
-                if let weatherIconURL = URL(string: weatherData.imageURL) {
-                    AsyncImage(url: weatherIconURL) { image in
-                        image
-                            .resizable()
-                            .aspectRatio(contentMode: .fit)
-                            .shadow(radius: 4)
-                    } placeholder: {
-                        ProgressView()
-                    }
-                    .frame(width: 120, height: 120)
-                }
-
-                Text(weatherData.weatherDesc)
-                    .font(Font(ThemeManager.Fonts.headline))
-                    .foregroundStyle(ThemeManager.shared.textColor.toColor)
-                    .multilineTextAlignment(.center)
-            }
-
-            // MARK: - Temperature Card
-            WeatherInfoCard(title: "Temperature", systemImage: "thermometer") {
-                VStack(spacing: 12) {
-                    Text(weatherData.temperature)
-                        .font(Font(ThemeManager.Fonts.title))
-                    Text(weatherData.feelsLike)
-                        .font(Font(ThemeManager.Fonts.body))
+            
+            Text("\(weatherData.regionName) • \(weatherData.countryName)")
+                .font(Font(ThemeManager.Fonts.caption))
+                .foregroundStyle(ThemeManager.shared.textColor.toColor.opacity(0.7))
+            
+            // Weather Icon and Description
+            if let weatherIconURL = URL(string: weatherData.imageURL) {
+                AsyncImage(url: weatherIconURL) { image in
+                    image
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: 100, height: 100)
+                } placeholder: {
+                    ProgressView()
+                        .scaleEffect(1.5)
                 }
             }
-
-            // MARK: - Wind Card
-            WeatherInfoCard(title: "Wind", systemImage: "wind") {
-                VStack(spacing: 12) {
-                    Text(weatherData.windSpeed)
-                        .font(Font(ThemeManager.Fonts.title))
-                    Text(weatherData.windDirection)
-                        .font(Font(ThemeManager.Fonts.body))
-                }
+            
+            Text(weatherData.weatherDesc)
+                .font(Font(ThemeManager.Fonts.headline))
+                .foregroundStyle(ThemeManager.shared.textColor.toColor)
+        }
+        .padding()
+        .background(
+            RoundedRectangle(cornerRadius: 20)
+                .fill(ThemeManager.shared.textColor.toColor.opacity(0.05))
+        )
+    }
+    
+    // MARK: - Temperature Card
+    private var temperatureCard: some View {
+        WeatherInfoCard(title: "Temperature", systemImage: "thermometer") {
+            VStack(spacing: 12) {
+                Text(weatherData.temperature)
+                    .font(Font(ThemeManager.Fonts.title))
+                    .fontWeight(.bold)
+                Text(weatherData.feelsLike)
+                    .font(Font(ThemeManager.Fonts.body))
             }
-
-            // MARK: - Atmospheric Conditions Card
-            WeatherInfoCard(title: "Atmospheric Conditions", systemImage: "barometer") {
-                VStack(spacing: 12) {
-                    WeatherRow(icon: "humidity.fill", value: weatherData.humidity, label: "Humidity")
-                    WeatherRow(icon: "gauge", value: weatherData.pressure, label: "Pressure")
-                    WeatherRow(icon: "eye.fill", value: weatherData.visibility, label: "Visibility")
-                    WeatherRow(icon: "cloud.fill", value: weatherData.cloudCover, label: "Cloud Cover")
-                    WeatherRow(icon: "drop.fill", value: weatherData.precipitation, label: "Precipitation")
-                }
+        }
+    }
+    
+    // MARK: - Wind Card
+    private var windCard: some View {
+        WeatherInfoCard(title: "Wind", systemImage: "wind") {
+            VStack(spacing: 12) {
+                Text(weatherData.windSpeed)
+                    .font(Font(ThemeManager.Fonts.title))
+                    .fontWeight(.bold)
+                Text(weatherData.windDirection)
+                    .font(Font(ThemeManager.Fonts.body))
             }
-
-            // MARK: - UV and Time Info Card
-            WeatherInfoCard(title: "Additional Info", systemImage: "info.circle") {
-                VStack(spacing: 12) {
-                    WeatherRow(icon: "sun.max.fill", value: weatherData.uvIndex, label: "UV Index")
-                    WeatherRow(icon: "clock.fill", value: weatherData.localTime, label: "Local Time")
-                    WeatherRow(icon: "calendar", value: weatherData.observationTime, label: "Last Updated")
-                }
+        }
+    }
+    
+    // MARK: - Atmospheric Card
+    private var atmosphericCard: some View {
+        WeatherInfoCard(title: "Atmospheric", systemImage: "barometer") {
+            VStack(spacing: 8) {
+                WeatherRow(icon: "humidity.fill", value: weatherData.humidity, label: "Humidity")
+                WeatherRow(icon: "gauge", value: weatherData.pressure, label: "Pressure")
+                WeatherRow(icon: "eye.fill", value: weatherData.visibility, label: "Visibility")
             }
-
-            // MARK: - Hourly Forecast
-            if !weatherData.forecastDays.isEmpty {
-                WeatherInfoCard(title: "Today's Forecast", systemImage: "clock") {
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        HStack(spacing: 16) {
-                            ForEach(weatherData.forecastDays[0].hourlyForecasts, id: \.time) { hourly in
-                                HourlyForecastView(forecast: hourly)
-                            }
-                        }
-                        .padding(.horizontal, 4)
+        }
+    }
+    
+    // MARK: - Additional Info Card
+    private var additionalInfoCard: some View {
+        WeatherInfoCard(title: "Additional", systemImage: "info.circle") {
+            VStack(spacing: 8) {
+                WeatherRow(icon: "sun.max.fill", value: weatherData.uvIndex, label: "UV")
+                WeatherRow(icon: "clock.fill", value: weatherData.localTime, label: "Time")
+            }
+        }
+    }
+    
+    // MARK: - Hourly Forecast Card
+    private var hourlyForecastCard: some View {
+        WeatherInfoCard(title: "Today's Forecast", systemImage: "clock") {
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 12) {
+                    ForEach(weatherData.forecastDays[0].hourlyForecasts, id: \.time) { hourly in
+                        HourlyForecastView(forecast: hourly)
                     }
                 }
             }
         }
-        .padding()
     }
 }

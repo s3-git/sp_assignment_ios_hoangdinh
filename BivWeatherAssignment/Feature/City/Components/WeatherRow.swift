@@ -25,10 +25,10 @@ struct WeatherRow: View {
         HStack(spacing: 12) {
             Image(systemName: icon)
                 .frame(width: 20)
-            Text(value)
-            Spacer()
             Text(label)
                 .foregroundStyle(ThemeManager.shared.textColor.toColor.opacity(0.6))
+            Spacer()
+            Text(value)
         }
         .font(Font(ThemeManager.Fonts.body))
     }

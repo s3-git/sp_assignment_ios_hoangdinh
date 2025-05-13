@@ -27,10 +27,12 @@ final class WeatherServiceImpl: WeatherServiceProtocol {
     }
 
     /// Get weather for a specific city
-    /// - Parameter query: get query
+    /// - Parameters:
+    ///   - query: get query
+    ///   - forceRefresh: if true, ignores cache and fetches fresh data
     /// - Returns: Publisher emitting weather data
-    func getWeather(query: WeatherRequestParameters) -> AnyPublisher<WeatherData, NetworkError> {
-        networkManager.request(WeatherRouter.getWeather(query: query))
+    func getWeather(query: WeatherRequestParameters, forceRefresh: Bool) -> AnyPublisher<WeatherData, NetworkError> {
+        networkManager.request(WeatherRouter.getWeather(query: query, forceRefresh: forceRefresh))
             .map { (response: WeatherModel) in
                 response.data ?? WeatherData()
             }

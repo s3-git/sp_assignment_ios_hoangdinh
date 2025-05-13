@@ -219,20 +219,22 @@ final class CityViewModel: BaseViewModel {
     private let weatherService: WeatherServiceProtocol
     private var lastFetchTime: Date?
     private let cacheExpiryInterval: TimeInterval = 60 // 1 minute cache
+    var navBarHeight: CGFloat = 0
 
     // MARK: - Initialization
-    init(city: SearchResult, weatherService: WeatherServiceProtocol = WeatherServiceImpl()) {
+    init(city: SearchResult,navBarHeight:CGFloat, weatherService: WeatherServiceProtocol = WeatherServiceImpl()) {
+        self.navBarHeight = navBarHeight
         self.city = city
         self.weatherService = weatherService
         super.init(initialState: .initial)
     }
 
     // MARK: - Public Methods
-    func fetchWeatherData() {
+    func fetchWeatherData(forceRefresh: Bool = false) {
         guard let lat = city.latitude, let lng = city.longitude else { return }
         state = .loading
         let getWeatherQuery = WeatherRequestParameters(query: lat + "," + lng)
-        weatherService.getWeather(query: getWeatherQuery)
+        weatherService.getWeather(query: getWeatherQuery,forceRefresh:forceRefresh)
             .receive(on: DispatchQueue.main)
             .sink(weak: self,
                   receiveValue: { [weak self] _, data in

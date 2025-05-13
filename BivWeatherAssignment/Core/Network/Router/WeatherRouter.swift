@@ -5,7 +5,7 @@ import Foundation
 typealias Coordinates = (lat: String, lng: String)
 enum WeatherRouter: Endpoint {
     case searchCity(query: WeatherSearchRequestParameters)
-    case getWeather(query: WeatherRequestParameters)
+    case getWeather(query: WeatherRequestParameters, forceRefresh: Bool = false)
 
     // MARK: - Endpoint Protocol
     var path: String {
@@ -41,7 +41,7 @@ enum WeatherRouter: Endpoint {
         switch self {
         case .searchCity(let query):
             items.append(contentsOf: query.toQueryItems())
-        case .getWeather(let query):
+        case .getWeather(let query, let forceRefresh):
             items.append(contentsOf: query.toQueryItems())
         }
 
@@ -53,8 +53,8 @@ enum WeatherRouter: Endpoint {
         switch self {
         case .searchCity:
             return 3600 // 1 hour
-        case .getWeather:
-            return 60 // 1 minute
+        case .getWeather(_, let forceRefresh):
+            return forceRefresh ? 0 : 60 // 0 for force refresh, 1 minute for normal
         }
     }
 

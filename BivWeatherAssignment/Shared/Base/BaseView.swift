@@ -43,24 +43,22 @@ struct BaseView<Content: View>: View {
                 .frame(minWidth: 0, maxWidth: .infinity)
                 .edgesIgnoringSafeArea(.all)
 
-            ScrollView(showsIndicators: false) {
-                content
-                    .overlay {
-                        switch viewState {
-                            case .loading:
-                                ProgressView()
-                            case .error(let message):
-                                VStack {
-                                    Text(message)
-                                        .foregroundColor(.red)
-                                        .multilineTextAlignment(.center)
-                                        .padding()
-                                }
-                            default:
-                                EmptyView()
-                        }
+            content
+                .overlay {
+                    switch viewState {
+                        case .loading:
+                            ProgressView()
+                        case .error(let message):
+                            VStack {
+                                Text(message)
+                                    .foregroundColor(.red)
+                                    .multilineTextAlignment(.center)
+                                    .padding()
+                            }
+                        default:
+                            EmptyView()
                     }
-            }.edgesIgnoringSafeArea(.horizontal)
+                }
         }
         .onChange(of: viewState) { newState in
             if case .error = newState {

@@ -22,10 +22,10 @@ final class AppCoordinator: Coordinator {
 
     // MARK: - Coordinator Methods
     func start() {
-        showHome()
+        showHomeAsRoot()
     }
 
-    func showHome() {
+    func showHomeAsRoot() {
         let viewModel = HomeViewModel(weatherService: weatherService)
         viewModel.coordinator = self // Set coordinator before creating view controller
         let viewController = HomeViewController(viewModel: viewModel)
@@ -33,7 +33,8 @@ final class AppCoordinator: Coordinator {
     }
 
     func showCityDetail(for city: SearchResult) {
-        let cityViewModel = CityViewModel(city: city, weatherService: weatherService)
+        let navBarHeight = navigationController.navigationBar.frame.height
+        let cityViewModel = CityViewModel(city: city, navBarHeight: navBarHeight, weatherService: weatherService)
         let cityView = CityView(viewModel: cityViewModel)
         let hostingController = UIHostingController(rootView: cityView)
         navigationController.pushViewController(hostingController, animated: true)
