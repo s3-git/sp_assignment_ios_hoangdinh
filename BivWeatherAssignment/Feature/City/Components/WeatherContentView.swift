@@ -100,4 +100,4 @@ struct WeatherContentView: View {
             .padding()
         }
     }
-} 
+}

@@ -32,4 +32,4 @@ struct WeatherRow: View {
         }
         .font(Font(ThemeManager.Fonts.body))
     }
-} 
+}

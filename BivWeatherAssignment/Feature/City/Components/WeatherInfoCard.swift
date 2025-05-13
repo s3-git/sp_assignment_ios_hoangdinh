@@ -38,4 +38,4 @@ struct WeatherInfoCard<Content: View>: View {
         .background(ThemeManager.shared.textColor.toColor.opacity(0.1))
         .clipShape(RoundedRectangle(cornerRadius: 16))
     }
-} 
+}

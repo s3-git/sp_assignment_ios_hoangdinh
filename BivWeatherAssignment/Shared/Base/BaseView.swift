@@ -12,7 +12,7 @@ enum ViewState: Equatable {
         switch (lhs, rhs) {
         case (.loading, .loading),
              (.success, .success),
-                (.empty,  .empty),
+                (.empty, .empty),
                 (.initial, .initial):
             return true
         case (.error(let lhsMessage), .error(let rhsMessage)):

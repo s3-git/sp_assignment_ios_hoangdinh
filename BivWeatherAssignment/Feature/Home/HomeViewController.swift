@@ -8,17 +8,6 @@ final class HomeViewController: BaseViewController {
     private var cancellables = Set<AnyCancellable>()
     private let keyboardManager = KeyboardManager.shared
 
-    private lazy var themeButton: UIBarButtonItem = {
-        let button = UIBarButtonItem(
-            image: UIImage(systemName: "moon.fill"),
-            style: .plain,
-            target: self,
-            action: #selector(toggleTheme)
-        )
-        button.accessibilityIdentifier = "themeButton"
-        return button
-    }()
-
     // MARK: - UI Components
     private lazy var searchBar: UISearchBar = {
         let searchBar = UISearchBar()
@@ -95,8 +84,7 @@ final class HomeViewController: BaseViewController {
         setupKeyboardHandling()
         setupBindings()
         initData()
-        navigationItem.rightBarButtonItem = themeButton
-        updateThemeButtonImage()
+        applyTheme()
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -227,18 +215,6 @@ final class HomeViewController: BaseViewController {
         tableView.backgroundColor = ThemeManager.shared.backgroundColor
         emptyLabel.textColor = ThemeManager.shared.textColor
         tableView.reloadData()
-        updateThemeButtonImage()
-    }
-
-    @objc private func toggleTheme() {
-        ThemeManager.shared.toggleDarkMode()
-        applyTheme()
-    }
-
-    private func updateThemeButtonImage() {
-        let isDark = ThemeManager.shared.isDarkMode
-        themeButton.image = UIImage(systemName: isDark ? "sun.max.fill" : "moon.fill")
-        themeButton.tintColor = ThemeManager.shared.accent
     }
 
     private func initData() {
