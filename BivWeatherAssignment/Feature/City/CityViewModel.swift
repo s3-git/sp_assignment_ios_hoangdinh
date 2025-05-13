@@ -1,34 +1,57 @@
 import Foundation
 import Combine
 import SwiftUI
-/// presenter view protocol
-protocol WeatherPresenterProtocol {
-    // MARK: - Location Information
+
+// MARK: - Weather Protocols
+/// Location information protocol
+protocol LocationInfoPresenter {
     var areaName: String { get }
     var regionName: String { get }
     var countryName: String { get }
     var localTime: String { get }
+}
 
-    // MARK: - Current Weather
+/// Current weather conditions protocol
+protocol CurrentWeatherPresenter {
     var weatherDesc: String { get }
     var imageURL: String { get }
     var temperature: String { get }
-    var humidity: String { get }
     var feelsLike: String { get }
-    var windSpeed: String { get }
-    var windDirection: String { get }
+}
+
+/// Atmospheric conditions protocol
+protocol AtmosphericConditionsPresenter {
+    var humidity: String { get }
     var pressure: String { get }
     var visibility: String { get }
-    var uvIndex: String { get }
-    var precipitation: String { get }
     var cloudCover: String { get }
+    var precipitation: String { get }
+}
 
-    // MARK: - Observation Details
+/// Wind information protocol
+protocol WindInfoPresenter {
+    var windSpeed: String { get }
+    var windDirection: String { get }
+}
+
+/// Additional weather metrics protocol
+protocol AdditionalWeatherInfoPresenter {
+    var uvIndex: String { get }
     var observationTime: String { get }
+}
 
-    // MARK: - 7-Day Forecast
+/// Forecast protocol
+protocol ForecastPresenter {
     var forecastDays: [ForecastDay] { get }
 }
+
+/// Combined weather presenter protocol
+protocol WeatherPresenterProtocol: LocationInfoPresenter,
+                                  CurrentWeatherPresenter,
+                                  AtmosphericConditionsPresenter,
+                                  WindInfoPresenter,
+                                  AdditionalWeatherInfoPresenter,
+                                  ForecastPresenter {}
 
 // MARK: - Forecast Models
 struct ForecastDay {
@@ -64,6 +87,7 @@ struct HourlyForecast {
     let uvIndex: String
 }
 
+// MARK: - WeatherData Extension
 extension WeatherData: WeatherPresenterProtocol {
     // MARK: - Location Information
     var areaName: String {
@@ -183,6 +207,8 @@ extension WeatherData: WeatherPresenterProtocol {
         } ?? []
     }
 }
+
+// MARK: - CityViewModel
 /// ViewModel for managing city weather data
 final class CityViewModel: BaseViewModel {
     // MARK: - Published Properties
