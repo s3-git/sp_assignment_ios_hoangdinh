@@ -222,7 +222,7 @@ final class CityViewModel: BaseViewModel {
     var navBarHeight: CGFloat = 0
 
     // MARK: - Initialization
-    init(city: SearchResult,navBarHeight:CGFloat, weatherService: WeatherServiceProtocol = WeatherServiceImpl()) {
+    init(city: SearchResult, navBarHeight: CGFloat, weatherService: WeatherServiceProtocol = WeatherServiceImpl()) {
         self.navBarHeight = navBarHeight
         self.city = city
         self.weatherService = weatherService
@@ -234,7 +234,7 @@ final class CityViewModel: BaseViewModel {
         guard let lat = city.latitude, let lng = city.longitude else { return }
         state = .loading
         let getWeatherQuery = WeatherRequestParameters(query: lat + "," + lng)
-        weatherService.getWeather(query: getWeatherQuery,forceRefresh:forceRefresh)
+        weatherService.getWeather(query: getWeatherQuery, forceRefresh: forceRefresh)
             .receive(on: DispatchQueue.main)
             .sink(weak: self,
                   receiveValue: { [weak self] _, data in

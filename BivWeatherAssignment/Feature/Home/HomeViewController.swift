@@ -95,6 +95,16 @@ final class HomeViewController: BaseViewController {
     // MARK: - Private Methods
     private func setupUI() {
         title = "Weather"
+        
+        // Add clear all button
+        let clearButton = UIBarButtonItem(
+            image: UIImage(systemName: "trash"),
+            style: .plain,
+            target: self,
+            action: #selector(clearAllRecentCities)
+        )
+        clearButton.accessibilityIdentifier = "clearAllButton"
+        navigationItem.rightBarButtonItem = clearButton
 
         view.addSubview(searchBar)
         view.addSubview(tableView)
@@ -169,8 +179,9 @@ final class HomeViewController: BaseViewController {
         // Bind showing recent cities
         viewModel.$showingRecentCities
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] _ in
+            .sink { [weak self] showingRecent in
                 self?.updateTableViewState()
+                self?.updateClearButtonVisibility(showingRecent)
             }
             .store(in: &cancellables)
 
@@ -181,6 +192,13 @@ final class HomeViewController: BaseViewController {
                 self?.handleState(state: state)
             }
             .store(in: &cancellables)
+    }
+
+    private func updateClearButtonVisibility(_ showingRecent: Bool) {
+        navigationItem.rightBarButtonItem?.isEnabled = showingRecent
+        navigationItem.rightBarButtonItem?.tintColor = showingRecent ? 
+            ThemeManager.shared.textColor : 
+            ThemeManager.shared.textColor.withAlphaComponent(0.3)
     }
 
     private func updateTableViewState() {
@@ -220,6 +238,44 @@ final class HomeViewController: BaseViewController {
     private func initData() {
         self.handleState(state: .loading)
     }
+
+    // MARK: - Actions
+    @objc private func clearAllRecentCities() {
+        let alert = UIAlertController(
+            title: "Clear Recent Cities",
+            message: "Are you sure you want to clear all recent cities?",
+            preferredStyle: .alert
+        )
+        
+        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+        alert.addAction(UIAlertAction(title: "Clear", style: .destructive) { [weak self] _ in
+            self?.viewModel.clearAllRecentCities()
+        })
+        
+        present(alert, animated: true)
+    }
+
+    private func removeCity(at indexPath: IndexPath) {
+        // Safety check for index
+        guard indexPath.row < viewModel.recentCities.count else {
+            return
+        }
+        
+        let city = viewModel.recentCities[indexPath.row]
+        
+        // Animate the removal
+        tableView.beginUpdates()
+        viewModel.removeRecentCity(city)
+        
+        // Safety check for index after removal
+        if indexPath.row < tableView.numberOfRows(inSection: indexPath.section) {
+            tableView.deleteRows(at: [indexPath], with: .fade)
+        } else {
+            tableView.reloadData()
+        }
+        
+        tableView.endUpdates()
+    }
 }
 
 // MARK: - UITableViewDataSource
@@ -233,8 +289,22 @@ extension HomeViewController: UITableViewDataSource {
             return UITableViewCell()
         }
 
+        // Safety check for index
+        guard indexPath.row < (viewModel.showingRecentCities ? viewModel.recentCities.count : viewModel.cities.count) else {
+            return cell
+        }
+
         let city = viewModel.showingRecentCities ? viewModel.recentCities[indexPath.row] : viewModel.cities[indexPath.row]
-        cell.configure(with: city)
+        
+        // Configure cell with recent city state
+        cell.configure(
+            with: city,
+            onRemove: viewModel.showingRecentCities ? { [weak self] in
+                self?.removeCity(at: indexPath)
+            } : nil,
+            isRecentCity: viewModel.showingRecentCities
+        )
+        
         cell.backgroundColor = ThemeManager.shared.backgroundColor
         return cell
     }
@@ -248,8 +318,22 @@ extension HomeViewController: UITableViewDataSource {
 extension HomeViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
+        
+        // Safety check for index
+        guard indexPath.row < (viewModel.showingRecentCities ? viewModel.recentCities.count : viewModel.cities.count) else {
+            return
+        }
+        
         let city = viewModel.showingRecentCities ? viewModel.recentCities[indexPath.row] : viewModel.cities[indexPath.row]
         viewModel.didSelectCity(city)
+    }
+    
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        return UITableView.automaticDimension
+    }
+    
+    func tableView(_ tableView: UITableView, estimatedHeightForRowAt indexPath: IndexPath) -> CGFloat {
+        return 120 // Estimated height for better performance
     }
 }
 

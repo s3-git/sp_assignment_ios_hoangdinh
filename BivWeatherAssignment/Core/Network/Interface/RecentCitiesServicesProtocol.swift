@@ -17,4 +17,9 @@ protocol RecentCitiesServiceProtocol {
 
     /// Clear all recent cities
     func clearRecentCities()
+    
+    /// Remove a specific city from recent cities list
+    /// - Parameter city: The city to remove
+    /// - Note: This will remove the city if it exists in the list
+    func removeRecentCity(_ city: SearchResult)
 }

@@ -41,7 +41,7 @@ enum WeatherRouter: Endpoint {
         switch self {
         case .searchCity(let query):
             items.append(contentsOf: query.toQueryItems())
-        case .getWeather(let query, let forceRefresh):
+        case .getWeather(let query,  _):
             items.append(contentsOf: query.toQueryItems())
         }
 

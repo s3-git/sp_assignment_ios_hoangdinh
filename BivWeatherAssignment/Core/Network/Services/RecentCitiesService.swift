@@ -47,8 +47,23 @@ final class RecentCitiesService: RecentCitiesServiceProtocol {
     func clearRecentCities() {
         userDefaults.removeObject(forKey: recentCitiesKey)
     }
+    
+    /// Remove a specific city from recent cities list
+    /// - Parameter city: The city to remove
+    /// - Note: This will remove the city if it exists in the list
+    func removeRecentCity(_ city: SearchResult) {
+        var recentCities = getRecentCities()
+        
+        // Remove the city if it exists
+        recentCities.removeAll { $0.areaName?.first?.value == city.areaName?.first?.value }
+        
+        // Save updated list
+        save(recentCities)
+    }
 
     // MARK: - Private Methods
+    /// Save cities to UserDefaults
+    /// - Parameter cities: Array of cities to save
     private func save(_ cities: [SearchResult]) {
         guard let data = try? JSONEncoder().encode(cities) else { return }
         userDefaults.set(data, forKey: recentCitiesKey)

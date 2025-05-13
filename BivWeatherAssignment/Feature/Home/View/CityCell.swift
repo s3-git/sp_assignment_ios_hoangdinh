@@ -5,6 +5,9 @@ final class CityCell: UITableViewCell {
     // MARK: - Properties
     static let identifier = "CityCell"
 
+    var onRemove: (() -> Void)?
+    private var isRecentCity: Bool = false
+
     // MARK: - UI Components
     private lazy var containerView: UIView = {
         let view = UIView()
@@ -69,6 +72,17 @@ final class CityCell: UITableViewCell {
         return label
     }()
 
+    private lazy var removeButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.setImage(UIImage(systemName: "xmark.circle.fill"), for: .normal)
+        button.tintColor = ThemeManager.shared.textColor.withAlphaComponent(0.6)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.addTarget(self, action: #selector(removeButtonTapped), for: .touchUpInside)
+        button.accessibilityIdentifier = "removeCityButton"
+        button.isUserInteractionEnabled = false
+        return button
+    }()
+
     // MARK: - Initialization
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
@@ -93,6 +107,7 @@ final class CityCell: UITableViewCell {
         containerView.addSubview(latLongLabel)
         containerView.addSubview(populationIcon)
         containerView.addSubview(populationLabel)
+        containerView.addSubview(removeButton)
 
         // Setup constraints
         NSLayoutConstraint.activate([
@@ -102,35 +117,40 @@ final class CityCell: UITableViewCell {
             containerView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -ThemeManager.Spacing.small),
 
             locationIcon.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: ThemeManager.Spacing.medium),
-            locationIcon.centerYAnchor.constraint(equalTo: containerView.centerYAnchor),
+            locationIcon.topAnchor.constraint(equalTo: containerView.topAnchor, constant: ThemeManager.Spacing.medium),
             locationIcon.widthAnchor.constraint(equalToConstant: 24),
             locationIcon.heightAnchor.constraint(equalToConstant: 24),
 
             cityLabel.topAnchor.constraint(equalTo: containerView.topAnchor, constant: ThemeManager.Spacing.medium),
             cityLabel.leadingAnchor.constraint(equalTo: locationIcon.trailingAnchor, constant: ThemeManager.Spacing.medium),
-            cityLabel.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -ThemeManager.Spacing.medium),
+            cityLabel.trailingAnchor.constraint(equalTo: removeButton.leadingAnchor, constant: -ThemeManager.Spacing.medium),
 
             regionLabel.topAnchor.constraint(equalTo: cityLabel.bottomAnchor, constant: ThemeManager.Spacing.small),
             regionLabel.leadingAnchor.constraint(equalTo: locationIcon.trailingAnchor, constant: ThemeManager.Spacing.medium),
-            regionLabel.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -ThemeManager.Spacing.medium),
+            regionLabel.trailingAnchor.constraint(equalTo: removeButton.leadingAnchor, constant: -ThemeManager.Spacing.medium),
 
             countryLabel.topAnchor.constraint(equalTo: regionLabel.bottomAnchor, constant: ThemeManager.Spacing.small),
             countryLabel.leadingAnchor.constraint(equalTo: locationIcon.trailingAnchor, constant: ThemeManager.Spacing.medium),
-            countryLabel.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -ThemeManager.Spacing.medium),
+            countryLabel.trailingAnchor.constraint(equalTo: removeButton.leadingAnchor, constant: -ThemeManager.Spacing.medium),
 
             latLongLabel.topAnchor.constraint(equalTo: countryLabel.bottomAnchor, constant: ThemeManager.Spacing.small),
             latLongLabel.leadingAnchor.constraint(equalTo: locationIcon.trailingAnchor, constant: ThemeManager.Spacing.medium),
-            latLongLabel.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -ThemeManager.Spacing.medium),
+            latLongLabel.trailingAnchor.constraint(equalTo: removeButton.leadingAnchor, constant: -ThemeManager.Spacing.medium),
 
             populationIcon.topAnchor.constraint(equalTo: latLongLabel.bottomAnchor, constant: ThemeManager.Spacing.small),
             populationIcon.leadingAnchor.constraint(equalTo: locationIcon.trailingAnchor, constant: ThemeManager.Spacing.medium),
             populationIcon.widthAnchor.constraint(equalToConstant: 24),
             populationIcon.heightAnchor.constraint(equalToConstant: 16),
+            populationIcon.bottomAnchor.constraint(equalTo: containerView.bottomAnchor, constant: -ThemeManager.Spacing.medium),
 
             populationLabel.centerYAnchor.constraint(equalTo: populationIcon.centerYAnchor),
             populationLabel.leadingAnchor.constraint(equalTo: populationIcon.trailingAnchor, constant: ThemeManager.Spacing.small),
-            populationLabel.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -ThemeManager.Spacing.medium),
-            populationLabel.bottomAnchor.constraint(equalTo: containerView.bottomAnchor, constant: -ThemeManager.Spacing.medium)
+            populationLabel.trailingAnchor.constraint(equalTo: removeButton.leadingAnchor, constant: -ThemeManager.Spacing.medium),
+
+            removeButton.centerYAnchor.constraint(equalTo: containerView.centerYAnchor),
+            removeButton.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -ThemeManager.Spacing.medium),
+            removeButton.widthAnchor.constraint(equalToConstant: 24),
+            removeButton.heightAnchor.constraint(equalToConstant: 24)
         ])
     }
 
@@ -152,10 +172,28 @@ final class CityCell: UITableViewCell {
         }
     }
 
+    // MARK: - Actions
+    @objc private func removeButtonTapped() {
+        onRemove?()
+    }
+
     // MARK: - Public Methods
     /// Configure cell with city data
-    /// - Parameter city: City model to display
-    func configure(with city: SearchResult) {
+    /// - Parameters:
+    ///   - city: City model to display
+    ///   - onRemove: Callback for remove action
+    ///   - isRecentCity: Whether this cell is in recent cities list
+    func configure(with city: SearchResult, onRemove: (() -> Void)? = nil, isRecentCity: Bool = false) {
+        self.onRemove = onRemove
+        self.isRecentCity = isRecentCity
+        
+        // Update remove button state
+        removeButton.isHidden = !isRecentCity
+        removeButton.isUserInteractionEnabled = isRecentCity
+        removeButton.tintColor = isRecentCity ? 
+            ThemeManager.shared.textColor.withAlphaComponent(0.6) : 
+            ThemeManager.shared.textColor.withAlphaComponent(0.3)
+        
         cityLabel.text = city.areaName?.first?.value
         regionLabel.text = city.region?.first?.value
         countryLabel.text = city.country?.first?.value
@@ -196,6 +234,9 @@ final class CityCell: UITableViewCell {
         populationLabel.text = nil
         populationIcon.isHidden = true
         populationLabel.isHidden = true
+        removeButton.isHidden = true
+        removeButton.isUserInteractionEnabled = false
+        isRecentCity = false
     }
 
     override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {

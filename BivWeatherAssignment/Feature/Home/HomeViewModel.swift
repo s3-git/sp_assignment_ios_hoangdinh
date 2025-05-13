@@ -91,6 +91,25 @@ final class HomeViewModel: BaseViewModel {
         coordinator?.showCityDetail(for: city)
     }
 
+    /// Clear all recent cities
+    /// - Note: This will:
+    ///   1. Remove all cities from persistence
+    ///   2. Update the recent cities list
+    func clearAllRecentCities() {
+        recentCitiesService.clearRecentCities()
+        loadRecentCities()
+    }
+
+    /// Remove a specific city from recent cities
+    /// - Parameter city: The city to remove
+    /// - Note: This will:
+    ///   1. Remove the city from persistence
+    ///   2. Update the recent cities list
+    func removeRecentCity(_ city: SearchResult) {
+        recentCitiesService.removeRecentCity(city)
+        loadRecentCities()
+    }
+
     // MARK: - Private Methods
     /// Load recently viewed cities from persistence
     private func loadRecentCities() {
@@ -137,18 +156,10 @@ final class HomeViewModel: BaseViewModel {
                 },
                 receiveCompletion: { [weak self] _, completion in
                     if case .failure(let error) = completion {
-                        self?.state = .empty
+                        self?.state = .error(error.localizedDescription)
                     }
                 }
             )
             .store(in: &cancellables)
-    }
-
-    override func retryLastOperation() {
-        if let query = lastSearchQuery, !query.isEmpty {
-            searchText = query
-        } else {
-            loadRecentCities()
-        }
     }
 }

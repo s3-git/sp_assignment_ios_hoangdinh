@@ -64,10 +64,6 @@ class BaseViewModel: ObservableObject, BaseViewModelType {
         // Log error
         errorHandler.logError(error)
 
-        // If error is recoverable, attempt recovery after delay
-        if errorHandler.isRecoverable(error) {
-            attemptRecovery(from: error)
-        }
     }
 
     /// Store cancellable
@@ -80,25 +76,6 @@ class BaseViewModel: ObservableObject, BaseViewModelType {
         cancellables.removeAll()
     }
 
-    // MARK: - Private Methods
-    private func attemptRecovery(from error: Error) {
-        // Wait for 3 seconds before attempting recovery
-        DispatchQueue.main.asyncAfter(deadline: .now() + 3) { [weak self] in
-            guard let self = self else { return }
-
-            // Only attempt recovery if still in error state
-            if case .error = self.state {
-                self.state = .initial
-                self.retryLastOperation()
-            }
-        }
-    }
-
-    /// Override this method in subclasses to implement retry logic
-    func retryLastOperation() {
-        // Default implementation does nothing
-        // Override in subclasses to implement specific retry logic
-    }
 
     // MARK: - Deinitialization
     deinit {
