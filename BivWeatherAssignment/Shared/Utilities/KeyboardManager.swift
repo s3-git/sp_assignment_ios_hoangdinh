@@ -1,5 +1,5 @@
-import SwiftUI
 import Combine
+import SwiftUI
 
 /// Manager for handling keyboard events
 class KeyboardManager: ObservableObject {

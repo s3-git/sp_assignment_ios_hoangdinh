@@ -1,5 +1,5 @@
-import Foundation
 import Combine
+import Foundation
 
 // MARK: - Publisher Extensions
 extension Publisher where Failure == Never {

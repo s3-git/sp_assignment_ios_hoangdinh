@@ -1,5 +1,5 @@
-import Foundation
 import Combine
+import Foundation
 
 /// Service for handling weather-related API calls
 ///
@@ -21,7 +21,7 @@ final class WeatherServiceImpl: WeatherServiceProtocol {
     func searchCities(query: WeatherSearchRequestParameters) -> AnyPublisher<[SearchResult], NetworkError> {
         networkManager.request(WeatherRouter.searchCity(query: query))
             .map { (response: SearchModel) in
-                response.searchAPI?.result?.compactMap({$0}) ?? []
+                response.searchAPI?.result?.compactMap({ $0 }) ?? []
             }
             .eraseToAnyPublisher()
     }

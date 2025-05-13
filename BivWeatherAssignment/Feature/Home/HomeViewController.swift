@@ -1,5 +1,5 @@
-import UIKit
 import Combine
+import UIKit
 
 /// Home screen view controller
 final class HomeViewController: BaseViewController {

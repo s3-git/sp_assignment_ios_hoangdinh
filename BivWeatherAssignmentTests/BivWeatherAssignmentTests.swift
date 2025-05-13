@@ -5,8 +5,8 @@
 //  Created by hoang.dinh on 5/9/25.
 //
 
-import XCTest
 @testable import BivWeatherAssignment
+import XCTest
 
 final class BivWeatherAssignmentTests: XCTestCase {
 

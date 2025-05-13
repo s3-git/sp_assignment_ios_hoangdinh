@@ -5,8 +5,8 @@
 //  Created by hoang.dinh on 5/9/25.
 //
 
-import UIKit
 import SwiftUI
+import UIKit
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
   // MARK: - Properties

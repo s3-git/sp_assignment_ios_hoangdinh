@@ -1,5 +1,5 @@
-import XCTest
 import Combine
+import XCTest
 
 /// Base test class for ViewModel testing
 class BaseViewModelTests: XCTestCase {

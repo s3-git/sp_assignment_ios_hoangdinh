@@ -1,5 +1,5 @@
-import Foundation
 import Combine
+import Foundation
 
 /// NetworkManager handles all network requests in the application
 /// Uses Combine framework for reactive programming and CacheManager for response caching

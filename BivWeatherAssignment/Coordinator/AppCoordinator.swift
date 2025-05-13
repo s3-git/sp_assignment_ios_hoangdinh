@@ -1,5 +1,5 @@
-import UIKit
 import SwiftUI
+import UIKit
 
 /// Protocol defining coordinator capabilities
 protocol Coordinator: AnyObject {

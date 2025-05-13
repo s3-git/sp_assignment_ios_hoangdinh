@@ -1,5 +1,5 @@
-import Foundation
 import Combine
+import Foundation
 
 /// Service for handling errors consistently across the app
 protocol ErrorHandlingServiceProtocol {

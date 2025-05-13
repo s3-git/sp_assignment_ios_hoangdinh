@@ -1,5 +1,5 @@
-import Foundation
 import Combine
+import Foundation
 
 /// Base protocol for all ViewModels in the application
 protocol BaseViewModelType: AnyObject {

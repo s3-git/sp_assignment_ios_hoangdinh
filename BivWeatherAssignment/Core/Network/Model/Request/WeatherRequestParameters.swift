@@ -5,8 +5,8 @@
 //  Created by hoang.dinh on 5/12/25.
 //
 
-import Foundation
 import CoreLocation
+import Foundation
 
 struct WeatherRequestParameters {
     var query: String                // e.g. "New York", "48.8566,2.3522"
