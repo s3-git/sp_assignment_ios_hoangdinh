@@ -60,7 +60,7 @@ struct BaseView<Content: View>: View {
                                 EmptyView()
                         }
                     }
-            }
+            }.edgesIgnoringSafeArea(.horizontal)
         }
         .onChange(of: viewState) { newState in
             if case .error = newState {
