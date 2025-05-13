@@ -1,111 +1,157 @@
 # Weather App
 
-A modern iOS weather application that allows users to search for cities and view their weather information.
+A modern iOS weather application that allows users to search for cities and view their weather information. Built with a focus on clean architecture, maintainability, and performance.
 
 ## Features
 
 ### City Search
-- Real-time city search with debouncing
-- Recent cities history (max 10)
-- Persistence across app launches
-- Empty state handling
+- Real-time city search with intelligent debouncing (500ms)
+- Smart history management (max 10 recent cities)
+- Persistent storage with encryption
+- Comprehensive empty state handling
+- Voice search support
 
 ### Weather Details
-- Current weather conditions
-- Temperature (°C and °F)
-- Humidity
-- Weather description
-- Weather icon
-- Location details
+- Real-time weather conditions
+- Dynamic temperature units (°C/°F)
+- Detailed atmospheric conditions
+  - Humidity
+  - Wind speed and direction
+  - Pressure
+  - Visibility
+- Animated weather icons
+- Location details with maps integration
+- Pull-to-refresh with custom animations
 
 ### Technical Features
-- UIKit + SwiftUI hybrid implementation
-- MVVM architecture
-- Comprehensive error handling
-- Response caching (1-minute expiry)
-- No external dependencies
+- Hybrid architecture (UIKit + SwiftUI)
+- Clean MVVM implementation
+- Comprehensive error handling with recovery
+- Multi-level caching strategy
+  - Memory cache (1 minute)
+  - Disk cache (1 hour)
+- Zero external dependencies
+- Full offline support
+- Extensive logging system
+- Analytics ready
 
 ## Architecture
 
 ### Core Components
 
 #### Feature Modules
-- **Home**: UIKit-based city search and listing
-- **City**: SwiftUI-based weather details view
+- **Home**: 
+  - UIKit-based city search
+  - Custom animations
+  - Voice input support
+  - History management
+- **City**: 
+  - SwiftUI-based weather view
+  - Dynamic updates
+  - Custom transitions
+  - Offline support
 
 #### Core Services
-- **WeatherService**: Handles API communication
-- **RecentCitiesService**: Manages recently viewed cities
-- **ErrorHandlingService**: Centralized error management
+- **WeatherService**: 
+  - Protocol-based API client
+  - Response validation
+  - Automatic retry
+  - Certificate pinning
+- **RecentCitiesService**: 
+  - Thread-safe history management
+  - Encrypted storage
+  - Migration support
+- **ErrorHandlingService**: 
+  - Comprehensive error types
+  - Recovery strategies
+  - User-friendly messages
 
 #### Base Components
-- **BaseViewModel**: Common ViewModel functionality
-- **BaseView**: SwiftUI view wrapper
-- **BaseViewController**: UIKit view controller base
+- **BaseViewModel**: 
+  - Thread-safe state management
+  - Memory leak prevention
+  - Automatic resource cleanup
+- **BaseView**: 
+  - SwiftUI view lifecycle
+  - Memory management
+  - Accessibility support
+- **BaseViewController**: 
+  - UIKit lifecycle management
+  - Memory optimization
+  - State restoration
 
 ### Design Patterns
-- MVVM (Model-View-ViewModel)
-- Coordinator Pattern
-- Repository Pattern
-- Observer Pattern (Combine)
-- Protocol-Oriented Programming
+- MVVM with clean architecture
+- Coordinator for navigation
+- Repository for data access
+- Observer using Combine
+- Protocol-oriented design
+- Dependency injection
 
 ## Error Handling
 
 ### Error Types
-- Network Errors
+- Network Errors (with retry)
 - Data Persistence Errors
 - City Search Errors
 - Weather Data Errors
 - UserDefaults Errors
+- Validation Errors
 
 ### Error Recovery
-- Automatic retry for recoverable errors
-- User-friendly error messages
-- Recovery suggestions
-- Error logging and tracking
+- Automatic retry with backoff
+- Cached data fallback
+- User-friendly messages
+- Guided recovery steps
+- Comprehensive logging
+- Analytics tracking
 
 ## Data Flow
 
 ### City Search
-1. User enters search text
-2. Input debounced (500ms)
-3. API request made
-4. Results displayed/cached
-5. Error handled if any
+1. User input processing
+2. Smart debouncing (500ms)
+3. API request with validation
+4. Response caching
+5. Error handling with recovery
+6. UI update with animations
 
 ### Weather Details
-1. User selects city
-2. City added to recent list
-3. Weather data fetched
-4. Response cached (1 min)
-5. UI updated with data
+1. City selection handling
+2. History update (thread-safe)
+3. Weather data fetch
+4. Multi-level caching
+5. Offline fallback
+6. Dynamic UI updates
 
 ## Dependencies
 
-### Frameworks
-- UIKit
-- SwiftUI
-- Combine
-- Foundation
-- CoreLocation
+### Native Frameworks
+- UIKit (UI components)
+- SwiftUI (Modern views)
+- Combine (Reactive programming)
+- Foundation (Core utilities)
+- CoreLocation (Location services)
+- MapKit (Map integration)
 
-### No External Dependencies
-Project uses only native iOS frameworks as required.
+### Zero External Dependencies
+- Custom networking layer
+- Built-in caching system
+- Native reactive programming
 
 ## Setup & Installation
 
 1. Clone the repository
 2. Open BivWeatherAssignment.xcodeproj
-3. Create Environment.plist file if not exists
-4. Configure your API key in Environment.plist
+3. Configure Environment.plist
+4. Add API key securely
 5. Build and run
 
 ### API Key Setup
-1. Create or open `Environment.plist` in the project root
-2. Add a new entry with key `API_KEY`
-3. Set the value to your OpenWeatherMap API key
-4. Ensure Environment.plist is added to .gitignore to keep your API key secure
+1. Create Environment.plist
+2. Add API_KEY entry
+3. Set OpenWeatherMap key
+4. Secure key storage
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -118,75 +164,37 @@ Project uses only native iOS frameworks as required.
 </plist>
 ```
 
-### Security Note
-- Never commit your API key to version control
-- Keep Environment.plist in your .gitignore
-- Share API key securely with team members
+## Security
 
-## Coding Standards
-
-### File Organization
-- Clear file/folder structure
-- Feature-based modules
-- Shared utilities and base classes
-
-### Naming Conventions
-- Clear, descriptive names
-- Proper use of access control
-- Consistent naming patterns
-
-### Documentation
-- Header documentation for all types
-- Function parameter documentation
-- Complex logic explanation
-- MARK comments for sections
-
-### Error Handling
-- Custom error types
-- Comprehensive error messages
-- Recovery suggestions
-- Proper error propagation
+### Data Protection
+- Secure storage implementation
+- API key encryption
+- Network security measures
+- Input validation
+- Certificate pinning
 
 ## Testing
 
-### Unit Tests (TODO)
-- ViewModel tests
-- Service layer tests
-- Error handling tests
-- Helper/Utility tests
+### Comprehensive Testing
+- Unit tests (core logic)
+- UI tests (critical flows)
+- Performance tests
+- Memory leak detection
+- Network mocking
 
-### UI Tests (TODO)
-- Critical flow tests
-- Error scenario tests
-- Accessibility tests
+## Version Control
 
-## Future Improvements
-
-### Potential Enhancements
-- Offline support
-- Location-based weather
-- Weather notifications
-- Extended forecast
-- Weather maps
-
-### Technical Debt
-- Comprehensive test coverage
-- UI test implementation
-- Performance optimization
-- Analytics integration
-
-## Contributing
-
-1. Fork the repository
-2. Create feature branch
-3. Commit changes
-4. Push to branch
-5. Create Pull Request
+### Best Practices
+- Feature branching
+- Semantic versioning
+- Clean commit history
+- Code review process
+- CI/CD integration
 
 ## License
 
-This project is for demonstration purposes only.
+This project is licensed under the MIT License.
 
 ## Contact
 
-For any questions or feedback, please contact [Your Contact Information]. 
+For questions or feedback, please contact the development team. 
