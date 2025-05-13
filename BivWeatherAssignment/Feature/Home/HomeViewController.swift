@@ -6,6 +6,7 @@ final class HomeViewController: BaseViewController {
     // MARK: - Properties
     private let viewModel: HomeViewModel
     private var cancellables = Set<AnyCancellable>()
+    private let keyboardManager = KeyboardManager.shared
 
     private lazy var themeButton: UIBarButtonItem = {
         let button = UIBarButtonItem(
@@ -26,6 +27,23 @@ final class HomeViewController: BaseViewController {
         searchBar.accessibilityIdentifier = "searchBar"
         searchBar.searchTextField.font = ThemeManager.Fonts.caption
         searchBar.placeholder = "Search cities..."
+
+        // Make search bar transparent and more beautiful
+        searchBar.backgroundImage = UIImage()
+        searchBar.backgroundColor = .clear
+        searchBar.searchTextField.backgroundColor = ThemeManager.shared.textColor.withAlphaComponent(0.1)
+        searchBar.searchTextField.layer.cornerRadius = 10
+        searchBar.searchTextField.clipsToBounds = true
+
+        // Update search icon color
+        if let searchIconView = searchBar.searchTextField.leftView as? UIImageView {
+            searchIconView.tintColor = ThemeManager.shared.textColor.withAlphaComponent(0.6)
+        }
+
+        // Add padding to search text field
+        searchBar.searchTextField.leftView?.tintColor = ThemeManager.shared.textColor.withAlphaComponent(0.6)
+        searchBar.searchTextPositionAdjustment = UIOffset(horizontal: 8, vertical: 0)
+
         return searchBar
     }()
 
@@ -36,6 +54,9 @@ final class HomeViewController: BaseViewController {
         tableView.dataSource = self
         tableView.translatesAutoresizingMaskIntoConstraints = false
         tableView.accessibilityIdentifier = "tableView"
+        tableView.keyboardDismissMode = .onDrag
+        // Add content inset to prevent content from being hidden under keyboard
+        tableView.contentInsetAdjustmentBehavior = .automatic
         return tableView
     }()
 
@@ -71,6 +92,7 @@ final class HomeViewController: BaseViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
+        setupKeyboardHandling()
         setupBindings()
         initData()
         navigationItem.rightBarButtonItem = themeButton
@@ -85,6 +107,7 @@ final class HomeViewController: BaseViewController {
     // MARK: - Private Methods
     private func setupUI() {
         title = "Weather"
+
         view.addSubview(searchBar)
         view.addSubview(tableView)
         view.addSubview(emptyView)
@@ -107,6 +130,35 @@ final class HomeViewController: BaseViewController {
             emptyLabel.centerXAnchor.constraint(equalTo: emptyView.centerXAnchor),
             emptyLabel.centerYAnchor.constraint(equalTo: emptyView.centerYAnchor)
         ])
+
+        // Add tap gesture to dismiss keyboard
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
+        tapGesture.cancelsTouchesInView = false
+        view.addGestureRecognizer(tapGesture)
+    }
+
+    private func setupKeyboardHandling() {
+        keyboardManager.$keyboardHeight
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] height in
+                self?.adjustContentForKeyboard(height: height)
+            }
+            .store(in: &cancellables)
+    }
+
+    private func adjustContentForKeyboard(height: CGFloat) {
+        let bottomInset = height > 0 ? height - view.safeAreaInsets.bottom : 0
+        tableView.contentInset.bottom = bottomInset
+        tableView.verticalScrollIndicatorInsets.bottom = bottomInset
+
+        // If search bar is active and content would be hidden, scroll to top
+        if searchBar.isFirstResponder && height > 0 {
+            tableView.setContentOffset(.zero, animated: true)
+        }
+    }
+
+    @objc private func dismissKeyboard() {
+        view.endEditing(true)
     }
 
     private func setupBindings() {
@@ -152,18 +204,30 @@ final class HomeViewController: BaseViewController {
     private func applyTheme() {
         emptyView.backgroundColor = ThemeManager.shared.backgroundColor
         view.backgroundColor = ThemeManager.shared.backgroundColor
-        searchBar.barTintColor = ThemeManager.shared.backgroundColor
+        searchBar.barTintColor = .clear
+        searchBar.backgroundColor = .clear
+        searchBar.searchTextField.backgroundColor = ThemeManager.shared.textColor.withAlphaComponent(0.1)
         searchBar.tintColor = ThemeManager.shared.textColor
         searchBar.searchTextField.textColor = ThemeManager.shared.textColor
-        searchBar.backgroundColor = ThemeManager.shared.backgroundColor
+
+        // Update search icon color when theme changes
+        if let searchIconView = searchBar.searchTextField.leftView as? UIImageView {
+            searchIconView.tintColor = ThemeManager.shared.textColor.withAlphaComponent(0.6)
+        }
+
+        // Update placeholder color
+        searchBar.searchTextField.attributedPlaceholder = NSAttributedString(
+            string: "Search cities...",
+            attributes: [
+                .foregroundColor: ThemeManager.shared.textColor.withAlphaComponent(0.6),
+                .font: ThemeManager.Fonts.caption
+            ]
+        )
+
         tableView.backgroundColor = ThemeManager.shared.backgroundColor
         emptyLabel.textColor = ThemeManager.shared.textColor
         tableView.reloadData()
         updateThemeButtonImage()
-        searchBar.searchTextField.attributedPlaceholder = NSAttributedString(
-            string: "Search cities...",
-            attributes: [NSAttributedString.Key.foregroundColor: ThemeManager.shared.textColor]
-        )
     }
 
     @objc private func toggleTheme() {
@@ -222,4 +286,18 @@ extension HomeViewController: UISearchBarDelegate {
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
         searchBar.resignFirstResponder()
     }
+
+//    func searchBarTextDidBeginEditing(_ searchBar: UISearchBar) {
+//        searchBar.setShowsCancelButton(true, animated: true)
+//    }
+//
+//    func searchBarTextDidEndEditing(_ searchBar: UISearchBar) {
+//        searchBar.setShowsCancelButton(false, animated: true)
+//    }
+//
+//    func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
+//        searchBar.text = ""
+//        searchBar.resignFirstResponder()
+//        viewModel.searchText = ""
+//    }
 }

@@ -86,24 +86,15 @@ final class HomeViewModel: BaseViewModel {
     ///   2. Update the recent cities list
     ///   3. Navigate to city details
     func didSelectCity(_ city: SearchResult) {
-        do {
-            try recentCitiesService.addRecentCity(city)
-            loadRecentCities()
-            coordinator?.showCityDetail(for: city)
-        } catch {
-            handleError(error)
-        }
+        recentCitiesService.addRecentCity(city)
+        loadRecentCities()
+        coordinator?.showCityDetail(for: city)
     }
 
     // MARK: - Private Methods
     /// Load recently viewed cities from persistence
     private func loadRecentCities() {
-        do {
-            recentCities = try recentCitiesService.getRecentCities()
-        } catch {
-            handleError(error)
-            recentCities = []
-        }
+        recentCities = recentCitiesService.getRecentCities()
     }
 
     /// Setup reactive bindings for search functionality
@@ -121,15 +112,16 @@ final class HomeViewModel: BaseViewModel {
                 self?.lastSearchQuery = query
             })
             .flatMap { [weak self] query -> AnyPublisher<[SearchResult], NetworkError> in
-                guard let self = self, !query.isEmpty else {
+                guard let self = self else {
                     return Just([])
                         .setFailureType(to: NetworkError.self)
                         .eraseToAnyPublisher()
                 }
 
-                // Validate search query
-                guard query.count >= AppConstants.Validation.minSearchLength else {
-                    return Fail(error: NetworkError.custom(AppError.invalidSearchQuery))
+                // Return empty results for empty query or query shorter than minimum length
+                guard !query.isEmpty, query.count >= AppConstants.Validation.minSearchLength else {
+                    return Just([])
+                        .setFailureType(to: NetworkError.self)
                         .eraseToAnyPublisher()
                 }
 
@@ -140,16 +132,12 @@ final class HomeViewModel: BaseViewModel {
             .sink(
                 weak: self,
                 receiveValue: { [weak self] _, cities in
-                    if cities.isEmpty {
-                        self?.handleError(AppError.cityNotFound)
-                    } else {
-                        self?.cities = cities
-                        self?.state = .success
-                    }
+                    self?.state = cities.isEmpty ? .empty : .success
+                    self?.cities = cities
                 },
                 receiveCompletion: { [weak self] _, completion in
                     if case .failure(let error) = completion {
-                        self?.handleError(error)
+                        self?.state = .empty
                     }
                 }
             )

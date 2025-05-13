@@ -1,29 +1,90 @@
 import Foundation
 import Combine
 import SwiftUI
+/// presenter view protocol
+protocol WeatherPresenterProtocol {
+    // MARK: - Location Information
+    var areaName: String { get }
+    var regionName: String { get }
+    var countryName: String { get }
+    var localTime: String { get }
+
+    // MARK: - Current Weather
+    var weatherDesc: String { get }
+    var imageURL: String { get }
+    var temperature: String { get }
+    var humidity: String { get }
+    var feelsLike: String { get }
+    var windSpeed: String { get }
+    var windDirection: String { get }
+    var pressure: String { get }
+    var visibility: String { get }
+    var uvIndex: String { get }
+    var precipitation: String { get }
+    var cloudCover: String { get }
+
+    // MARK: - Observation Details
+    var observationTime: String { get }
+
+    // MARK: - 7-Day Forecast
+    var forecastDays: [ForecastDay] { get }
+}
+
+// MARK: - Forecast Models
+struct ForecastDay {
+    let date: String
+    let maxTemp: String
+    let minTemp: String
+    let avgTemp: String
+    let sunHours: String
+    let uvIndex: String
+    let sunrise: String
+    let sunset: String
+    let moonrise: String
+    let moonset: String
+    let moonPhase: String
+    let moonIllumination: String
+    let hourlyForecasts: [HourlyForecast]
+}
+
+struct HourlyForecast {
+    let time: String
+    let temperature: String
+    let weatherDesc: String
+    let weatherIconURL: String
+    let precipitation: String
+    let humidity: String
+    let cloudCover: String
+    let windSpeed: String
+    let windDirection: String
+    let feelsLike: String
+    let chanceOfRain: String
+    let chanceOfSnow: String
+    let visibility: String
+    let uvIndex: String
+}
 
 extension WeatherData: WeatherPresenterProtocol {
-
+    // MARK: - Location Information
     var areaName: String {
-        self.nearestArea?.first?.areaName?.first?.value ?? "Unknow Area"
-    }
-
-    var weatherDesc: String {
-        self.currentCondition?.first?.weatherDesc?.first?.value ?? "Unknow Weather"
+        self.nearestArea?.first?.areaName?.first?.value ?? "Unknown Area"
     }
 
     var regionName: String {
-        self.nearestArea?.first?.region?.first?.value ?? "Unknow Region"
+        self.nearestArea?.first?.region?.first?.value ?? "Unknown Region"
     }
 
     var countryName: String {
-        self.nearestArea?.first?.country?.first?.value ?? "Unknow Country"
-
+        self.nearestArea?.first?.country?.first?.value ?? "Unknown Country"
     }
 
     var localTime: String {
-        self.timeZone?.first?.localtime ?? "Unknow TimeZone"
+        self.timeZone?.first?.localtime ?? "Unknown TimeZone"
+    }
 
+    // MARK: - Current Weather
+    var weatherDesc: String {
+        self.currentCondition?.first?.weatherDesc?.first?.value ?? "Unknown Weather"
     }
 
     var imageURL: String {
@@ -31,13 +92,96 @@ extension WeatherData: WeatherPresenterProtocol {
     }
 
     var temperature: String {
-        "\(self.currentCondition?.first?.tempC ?? "Unknow")°C,\(self.currentCondition?.first?.tempF ?? "Unknow")°F"
+        "\(self.currentCondition?.first?.tempC ?? "Unknown")°C, \(self.currentCondition?.first?.tempF ?? "Unknown")°F"
     }
 
     var humidity: String {
-        "\(self.currentCondition?.first?.humidity ?? "Unknow")%"
+        "\(self.currentCondition?.first?.humidity ?? "Unknown")%"
     }
 
+    var feelsLike: String {
+        "Feels like \(self.currentCondition?.first?.feelsLikeC ?? "Unknown")°C, \(self.currentCondition?.first?.feelsLikeF ?? "Unknown")°F"
+    }
+
+    var windSpeed: String {
+        "\(self.currentCondition?.first?.windspeedKmph ?? "Unknown") km/h"
+    }
+
+    var windDirection: String {
+        "\(self.currentCondition?.first?.winddir16Point ?? "Unknown") (\(self.currentCondition?.first?.winddirDegree ?? "Unknown")°)"
+    }
+
+    var pressure: String {
+        "\(self.currentCondition?.first?.pressure ?? "Unknown") mb"
+    }
+
+    var visibility: String {
+        "\(self.currentCondition?.first?.visibility ?? "Unknown") km"
+    }
+
+    var uvIndex: String {
+        "UV Index: \(self.currentCondition?.first?.uvIndex ?? "Unknown")"
+    }
+
+    var precipitation: String {
+        "\(self.currentCondition?.first?.precipMM ?? "Unknown") mm"
+    }
+
+    var cloudCover: String {
+        "\(self.currentCondition?.first?.cloudcover ?? "Unknown")%"
+    }
+
+    // MARK: - Observation Details
+    var observationTime: String {
+        "Observed at: \(self.currentCondition?.first?.observationTime ?? "Unknown")"
+    }
+
+    // MARK: - 7-Day Forecast
+    var forecastDays: [ForecastDay] {
+        weather?.compactMap { day -> ForecastDay? in
+            guard let astronomy = day.astronomy?.first else { return nil }
+
+            let hourlyForecasts = (day.hourly ?? []).map { hourly -> HourlyForecast in
+                // Convert 24-hour format to readable time (e.g., "0" -> "00:00", "1300" -> "13:00")
+                let timeInt = Int(hourly.time ?? "0") ?? 0
+                let hour = timeInt / 100
+                let formattedTime = String(format: "%02d:00", hour)
+
+                return HourlyForecast(
+                    time: formattedTime,
+                    temperature: "\(hourly.tempC ?? "Unknown")°C, \(hourly.tempF ?? "Unknown")°F",
+                    weatherDesc: hourly.weatherDesc?.first?.value ?? "Unknown",
+                    weatherIconURL: hourly.weatherIconURL?.first?.value ?? "",
+                    precipitation: "\(hourly.precipMM ?? "Unknown") mm",
+                    humidity: "\(hourly.humidity ?? "Unknown")%",
+                    cloudCover: "\(hourly.cloudcover ?? "Unknown")%",
+                    windSpeed: "\(hourly.windspeedKmph ?? "Unknown") km/h",
+                    windDirection: "\(hourly.winddir16Point ?? "Unknown") (\(hourly.winddirDegree ?? "Unknown")°)",
+                    feelsLike: "\(hourly.feelsLikeC ?? "Unknown")°C, \(hourly.feelsLikeF ?? "Unknown")°F",
+                    chanceOfRain: "\(hourly.chanceofrain ?? "Unknown")%",
+                    chanceOfSnow: "\(hourly.chanceofsnow ?? "Unknown")%",
+                    visibility: "\(hourly.visibility ?? "Unknown") km",
+                    uvIndex: hourly.uvIndex ?? "Unknown"
+                )
+            }
+
+            return ForecastDay(
+                date: day.date ?? "Unknown",
+                maxTemp: "\(day.maxtempC ?? "Unknown")°C, \(day.maxtempF ?? "Unknown")°F",
+                minTemp: "\(day.mintempC ?? "Unknown")°C, \(day.mintempF ?? "Unknown")°F",
+                avgTemp: "\(day.avgtempC ?? "Unknown")°C, \(day.avgtempF ?? "Unknown")°F",
+                sunHours: "\(day.sunHour ?? "Unknown") hours",
+                uvIndex: "UV Index: \(day.uvIndex ?? "Unknown")",
+                sunrise: astronomy.sunrise ?? "Unknown",
+                sunset: astronomy.sunset ?? "Unknown",
+                moonrise: astronomy.moonrise ?? "Unknown",
+                moonset: astronomy.moonset ?? "Unknown",
+                moonPhase: astronomy.moonPhase ?? "Unknown",
+                moonIllumination: "\(astronomy.moonIllumination ?? "Unknown")%",
+                hourlyForecasts: hourlyForecasts
+            )
+        } ?? []
+    }
 }
 /// ViewModel for managing city weather data
 final class CityViewModel: BaseViewModel {

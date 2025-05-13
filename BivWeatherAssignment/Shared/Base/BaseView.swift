@@ -5,12 +5,14 @@ enum ViewState: Equatable {
     case initial
     case loading
     case error(String)
+    case empty
     case success
 
     static func == (lhs: ViewState, rhs: ViewState) -> Bool {
         switch (lhs, rhs) {
         case (.loading, .loading),
              (.success, .success),
+                (.empty,  .empty),
                 (.initial, .initial):
             return true
         case (.error(let lhsMessage), .error(let rhsMessage)):

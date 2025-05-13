@@ -24,7 +24,7 @@ enum AppConstants {
         static let padding: CGFloat = 16
         static let animationDuration: Double = 0.3
         static let errorDisplayDuration: TimeInterval = 3
-        static let searchDebounceInterval: TimeInterval = 0.5
+        static let searchDebounceInterval: Int = 500
         static let maxRecentCities = 10
     }
 
