@@ -76,17 +76,6 @@ final class NetworkTestHelper {
         return json.data(using: .utf8)!
     }
     
-    func createMockErrorResponse() -> Data {
-        let json = """
-        {
-            "error": {
-                "code": 1006,
-                "message": "No matching location found."
-            }
-        }
-        """
-        return json.data(using: .utf8)!
-    }
     
     
     // MARK: - Helper Methods

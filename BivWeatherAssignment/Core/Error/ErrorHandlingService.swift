@@ -16,32 +16,6 @@ protocol ErrorHandlingServiceProtocol {
     /// ```
     func handle(_ error: Error) -> String
 
-    /// Get recovery suggestion for an error
-    /// - Parameter error: The error to get recovery suggestion for
-    /// - Returns: Optional recovery suggestion string
-    /// - Example:
-    /// ```swift
-    /// let error = CacheError.cacheExpired
-    /// if let suggestion = errorHandler.getRecoverySuggestion(for: error) {
-    ///     showRetryButton(with: suggestion) // "Data has expired, refreshing..."
-    /// }
-    /// ```
-    func getRecoverySuggestion(for error: Error) -> String?
-
-    /// Check if error is recoverable
-    /// - Parameter error: The error to check
-    /// - Returns: Boolean indicating if the error can be recovered from
-    /// - Example:
-    /// ```swift
-    /// let error = NetworkError.networkError(URLError(.notConnectedToInternet))
-    /// if errorHandler.isRecoverable(error) {
-    ///     showRetryButton()
-    /// } else {
-    ///     showContactSupport()
-    /// }
-    /// ```
-    func isRecoverable(_ error: Error) -> Bool
-
     /// Log error for analytics
     /// - Parameter error: The error to log
     /// - Example:
@@ -82,23 +56,6 @@ final class ErrorHandlingService: ErrorHandlingServiceProtocol {
         return appError.localizedDescription
     }
 
-    /// Get recovery suggestion for an error
-    /// Provides user-friendly suggestions for error recovery
-    /// - Parameter error: The error to get recovery suggestion for
-    /// - Returns: Optional recovery suggestion string
-    func getRecoverySuggestion(for error: Error) -> String? {
-        let appError = AppError.handle(error)
-        return appError.recoverySuggestion
-    }
-
-    /// Check if error is recoverable
-    /// Determines if an error can be recovered from
-    /// - Parameter error: The error to check
-    /// - Returns: Boolean indicating if the error can be recovered from
-    func isRecoverable(_ error: Error) -> Bool {
-        let appError = AppError.handle(error)
-        return isErrorRecoverable(appError)
-    }
 
     /// Log error for analytics
     /// Logs errors with detailed context for debugging
@@ -112,96 +69,6 @@ final class ErrorHandlingService: ErrorHandlingServiceProtocol {
     }
 
     // MARK: - Private Methods
-    /// Internal method to check error recoverability
-    /// - Parameter error: The AppError to check
-    /// - Returns: Boolean indicating if the error can be recovered from
-    private func isErrorRecoverable(_ error: AppError) -> Bool {
-        switch error {
-        case .network(let networkError):
-            return isNetworkErrorRecoverable(networkError)
-        case .persistence(let persistenceError):
-            return isPersistenceErrorRecoverable(persistenceError)
-        case .search(let searchError):
-            return isSearchErrorRecoverable(searchError)
-        case .weather(let weatherError):
-            return isWeatherErrorRecoverable(weatherError)
-        case .storage:
-            return false
-        case .cache(let cacheError):
-            return isCacheErrorRecoverable(cacheError)
-        }
-    }
-
-    /// Check if network errors are recoverable
-    /// - Parameter error: The NetworkError to check
-    /// - Returns: Boolean indicating if the network error can be recovered from
-    /// - Note: Recoverable: invalidURL, invalidResponse, httpError, networkError, decodingError, timeout
-    /// - Note: Not Recoverable: sslError, rateLimitExceeded, custom
-    private func isNetworkErrorRecoverable(_ error: NetworkError) -> Bool {
-        switch error {
-        case .invalidURL, .invalidResponse, .httpError, .networkError, .decodingError, .timeout:
-            return true
-        case .sslError, .rateLimitExceeded, .custom:
-            return false
-        }
-    }
-
-    /// Check if persistence errors are recoverable
-    /// - Parameter error: The PersistenceError to check
-    /// - Returns: Boolean indicating if the persistence error can be recovered from
-    /// - Note: Recoverable: persistenceError, dataNotFound, invalidData
-    /// - Note: Not Recoverable: saveFailed, migrationFailed, quotaExceeded, fileSystemError
-    private func isPersistenceErrorRecoverable(_ error: PersistenceError) -> Bool {
-        switch error {
-        case .persistenceError, .dataNotFound, .invalidData:
-            return true
-        case .saveFailed, .migrationFailed, .quotaExceeded, .fileSystemError:
-            return false
-        }
-    }
-
-    /// Check if search errors are recoverable
-    /// - Parameter error: The SearchError to check
-    /// - Returns: Boolean indicating if the search error can be recovered from
-    /// - Note: Recoverable: cityNotFound, invalidSearchQuery, tooManyResults, invalidCharacters
-    /// - Note: Not Recoverable: searchLimitExceeded, encodingError
-    private func isSearchErrorRecoverable(_ error: SearchError) -> Bool {
-        switch error {
-        case .cityNotFound, .invalidSearchQuery, .tooManyResults, .invalidCharacters:
-            return true
-        case .searchLimitExceeded, .encodingError:
-            return false
-        }
-    }
-
-    /// Check if weather errors are recoverable
-    /// - Parameter error: The WeatherError to check
-    /// - Returns: Boolean indicating if the weather error can be recovered from
-    /// - Note: Recoverable: weatherDataUnavailable, partialDataAvailable
-    /// - Note: Not Recoverable: locationNotAvailable, invalidCoordinates, dataFormatChanged, apiVersionMismatch
-    private func isWeatherErrorRecoverable(_ error: WeatherError) -> Bool {
-        switch error {
-        case .weatherDataUnavailable, .partialDataAvailable:
-            return true
-        case .locationNotAvailable, .invalidCoordinates, .dataFormatChanged, .apiVersionMismatch:
-            return false
-        }
-    }
-
-    /// Check if cache errors are recoverable
-    /// - Parameter error: The CacheError to check
-    /// - Returns: Boolean indicating if the cache error can be recovered from
-    /// - Note: Recoverable: cacheMiss, cacheExpired, invalidCacheData
-    /// - Note: Not Recoverable: cacheWriteFailed, cacheReadFailed, cacheClearFailed, cacheCorruption, insufficientDiskSpace, migrationFailed
-    private func isCacheErrorRecoverable(_ error: CacheError) -> Bool {
-        switch error {
-        case .cacheMiss, .cacheExpired, .invalidCacheData:
-            return true
-        case .cacheWriteFailed, .cacheReadFailed, .cacheClearFailed, .cacheCorruption, .insufficientDiskSpace, .migrationFailed:
-            return false
-        }
-    }
-
     /// Create detailed error context for logging
     /// - Parameter error: The AppError to create context for
     /// - Returns: Dictionary containing error context information
@@ -209,8 +76,7 @@ final class ErrorHandlingService: ErrorHandlingServiceProtocol {
         var context: [String: Any] = [
             "error_type": String(describing: type(of: error)),
             "error_code": getErrorCode(for: error),
-            "timestamp": Date().timeIntervalSince1970,
-            "is_recoverable": isErrorRecoverable(error)
+            "timestamp": Date().timeIntervalSince1970
         ]
 
         if let recoverySuggestion = error.recoverySuggestion {

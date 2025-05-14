@@ -81,7 +81,6 @@ class BaseViewController: UIViewController {
     }
 
     // MARK: - Public Methods
-    /// Show loading state
     func handleState(state: ViewState) {
         viewState = state
     }

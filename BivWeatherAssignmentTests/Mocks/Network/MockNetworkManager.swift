@@ -8,7 +8,6 @@ final class MockNetworkManager: NetworkManagerProtocol, MockProtocol {
     var shouldFail = false
     var mockError: AppError = .network(.invalidResponse)
     var lastRequest: Endpoint?
-    var forceRefreshCalled = false
     
     // MARK: - Mock Data
     private var mockResponse: Data?
@@ -16,17 +15,7 @@ final class MockNetworkManager: NetworkManagerProtocol, MockProtocol {
     private let networkHelper = NetworkTestHelper.shared
     
     // MARK: - Initialization
-    init(shouldFail: Bool = false, 
-         mockError: AppError = .network(.invalidResponse),
-         lastRequest: Endpoint? = nil,
-         forceRefreshCalled: Bool = false,
-         mockResponse: Data? = nil,
-         cacheManager: MockCacheManager = MockCacheManager()) {
-        self.shouldFail = shouldFail
-        self.mockError = mockError
-        self.lastRequest = lastRequest
-        self.forceRefreshCalled = forceRefreshCalled
-        self.mockResponse = mockResponse
+    init(cacheManager: MockCacheManager = MockCacheManager()) {
         self.cacheManager = cacheManager
     }
     
@@ -39,7 +28,7 @@ final class MockNetworkManager: NetworkManagerProtocol, MockProtocol {
         }
         
         // Check cache first if not force refresh
-        if !forceRefreshCalled,
+        if endpoint.cacheTime != 0,
            let url = endpoint.asURL(),
            let cachedData = cacheManager.getCachedResponse(forKey: url.absoluteString),
            let decodedData = try? JSONDecoder().decode(T.self, from: cachedData) {
@@ -65,7 +54,6 @@ final class MockNetworkManager: NetworkManagerProtocol, MockProtocol {
     }
     
     func clearCache() {
-        forceRefreshCalled = true
         cacheManager.clearRequestCache()
     }
     
@@ -82,9 +70,9 @@ final class MockNetworkManager: NetworkManagerProtocol, MockProtocol {
             mockResponse = networkHelper.createMockWeatherResponse()
         case .search:
             mockResponse = networkHelper.createMockSearchResponse()
-        case .error:
-            mockResponse = networkHelper.createMockErrorResponse()
+        case .error(let error):
             shouldFail = true
+            mockError = error
         case .custom(let data):
             mockResponse = data
         }
@@ -95,7 +83,6 @@ final class MockNetworkManager: NetworkManagerProtocol, MockProtocol {
         shouldFail = false
         mockError = .network(.invalidResponse)
         lastRequest = nil
-        forceRefreshCalled = false
         mockResponse = nil
         cacheManager.reset()
     }
@@ -105,6 +92,6 @@ final class MockNetworkManager: NetworkManagerProtocol, MockProtocol {
 enum MockResponseType {
     case weather
     case search
-    case error
+    case error(AppError)
     case custom(Data)
 } 

@@ -7,9 +7,6 @@ protocol BaseViewModelType: AnyObject {
     /// The current state of the ViewModel
     var state: ViewState { get }
 
-    /// Publisher for state changes
-    var statePublisher: AnyPublisher<ViewState, Never> { get }
-
     /// Set of cancellables for managing subscriptions
     var cancellables: Set<AnyCancellable> { get set }
 
@@ -24,11 +21,6 @@ protocol BaseViewModelType: AnyObject {
 class BaseViewModel: ObservableObject, BaseViewModelType {
     // MARK: - Published Properties
     @Published var state: ViewState
-
-    // MARK: - Properties
-    var statePublisher: AnyPublisher<ViewState, Never> {
-        $state.eraseToAnyPublisher()
-    }
 
     var cancellables = Set<AnyCancellable>()
 
@@ -52,14 +44,9 @@ class BaseViewModel: ObservableObject, BaseViewModelType {
     /// Handle errors in a consistent way
     func handleError(_ error: Error) {
         let errorMessage = errorHandler.handle(error)
-        let recoverySuggestion = errorHandler.getRecoverySuggestion(for: error)
 
         // Update state with error and recovery suggestion
-        if let suggestion = recoverySuggestion {
-            self.state = .error("\(errorMessage)\n\n\(suggestion)")
-        } else {
-            self.state = .error(errorMessage)
-        }
+        self.state = .error(errorMessage)
 
         // Log error
         errorHandler.logError(error)
