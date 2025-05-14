@@ -54,7 +54,7 @@ final class HomeViewModel: BaseViewModel {
     ///   - recentCitiesService: Service for managing recently viewed cities
     ///   - errorHandler: Service for handling errors
     init(weatherService: WeatherServiceProtocol = WeatherServiceImpl(),
-         recentCitiesService: RecentCitiesServiceProtocol = RecentCitiesService(),
+         recentCitiesService: RecentCitiesServiceProtocol = RecentCitiesServiceImpl(),
          errorHandler: ErrorHandlingServiceProtocol = ErrorHandlingService()) {
         self.weatherService = weatherService
         self.recentCitiesService = recentCitiesService

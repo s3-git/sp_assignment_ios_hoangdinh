@@ -4,22 +4,48 @@ import SwiftUI
 struct CityView: View {
     // MARK: - Properties
     @StateObject private var viewModel: CityViewModel
-
+    
     // MARK: - Initialization
     init(viewModel: CityViewModel) {
         _viewModel = StateObject(wrappedValue: viewModel)
     }
-
+    
     // MARK: - Body
     var body: some View {
         BaseView {
-            if let weatherData = $viewModel.weatherData.wrappedValue {
-                WeatherContentView(weatherData: weatherData, onRefresh: {
-                    viewModel.fetchWeatherData(forceRefresh: true)
-                })
-                    .padding(.top, viewModel.navBarHeight)
+            switch viewModel.state {
+                case .loading:
+                    ProgressView()
+                case .error(let message):
+                    ErrorView(error: message, retryAction: {
+                        viewModel.fetchWeatherData(forceRefresh: true)
+                    })
+                case .success:
+                    if let weatherData = viewModel.weatherData {
+                        WeatherContentView(weatherData: weatherData, onRefresh: {
+                            viewModel.fetchWeatherData(forceRefresh: true)
+                        }).padding(.top, viewModel.navBarHeight)
+                    } else {
+                        EmptyStateView(
+                            title: "No Weather Data",
+                            message: "Unable to load weather information. Please try again.",
+                            systemImage: "cloud.slash",
+                            action: {
+                                viewModel.fetchWeatherData(forceRefresh: true)
+                            },
+                            actionTitle: "Retry"
+                        )
+                    }
+                default:
+                    EmptyStateView(
+                        title: "No Data",
+                        message: "Please wait while we load the weather information.",
+                        systemImage: "hourglass"
+                    )
             }
-        }.safeAreaPadding(.all)
+            
+        }
+        .safeAreaPadding(.all)
         .onAppear {
             viewModel.fetchWeatherData()
         }
@@ -32,13 +58,13 @@ struct WeatherContentView: View {
     private let weatherData: WeatherPresenterProtocol
     @State private var isRefreshing = false
     var onRefresh: () -> Void
-
+    
     // MARK: - Initialization
     init(weatherData: WeatherPresenterProtocol, onRefresh: @escaping () -> Void) {
         self.weatherData = weatherData
         self.onRefresh = onRefresh
     }
-
+    
     var body: some View {
         ScrollView(.vertical, showsIndicators: false) {
             VStack(spacing: 16) {
@@ -82,6 +108,7 @@ struct WeatherContentView: View {
                     .foregroundStyle(ThemeManager.shared.textColor.toColor)
                 
                 Text(weatherData.areaName)
+                    .foregroundStyle(ThemeManager.shared.textColor.toColor)
                     .font(Font(ThemeManager.Fonts.title))
                     .fontWeight(.bold)
             }

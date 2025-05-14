@@ -69,23 +69,26 @@ class ThemeManager: ObservableObject {
     }
 
     /// Accent color that pops in both modes
-    var accent: UIColor {
+    var accentColor: UIColor {
         isDarkMode ? UIColor(hex: "#FF8000") : UIColor(hex: "#CC0099")
     }
 
     /// Error color with high visibility
-    var error: UIColor {
+    var errorColor: UIColor {
         isDarkMode ? UIColor(hex: "#FF4D4D") : UIColor(hex: "#CC0000")
     }
 
     /// Success color that's clear in both modes
-    var success: UIColor {
+    var successColor: UIColor {
         isDarkMode ? UIColor(hex: "#4DE64D") : UIColor(hex: "#009900")
     }
 
     /// Warning color with good visibility
-    var warning: UIColor {
+    var warningColor: UIColor {
         isDarkMode ? UIColor(hex: "#FFCC00") : UIColor(hex: "#CC6600")
+    }
+    var shadowColor: UIColor {
+        .white
     }
 }
 

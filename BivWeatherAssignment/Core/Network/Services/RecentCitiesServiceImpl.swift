@@ -1,7 +1,7 @@
 import Foundation
 
 /// Service for managing recently viewed cities
-final class RecentCitiesService: RecentCitiesServiceProtocol {
+final class RecentCitiesServiceImpl: RecentCitiesServiceProtocol {
     // MARK: - Properties
     private let userDefaults: UserDefaults
     private let maxRecentCities = AppConstants.UserInterface.maxRecentCities

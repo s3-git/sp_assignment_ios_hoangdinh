@@ -1,5 +1,5 @@
-import XCTest
 @testable import BivWeatherAssignment
+import XCTest
 
 final class RecentCitiesServiceTests: XCTestCase {
     // MARK: - Properties

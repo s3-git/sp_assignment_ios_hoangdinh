@@ -8,7 +8,7 @@ struct WeatherCard: View {
     let iconURL: URL?
 
     var body: some View {
-        VStack(spacing: 16) {
+        VStack(spacing: AppConstants.UserInterface.padding) {
             if let iconURL = iconURL {
                 AsyncImage(url: iconURL) { image in
                     image
@@ -16,107 +16,35 @@ struct WeatherCard: View {
                         .aspectRatio(contentMode: .fit)
                 } placeholder: {
                     ProgressView()
+                        .tint(ThemeManager.shared.accentColor.toColor)
                 }
                 .frame(width: 100, height: 100)
             }
 
             Text(temperature)
-                .font(.system(size: 48, weight: .bold))
+                .font(Font(ThemeManager.Fonts.title))
+                .foregroundStyle(ThemeManager.shared.textColor.toColor)
 
             Text(description)
-                .font(.title2)
-                .foregroundColor(.secondary)
+                .font(Font(ThemeManager.Fonts.headline))
+                .foregroundStyle(ThemeManager.shared.secondary.toColor)
 
             HStack {
                 Image(systemName: "humidity")
                 Text(humidity)
             }
-            .font(.subheadline)
-            .foregroundColor(.secondary)
+            .font(Font(ThemeManager.Fonts.body))
+            .foregroundStyle(ThemeManager.shared.secondary.toColor)
         }
-        .padding()
-        .background(Color(UIColor.systemBackground))
-        .cornerRadius(16)
-        .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
-    }
-}
-
-// MARK: - Empty State View
-struct EmptyStateView: View {
-    let title: String
-    let message: String
-    let systemImage: String
-
-    var body: some View {
-        VStack(spacing: 16) {
-            Image(systemName: systemImage)
-                .font(.system(size: 48))
-                .foregroundColor(.secondary)
-
-            Text(title)
-                .font(.title2)
-                .fontWeight(.bold)
-
-            Text(message)
-                .font(.body)
-                .foregroundColor(.secondary)
-                .multilineTextAlignment(.center)
-        }
-        .padding()
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
-    }
-}
-
-// MARK: - Loading View
-struct LoadingView: View {
-    let message: String
-
-    var body: some View {
-        VStack(spacing: 16) {
-            ProgressView()
-                .scaleEffect(1.5)
-
-            Text(message)
-                .font(.subheadline)
-                .foregroundColor(.secondary)
-        }
-        .padding()
-        .background(Color(UIColor.systemBackground))
-        .cornerRadius(16)
-        .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
-    }
-}
-
-// MARK: - Error View
-struct ErrorView: View {
-    let error: Error
-    let retryAction: () -> Void
-
-    var body: some View {
-        VStack(spacing: 16) {
-            Image(systemName: "exclamationmark.triangle")
-                .font(.system(size: 48))
-                .foregroundColor(.red)
-
-            Text(error.localizedDescription)
-                .font(.body)
-                .foregroundColor(.secondary)
-                .multilineTextAlignment(.center)
-
-            Button(action: retryAction) {
-                Text("Retry")
-                    .font(.headline)
-                    .foregroundColor(.white)
-                    .padding(.horizontal, 32)
-                    .padding(.vertical, 12)
-                    .background(Color.blue)
-                    .cornerRadius(8)
-            }
-        }
-        .padding()
-        .background(Color(UIColor.systemBackground))
-        .cornerRadius(16)
-        .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
+        .padding(AppConstants.UserInterface.padding)
+        .background(ThemeManager.shared.backgroundColor.toColor)
+        .cornerRadius(AppConstants.UserInterface.cornerRadius)
+        .shadow(
+            color: ThemeManager.shared.shadowColor.toColor.opacity(0.1),
+            radius: AppConstants.UserInterface.padding * 0.625,
+            x: 0,
+            y: AppConstants.UserInterface.padding * 0.3125
+        )
     }
 }
 
@@ -131,22 +59,28 @@ struct WeatherComponents_Previews: PreviewProvider {
                 iconURL: nil
             )
             .previewLayout(.sizeThatFits)
+            .applyTheme()
 
             EmptyStateView(
                 title: "No Cities",
                 message: "Search for a city to see its weather",
-                systemImage: "magnifyingglass"
+                systemImage: "magnifyingglass",
+                action: {},
+                actionTitle: "Search"
             )
             .previewLayout(.sizeThatFits)
+            .applyTheme()
 
             LoadingView(message: "Loading weather data...")
                 .previewLayout(.sizeThatFits)
+                .applyTheme()
 
             ErrorView(
-                error: NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "Failed to load weather data"]),
+                error: "Failed to load weather data",
                 retryAction: {}
             )
             .previewLayout(.sizeThatFits)
+            .applyTheme()
         }
     }
 }

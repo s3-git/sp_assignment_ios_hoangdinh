@@ -41,11 +41,11 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         UINavigationBar.appearance().standardAppearance = appearance
         UINavigationBar.appearance().scrollEdgeAppearance = appearance
         UINavigationBar.appearance().compactAppearance = appearance
-        UINavigationBar.appearance().tintColor = ThemeManager.shared.accent
+        UINavigationBar.appearance().tintColor = ThemeManager.shared.accentColor
 
         // Configure search bar appearance
         let searchBarAppearance = UISearchBar.appearance()
-        searchBarAppearance.tintColor = ThemeManager.shared.accent
+        searchBarAppearance.tintColor = ThemeManager.shared.accentColor
         searchBarAppearance.barTintColor = ThemeManager.shared.backgroundColor
 
         // Configure table view appearance
