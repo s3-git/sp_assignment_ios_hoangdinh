@@ -14,15 +14,17 @@ final class NetworkManager: NetworkManagerProtocol {
     private let session: URLSession
     private let baseURL: String
     private let cacheManager: CacheManagerProtocol
-    private let logger = Logger.shared
+    private let logger: Logger
     private let errorHandler: ErrorHandlingServiceProtocol
 
     // MARK: - Initialization
     init(session: URLSession? = .shared, 
-         cacheManager: CacheManager = .shared,
+         cacheManager: CacheManagerProtocol = CacheManager.shared,
+         logger: Logger = Logger.shared,
          errorHandler: ErrorHandlingServiceProtocol = ErrorHandlingService()) {
         self.baseURL = Environment.shared.baseURL
         self.cacheManager = cacheManager
+        self.logger = logger
         self.errorHandler = errorHandler
 
         // Configure URLSession with caching
@@ -35,8 +37,9 @@ final class NetworkManager: NetworkManagerProtocol {
     // MARK: - Public Methods
     func request<T: Codable>(_ endpoint: Endpoint) -> AnyPublisher<T, AppError> {
         guard let url = endpoint.asURL() else {
-            
-            return Fail(error: AppError.network(.invalidURL)).eraseToAnyPublisher()
+            let error = AppError.network(.invalidURL)
+            errorHandler.logError(error)
+            return Fail(error: error).eraseToAnyPublisher()
         }
 
         // Check cache first
@@ -56,40 +59,62 @@ final class NetworkManager: NetworkManagerProtocol {
         logger.logRequest(request)
 
         return session.dataTaskPublisher(for: request)
-            .mapError { error -> AppError in
-                
-                self.errorHandler.logError(error)
-                return AppError.network(.networkError(error))
+            .mapError { [weak self] error -> AppError in
+                var appError = AppError.network(.custom(error))
+
+                guard let self = self else { return appError }
+
+                switch error.code {
+                    case .timedOut:
+                        appError = .network(.timeout)
+                    case .secureConnectionFailed:
+                        appError = .network(.sslError(error))
+                    default:
+                        appError = .network(.networkError(error))
+                }
+                self.errorHandler.logError(appError)
+                return appError
             }
-            .flatMap { data, response -> AnyPublisher<T, AppError> in
+            .flatMap { [weak self] data, response -> AnyPublisher<T, AppError> in
+                guard let self = self else {
+                    return Fail(error: AppError.network(.custom(NSError(domain: "", code: -1)))).eraseToAnyPublisher()
+                }
+                
                 guard let httpResponse = response as? HTTPURLResponse else {
-                    
-                    self.errorHandler.logError(AppError.network(.invalidResponse))
-                    return Fail(error: AppError.network(.invalidResponse)).eraseToAnyPublisher()
+                    let error = AppError.network(.invalidResponse)
+                    self.errorHandler.logError(error)
+                    return Fail(error: error).eraseToAnyPublisher()
                 }
 
                 // Log response
                 self.logger.logResponse(httpResponse, data: data)
 
-                guard (200...299).contains(httpResponse.statusCode) else {
+                // Handle specific HTTP status codes
+                switch httpResponse.statusCode {
+                case 200...299:
+                    // Cache the successful response
+                    self.cacheManager.cacheResponse(data, forKey: url.absoluteString, expirationTime: endpoint.cacheTime)
+                    self.logger.info("Successfully cached response for URL: \(url.absoluteString)")
                     
+                    return Just(data)
+                        .decode(type: T.self, decoder: JSONDecoder())
+                        .mapError { error -> AppError in
+                            let appError = AppError.network(.decodingError(error))
+                            self.errorHandler.logError(appError)
+                            return appError
+                        }
+                        .eraseToAnyPublisher()
+                        
+                case 429:
+                    let error = AppError.network(.rateLimitExceeded)
+                    self.errorHandler.logError(error)
+                    return Fail(error: error).eraseToAnyPublisher()
+                    
+                default:
                     let error = AppError.network(.httpError(httpResponse.statusCode))
                     self.errorHandler.logError(error)
                     return Fail(error: error).eraseToAnyPublisher()
                 }
-
-                // Cache the successful response
-                self.cacheManager.cacheResponse(data, forKey: url.absoluteString, expirationTime: endpoint.cacheTime)
-                self.logger.info("Successfully cached response for URL: \(url.absoluteString)")
-
-                return Just(data)
-                    .decode(type: T.self, decoder: JSONDecoder())
-                    .mapError { error -> AppError in
-                        
-                        self.errorHandler.logError(error)
-                        return AppError.network(.decodingError(error))
-                    }
-                    .eraseToAnyPublisher()
             }
             .eraseToAnyPublisher()
     }
@@ -102,7 +127,8 @@ final class NetworkManager: NetworkManagerProtocol {
 
     func removeCache(for endpoint: Endpoint) {
         guard let url = endpoint.asURL() else {
-            self.errorHandler.logError(AppError.cache(.cacheClearFailed("Invalid URL for cache removal")))
+            let error = AppError.cache(.cacheClearFailed("Invalid URL for cache removal"))
+            errorHandler.logError(error)
             return
         }
         logger.info("Removing cache for URL: \(url.absoluteString)")
@@ -110,6 +136,7 @@ final class NetworkManager: NetworkManagerProtocol {
     }
 }
 
+// MARK: - Supporting Types
 enum HTTPMethod: String {
     case get = "GET"
     case post = "POST"

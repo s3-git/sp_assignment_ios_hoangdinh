@@ -135,13 +135,13 @@ final class ErrorHandlingService: ErrorHandlingServiceProtocol {
     /// Check if network errors are recoverable
     /// - Parameter error: The NetworkError to check
     /// - Returns: Boolean indicating if the network error can be recovered from
-    /// - Note: Recoverable: invalidURL, invalidResponse, httpError
-    /// - Note: Not Recoverable: custom errors
+    /// - Note: Recoverable: invalidURL, invalidResponse, httpError, networkError, decodingError, timeout
+    /// - Note: Not Recoverable: sslError, rateLimitExceeded, custom
     private func isNetworkErrorRecoverable(_ error: NetworkError) -> Bool {
         switch error {
-        case .invalidURL, .invalidResponse, .httpError, .networkError, .decodingError:
+        case .invalidURL, .invalidResponse, .httpError, .networkError, .decodingError, .timeout:
             return true
-        case .custom:
+        case .sslError, .rateLimitExceeded, .custom:
             return false
         }
     }
@@ -150,12 +150,12 @@ final class ErrorHandlingService: ErrorHandlingServiceProtocol {
     /// - Parameter error: The PersistenceError to check
     /// - Returns: Boolean indicating if the persistence error can be recovered from
     /// - Note: Recoverable: persistenceError, dataNotFound, invalidData
-    /// - Note: Not Recoverable: saveFailed
+    /// - Note: Not Recoverable: saveFailed, migrationFailed, quotaExceeded, fileSystemError
     private func isPersistenceErrorRecoverable(_ error: PersistenceError) -> Bool {
         switch error {
         case .persistenceError, .dataNotFound, .invalidData:
             return true
-        case .saveFailed:
+        case .saveFailed, .migrationFailed, .quotaExceeded, .fileSystemError:
             return false
         }
     }
@@ -163,13 +163,13 @@ final class ErrorHandlingService: ErrorHandlingServiceProtocol {
     /// Check if search errors are recoverable
     /// - Parameter error: The SearchError to check
     /// - Returns: Boolean indicating if the search error can be recovered from
-    /// - Note: Recoverable: cityNotFound, invalidSearchQuery, tooManyResults
-    /// - Note: Not Recoverable: searchLimitExceeded
+    /// - Note: Recoverable: cityNotFound, invalidSearchQuery, tooManyResults, invalidCharacters
+    /// - Note: Not Recoverable: searchLimitExceeded, encodingError
     private func isSearchErrorRecoverable(_ error: SearchError) -> Bool {
         switch error {
-        case .cityNotFound, .invalidSearchQuery, .tooManyResults:
+        case .cityNotFound, .invalidSearchQuery, .tooManyResults, .invalidCharacters:
             return true
-        case .searchLimitExceeded:
+        case .searchLimitExceeded, .encodingError:
             return false
         }
     }
@@ -177,13 +177,13 @@ final class ErrorHandlingService: ErrorHandlingServiceProtocol {
     /// Check if weather errors are recoverable
     /// - Parameter error: The WeatherError to check
     /// - Returns: Boolean indicating if the weather error can be recovered from
-    /// - Note: Recoverable: weatherDataUnavailable
-    /// - Note: Not Recoverable: locationNotAvailable, invalidCoordinates
+    /// - Note: Recoverable: weatherDataUnavailable, partialDataAvailable
+    /// - Note: Not Recoverable: locationNotAvailable, invalidCoordinates, dataFormatChanged, apiVersionMismatch
     private func isWeatherErrorRecoverable(_ error: WeatherError) -> Bool {
         switch error {
-        case .weatherDataUnavailable:
+        case .weatherDataUnavailable, .partialDataAvailable:
             return true
-        case .locationNotAvailable, .invalidCoordinates:
+        case .locationNotAvailable, .invalidCoordinates, .dataFormatChanged, .apiVersionMismatch:
             return false
         }
     }
@@ -192,12 +192,12 @@ final class ErrorHandlingService: ErrorHandlingServiceProtocol {
     /// - Parameter error: The CacheError to check
     /// - Returns: Boolean indicating if the cache error can be recovered from
     /// - Note: Recoverable: cacheMiss, cacheExpired, invalidCacheData
-    /// - Note: Not Recoverable: cacheWriteFailed, cacheReadFailed, cacheClearFailed
+    /// - Note: Not Recoverable: cacheWriteFailed, cacheReadFailed, cacheClearFailed, cacheCorruption, insufficientDiskSpace, migrationFailed
     private func isCacheErrorRecoverable(_ error: CacheError) -> Bool {
         switch error {
         case .cacheMiss, .cacheExpired, .invalidCacheData:
             return true
-        case .cacheWriteFailed, .cacheReadFailed, .cacheClearFailed:
+        case .cacheWriteFailed, .cacheReadFailed, .cacheClearFailed, .cacheCorruption, .insufficientDiskSpace, .migrationFailed:
             return false
         }
     }
@@ -273,7 +273,10 @@ final class ErrorHandlingService: ErrorHandlingServiceProtocol {
         case .httpError: return "ERR_NETWORK_003"
         case .networkError: return "ERR_NETWORK_004"
         case .decodingError: return "ERR_NETWORK_005"
-        case .custom: return "ERR_NETWORK_006"
+        case .timeout: return "ERR_NETWORK_006"
+        case .sslError: return "ERR_NETWORK_007"
+        case .rateLimitExceeded: return "ERR_NETWORK_008"
+        case .custom: return "ERR_NETWORK_009"
         }
     }
 
@@ -287,6 +290,9 @@ final class ErrorHandlingService: ErrorHandlingServiceProtocol {
         case .dataNotFound: return "ERR_DATA_002"
         case .invalidData: return "ERR_DATA_003"
         case .saveFailed: return "ERR_DATA_004"
+        case .migrationFailed: return "ERR_DATA_005"
+        case .quotaExceeded: return "ERR_DATA_006"
+        case .fileSystemError: return "ERR_DATA_007"
         }
     }
 
@@ -300,6 +306,8 @@ final class ErrorHandlingService: ErrorHandlingServiceProtocol {
         case .invalidSearchQuery: return "ERR_SEARCH_002"
         case .tooManyResults: return "ERR_SEARCH_003"
         case .searchLimitExceeded: return "ERR_SEARCH_004"
+        case .invalidCharacters: return "ERR_SEARCH_005"
+        case .encodingError: return "ERR_SEARCH_006"
         }
     }
 
@@ -312,6 +320,9 @@ final class ErrorHandlingService: ErrorHandlingServiceProtocol {
         case .weatherDataUnavailable: return "ERR_WEATHER_001"
         case .locationNotAvailable: return "ERR_WEATHER_002"
         case .invalidCoordinates: return "ERR_WEATHER_003"
+        case .partialDataAvailable: return "ERR_WEATHER_004"
+        case .dataFormatChanged: return "ERR_WEATHER_005"
+        case .apiVersionMismatch: return "ERR_WEATHER_006"
         }
     }
 
@@ -338,6 +349,9 @@ final class ErrorHandlingService: ErrorHandlingServiceProtocol {
         case .cacheWriteFailed: return "ERR_CACHE_004"
         case .cacheReadFailed: return "ERR_CACHE_005"
         case .cacheClearFailed: return "ERR_CACHE_006"
+        case .cacheCorruption: return "ERR_CACHE_007"
+        case .insufficientDiskSpace: return "ERR_CACHE_008"
+        case .migrationFailed: return "ERR_CACHE_009"
         }
     }
 }

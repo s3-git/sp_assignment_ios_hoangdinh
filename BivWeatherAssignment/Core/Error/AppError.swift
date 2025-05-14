@@ -12,6 +12,9 @@ enum NetworkError: Error {
     case networkError(Error)
     case decodingError(Error)
     case custom(Error)
+    case timeout
+    case sslError(Error)
+    case rateLimitExceeded
     
     var localizedDescription: String {
         switch self {
@@ -27,6 +30,12 @@ enum NetworkError: Error {
             return "Failed to decode data: \(error.localizedDescription)"
         case .custom(let error):
             return "Custom error: \(error.localizedDescription)"
+        case .timeout:
+            return "Request timed out. Please try again"
+        case .sslError(let error):
+            return "SSL error: \(error.localizedDescription)"
+        case .rateLimitExceeded:
+            return "Too many requests. Please try again later"
         }
     }
 }
@@ -39,6 +48,9 @@ enum CacheError: Error {
     case cacheWriteFailed(String)
     case cacheReadFailed(String)
     case cacheClearFailed(String)
+    case cacheCorruption
+    case insufficientDiskSpace
+    case migrationFailed(String)
     
     var localizedDescription: String {
         switch self {
@@ -54,6 +66,12 @@ enum CacheError: Error {
             return "Failed to read from cache: \(reason)"
         case .cacheClearFailed(let reason):
             return "Failed to clear cache: \(reason)"
+        case .cacheCorruption:
+            return "Cache data is corrupted"
+        case .insufficientDiskSpace:
+            return "Insufficient disk space for caching"
+        case .migrationFailed(let reason):
+            return "Cache migration failed: \(reason)"
         }
     }
 }
@@ -64,6 +82,9 @@ enum PersistenceError: Error {
     case dataNotFound
     case invalidData
     case saveFailed(String)
+    case migrationFailed(String)
+    case quotaExceeded
+    case fileSystemError(String)
     
     var localizedDescription: String {
         switch self {
@@ -75,6 +96,12 @@ enum PersistenceError: Error {
             return "Data is invalid or corrupted"
         case .saveFailed(let reason):
             return "Failed to save data: \(reason)"
+        case .migrationFailed(let reason):
+            return "Data migration failed: \(reason)"
+        case .quotaExceeded:
+            return "Storage quota exceeded"
+        case .fileSystemError(let reason):
+            return "File system error: \(reason)"
         }
     }
 }
@@ -85,6 +112,8 @@ enum SearchError: Error {
     case invalidSearchQuery
     case tooManyResults
     case searchLimitExceeded
+    case invalidCharacters
+    case encodingError
     
     var localizedDescription: String {
         switch self {
@@ -96,6 +125,10 @@ enum SearchError: Error {
             return "Too many results. Please be more specific"
         case .searchLimitExceeded:
             return "Search limit exceeded. Please try again later"
+        case .invalidCharacters:
+            return "Search query contains invalid characters"
+        case .encodingError:
+            return "Failed to process search query encoding"
         }
     }
 }
@@ -105,6 +138,9 @@ enum WeatherError: Error {
     case weatherDataUnavailable
     case locationNotAvailable
     case invalidCoordinates
+    case partialDataAvailable
+    case dataFormatChanged
+    case apiVersionMismatch
     
     var localizedDescription: String {
         switch self {
@@ -114,6 +150,12 @@ enum WeatherError: Error {
             return "Location services are not available"
         case .invalidCoordinates:
             return "Invalid coordinates provided"
+        case .partialDataAvailable:
+            return "Some weather data is unavailable"
+        case .dataFormatChanged:
+            return "Weather data format has changed"
+        case .apiVersionMismatch:
+            return "Weather API version mismatch"
         }
     }
 }
@@ -177,6 +219,12 @@ enum AppError: LocalizedError {
                 return "Please check your internet connection and try again"
             case .custom:
                 return "Please try again later"
+            case .timeout:
+                return "Please try again later"
+            case .sslError:
+                return "Please check your internet connection and try again"
+            case .rateLimitExceeded:
+                return "Please try again later"
             }
         case .persistence(let error):
             switch error {
@@ -186,6 +234,12 @@ enum AppError: LocalizedError {
                 return "Please refresh the data or try your search again"
             case .saveFailed:
                 return "Please ensure you have enough storage space and try again"
+            case .migrationFailed:
+                return "Try clearing app data and restarting the app"
+            case .quotaExceeded:
+                return "Please free up storage space and try again"
+            case .fileSystemError:
+                return "Please check your file system and try again"
             }
         case .search(let error):
             switch error {
@@ -197,6 +251,10 @@ enum AppError: LocalizedError {
                 return "Add more characters to narrow down your search"
             case .searchLimitExceeded:
                 return "Wait a few minutes before trying again"
+            case .invalidCharacters:
+                return "Search query contains invalid characters"
+            case .encodingError:
+                return "Please update the app to the latest version"
             }
         case .weather(let error):
             switch error {
@@ -206,6 +264,12 @@ enum AppError: LocalizedError {
                 return "Enable location services in Settings to use this feature"
             case .invalidCoordinates:
                 return "Please select a valid location"
+            case .partialDataAvailable:
+                return "Some weather data is unavailable"
+            case .dataFormatChanged:
+                return "Weather data format has changed"
+            case .apiVersionMismatch:
+                return "Weather API version mismatch"
             }
         case .storage(let error):
             switch error {
@@ -222,6 +286,12 @@ enum AppError: LocalizedError {
                 return "Try clearing the cache and refreshing"
             case .cacheWriteFailed, .cacheReadFailed, .cacheClearFailed:
                 return "Try clearing app data or reinstalling the app"
+            case .cacheCorruption:
+                return "Cache data is corrupted"
+            case .insufficientDiskSpace:
+                return "Insufficient disk space for caching"
+            case .migrationFailed:
+                return "Try clearing app data and restarting the app"
             }
         }
     }
