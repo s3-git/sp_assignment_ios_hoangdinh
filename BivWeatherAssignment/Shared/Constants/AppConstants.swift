@@ -41,14 +41,6 @@ enum AppConstants {
         static let maxSearchLength = 50
     }
 
-    // MARK: - Error Messages
-    enum ErrorMessages {
-        static let networkError = "Unable to connect to the server. Please check your internet connection."
-        static let invalidResponse = "Received invalid response from the server."
-        static let invalidData = "Received invalid data from the server."
-        static let locationError = "Unable to access your location. Please enable location services."
-        static let searchError = "Please enter a valid city name."
-    }
 
     // MARK: - Keys
     enum Assets {

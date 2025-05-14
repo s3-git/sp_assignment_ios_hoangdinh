@@ -58,14 +58,6 @@ extension Publisher {
     }
 }
 
-// MARK: - AnyCancellable Extensions
-extension AnyCancellable {
-    /// Store in a set of cancellables
-    func store(in set: inout Set<AnyCancellable>) {
-        set.insert(self)
-    }
-}
-
 // MARK: - CurrentValueSubject Extensions
 extension CurrentValueSubject where Output: Equatable {
     /// Update value if different

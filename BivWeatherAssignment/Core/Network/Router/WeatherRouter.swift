@@ -41,7 +41,7 @@ enum WeatherRouter: Endpoint {
         switch self {
         case .searchCity(let query):
             items.append(contentsOf: query.toQueryItems())
-        case .getWeather(let query,  _):
+        case .getWeather(let query, _):
             items.append(contentsOf: query.toQueryItems())
         }
 
@@ -61,7 +61,7 @@ enum WeatherRouter: Endpoint {
     // MARK: - URL Construction
     func asURL() -> URL? {
         var components = URLComponents(string: Environment.shared.baseURL + path)
-        components?.queryItems = queryItems
+        components?.percentEncodedQueryItems = queryItems
         return components?.url
     }
 }

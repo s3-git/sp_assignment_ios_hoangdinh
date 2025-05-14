@@ -17,10 +17,9 @@ final class MockCacheManager: CacheManagerProtocol, MockProtocol {
     var lastCachedKey: String?
     var lastCachedData: Data?
     var lastCacheExpiration: TimeInterval?
-    var clearCacheCalled = false
     
     // MARK: - Mock Data
-    private var cache: [String: (data: Data, expiration: Date)] = [:]
+    var cache: [String: (data: Data, expiration: Date)] = [:]
     
     // MARK: - CacheManagerProtocol
     func cacheResponse(_ data: Data, forKey key: String, expirationTime: TimeInterval) {
@@ -47,7 +46,6 @@ final class MockCacheManager: CacheManagerProtocol, MockProtocol {
     }
     
     func clearRequestCache() {
-        clearCacheCalled = true
         if !shouldFail {
             cache.removeAll()
         }
@@ -76,7 +74,6 @@ final class MockCacheManager: CacheManagerProtocol, MockProtocol {
         lastCachedKey = nil
         lastCachedData = nil
         lastCacheExpiration = nil
-        clearCacheCalled = false
         cache.removeAll()
     }
 }

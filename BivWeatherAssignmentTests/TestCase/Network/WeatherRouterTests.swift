@@ -5,10 +5,6 @@ final class WeatherRouterTests: BaseXCTestCase {
     // MARK: - Properties
     private let apiKey = "mock_api_key"
     
-    override func setUp() {
-        super.setUp()
-    }
-    
     // MARK: - Search City Tests
     func testSearchCityEndpoint() {
         // Given
@@ -86,5 +82,33 @@ final class WeatherRouterTests: BaseXCTestCase {
         // Then
         XCTAssertEqual(headers["Content-Type"], "application/json")
         XCTAssertEqual(headers["Accept"], "application/json")
+    }
+    
+    // MARK: - Error Handling Tests
+    func testNetworkErrorMapping() {
+        // Given
+        let networkError = NetworkError.invalidResponse
+        let appError = networkError.toAppError()
+        
+        // Then
+        XCTAssertEqual(appError.localizedDescription, AppError.network(.invalidResponse).localizedDescription)
+    }
+    
+    func testTimeoutErrorHandling() {
+        // Given
+        let timeoutError = NetworkError.timeout
+        let appError = timeoutError.toAppError()
+        
+        // Then
+        XCTAssertEqual(appError.localizedDescription, AppError.network(.timeout).localizedDescription)
+    }
+    
+    func testInvalidDataErrorHandling() {
+        // Given
+        let invalidDataError = NetworkError.invalidResponse
+        let appError = invalidDataError.toAppError()
+        
+        // Then
+        XCTAssertEqual(appError.localizedDescription, AppError.network(.invalidResponse).localizedDescription)
     }
 } 

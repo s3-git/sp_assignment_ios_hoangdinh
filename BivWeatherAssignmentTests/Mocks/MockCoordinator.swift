@@ -5,29 +5,25 @@ import UIKit
 final class MockCoordinator: Coordinator, MockProtocol {
     let navigationController: UINavigationController
     
-    init(navigationController: UINavigationController, showCityDetailCalled: Bool = false, lastCity: SearchResult? = nil) {
+    
+    
+    init(navigationController: UINavigationController) {
         self.navigationController = navigationController
-        self.showCityDetailCalled = showCityDetailCalled
-        self.lastCity = lastCity
     }
     func start() {
-        showCityDetailCalled = false
-        lastCity = nil
     }
     
-    // MARK: - Properties
-    var showCityDetailCalled = false
-    var lastCity: SearchResult?
     
+    // MARK: - Properties
+    var showCityDetailCalled:Bool?
+
     // MARK: - Coordinator
     func showCityDetail(for city: SearchResult) {
         showCityDetailCalled = true
-        lastCity = city
     }
     
     // MARK: - MockProtocol
     func reset() {
         showCityDetailCalled = false
-        lastCity = nil
     }
 } 

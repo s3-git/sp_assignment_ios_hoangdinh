@@ -8,6 +8,7 @@ final class MockNetworkManager: NetworkManagerProtocol, MockProtocol {
     var shouldFail = false
     var mockError: AppError = .network(.invalidResponse)
     var lastRequest: Endpoint?
+    var isRemoveAllCacheCalled = false
     
     // MARK: - Mock Data
     private var mockResponse: Data?
@@ -54,6 +55,7 @@ final class MockNetworkManager: NetworkManagerProtocol, MockProtocol {
     }
     
     func clearCache() {
+        isRemoveAllCacheCalled = true
         cacheManager.clearRequestCache()
     }
     
@@ -66,15 +68,17 @@ final class MockNetworkManager: NetworkManagerProtocol, MockProtocol {
     // MARK: - Mock Methods
     func setMockResponse(_ type: MockResponseType) {
         switch type {
-        case .weather:
-            mockResponse = networkHelper.createMockWeatherResponse()
-        case .search:
-            mockResponse = networkHelper.createMockSearchResponse()
-        case .error(let error):
-            shouldFail = true
-            mockError = error
-        case .custom(let data):
-            mockResponse = data
+            case .weather:
+                mockResponse = networkHelper.createMockWeatherResponse()
+            case .search:
+                mockResponse = networkHelper.createMockSearchResponse()
+            case .error(let error):
+                shouldFail = true
+                mockError = error
+            case .custom(let data):
+                mockResponse = data
+            case .emptySearch:
+                mockResponse = networkHelper.createEmptySearchResponse()
         }
     }
     
@@ -93,5 +97,6 @@ enum MockResponseType {
     case weather
     case search
     case error(AppError)
-    case custom(Data)
-} 
+    case custom(Data?)
+    case emptySearch
+}

@@ -23,7 +23,7 @@ final class HomeViewModel: BaseViewModel {
     private let recentCitiesService: RecentCitiesServiceProtocol
 
     /// Coordinator for handling navigation
-    weak var coordinator: Coordinator?
+    private let coordinator: Coordinator
 
     // MARK: - Private Properties
     /// Subject for handling search text changes with debouncing
@@ -31,9 +31,6 @@ final class HomeViewModel: BaseViewModel {
 
     /// Backing property for searchText to avoid publisher loops
     private var _searchText: String
-
-    /// Last successful search query for retry operations
-    private var lastSearchQuery: String?
 
     // MARK: - Published Properties
     /// List of cities matching the current search query
@@ -53,18 +50,33 @@ final class HomeViewModel: BaseViewModel {
     ///   - weatherService: Service for weather-related API calls
     ///   - recentCitiesService: Service for managing recently viewed cities
     ///   - errorHandler: Service for handling errors
-    init(weatherService: WeatherServiceProtocol = WeatherServiceImpl(),
-         recentCitiesService: RecentCitiesServiceProtocol = RecentCitiesServiceImpl(),
-         errorHandler: ErrorHandlingServiceProtocol = ErrorHandlingService()) {
+    ///
+    init(weatherService: WeatherServiceProtocol = WeatherServiceImpl(), recentCitiesService: RecentCitiesServiceProtocol = RecentCitiesServiceImpl(),errorHandler: ErrorHandlingServiceProtocol = ErrorHandlingService(), coordinator: Coordinator) {
         self.weatherService = weatherService
         self.recentCitiesService = recentCitiesService
+        self.coordinator = coordinator
         self.cities = []
         self.recentCities = []
         self._searchText = ""
         self.showingRecentCities = true
         super.init(initialState: .initial, errorHandler: errorHandler)
         loadRecentCities()
+
+
     }
+//    init(weatherService: WeatherServiceProtocol = WeatherServiceImpl(),
+//         recentCitiesService: RecentCitiesServiceProtocol = RecentCitiesServiceImpl(),
+//         errorHandler: ErrorHandlingServiceProtocol = ErrorHandlingService()) {
+//        self.weatherService = weatherService
+//        self.recentCitiesService = recentCitiesService
+//        self.cities = []
+//        self.recentCities = []
+//        self._searchText = ""
+//        self.showingRecentCities = true
+//        super.init(initialState: .initial, errorHandler: errorHandler)
+//        loadRecentCities()
+//    }
+//
 
     // MARK: - Public Methods
     /// Current search text with automatic mode switching
@@ -88,7 +100,7 @@ final class HomeViewModel: BaseViewModel {
     func didSelectCity(_ city: SearchResult) {
         recentCitiesService.addRecentCity(city)
         loadRecentCities()
-        coordinator?.showCityDetail(for: city)
+        coordinator.showCityDetail(for: city)
     }
 
     /// Clear all recent cities
@@ -110,9 +122,8 @@ final class HomeViewModel: BaseViewModel {
         loadRecentCities()
     }
 
-    // MARK: - Private Methods
     /// Load recently viewed cities from persistence
-    private func loadRecentCities() {
+    func loadRecentCities() {
         recentCities = recentCitiesService.getRecentCities()
     }
 
@@ -128,7 +139,6 @@ final class HomeViewModel: BaseViewModel {
             .removeDuplicates()
             .handleEvents(receiveOutput: { [weak self] query in
                 self?.state = .loading
-                self?.lastSearchQuery = query
             })
             .flatMap { [weak self] query -> AnyPublisher<[SearchResult], AppError> in
                 guard let self = self else {

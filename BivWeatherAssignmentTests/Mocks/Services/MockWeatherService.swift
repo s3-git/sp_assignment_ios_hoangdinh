@@ -4,7 +4,7 @@ import Foundation
 /// Mock implementation of WeatherServiceProtocol for testing
 final class MockWeatherService: WeatherServiceProtocol, MockProtocol {
     // MARK: - Properties
-    var lastSearchQuery: String?
+    var lastSearchQuery: WeatherSearchRequestParameters?
     var forceRefreshCalled = false
     
     private let mockNetworkManager: MockNetworkManager
@@ -16,7 +16,7 @@ final class MockWeatherService: WeatherServiceProtocol, MockProtocol {
         
     // MARK: - WeatherServiceProtocol
     func searchCities(query: WeatherSearchRequestParameters) -> AnyPublisher<[SearchResult], AppError> {
-        lastSearchQuery = query.query
+        lastSearchQuery = query
         
         return mockNetworkManager.request(WeatherRouter.searchCity(query: query))
             .map { (response: SearchModel) in

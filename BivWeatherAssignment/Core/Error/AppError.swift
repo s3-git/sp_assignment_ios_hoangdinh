@@ -232,3 +232,11 @@ enum AppError: LocalizedError {
         }
     }
 }
+
+// MARK: - NetworkError Extension
+extension NetworkError {
+    /// Convert NetworkError to AppError
+    func toAppError() -> AppError {
+        return .network(self)
+    }
+}

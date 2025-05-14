@@ -37,15 +37,15 @@ final class WeatherServiceImpl: WeatherServiceProtocol {
     ///   - forceRefresh: if true, ignores cache and fetches fresh data
     /// - Returns: Publisher emitting weather data
     func getWeather(query: WeatherRequestParameters, forceRefresh: Bool) -> AnyPublisher<WeatherData, AppError> {
-//#if DEBUG
+// #if DEBUG
 //        return self.forceError(.weatherDataUnavailable)
-//#else
+// #else
         networkManager.request(WeatherRouter.getWeather(query: query, forceRefresh: forceRefresh))
             .map { (response: WeatherModel) in
                 response.data ?? WeatherData()
             }
             .eraseToAnyPublisher()
-//#endif
+// #endif
     }
 
     // MARK: - Cache Management
@@ -61,54 +61,54 @@ final class WeatherServiceImpl: WeatherServiceProtocol {
     /// - Parameter errorType: Type of error to force
     /// - Returns: Publisher that always fails with specified error
     /// - Note: This method is for debugging purposes only
-    func forceError<T>(_ errorType: DebugErrorType) -> AnyPublisher<T, AppError> {
-        switch errorType {
-        case .network:
-            return Fail(error: AppError.network(.networkError(URLError(.notConnectedToInternet))))
-                .eraseToAnyPublisher()
-        case .invalidResponse:
-            return Fail(error: AppError.network(.invalidResponse))
-                .eraseToAnyPublisher()
-        case .httpError:
-            return Fail(error: AppError.network(.httpError(404)))
-                .eraseToAnyPublisher()
-        case .decodingError:
-            return Fail(error: AppError.network(.decodingError(DecodingError.dataCorrupted(DecodingError.Context(codingPath: [], debugDescription: "Invalid data format")))))
-                .eraseToAnyPublisher()
-        case .cacheMiss:
-            return Fail(error: AppError.cache(.cacheMiss))
-                .eraseToAnyPublisher()
-        case .cacheExpired:
-            return Fail(error: AppError.cache(.cacheExpired))
-                .eraseToAnyPublisher()
-        case .invalidCacheData:
-            return Fail(error: AppError.cache(.invalidCacheData))
-                .eraseToAnyPublisher()
-        case .locationNotAvailable:
-            return Fail(error: AppError.weather(.locationNotAvailable))
-                .eraseToAnyPublisher()
-        case .weatherDataUnavailable:
-            return Fail(error: AppError.weather(.weatherDataUnavailable))
-                .eraseToAnyPublisher()
-        case .invalidCoordinates:
-            return Fail(error: AppError.weather(.invalidCoordinates))
-                .eraseToAnyPublisher()
-        }
-    }
+    // func forceError<T>(_ errorType: DebugErrorType) -> AnyPublisher<T, AppError> {
+    //     switch errorType {
+    //     case .network:
+    //         return Fail(error: AppError.network(.networkError(URLError(.notConnectedToInternet))))
+    //             .eraseToAnyPublisher()
+    //     case .invalidResponse:
+    //         return Fail(error: AppError.network(.invalidResponse))
+    //             .eraseToAnyPublisher()
+    //     case .httpError:
+    //         return Fail(error: AppError.network(.httpError(404)))
+    //             .eraseToAnyPublisher()
+    //     case .decodingError:
+    //         return Fail(error: AppError.network(.decodingError(DecodingError.dataCorrupted(DecodingError.Context(codingPath: [], debugDescription: "Invalid data format")))))
+    //             .eraseToAnyPublisher()
+    //     case .cacheMiss:
+    //         return Fail(error: AppError.cache(.cacheMiss))
+    //             .eraseToAnyPublisher()
+    //     case .cacheExpired:
+    //         return Fail(error: AppError.cache(.cacheExpired))
+    //             .eraseToAnyPublisher()
+    //     case .invalidCacheData:
+    //         return Fail(error: AppError.cache(.invalidCacheData))
+    //             .eraseToAnyPublisher()
+    //     case .locationNotAvailable:
+    //         return Fail(error: AppError.weather(.locationNotAvailable))
+    //             .eraseToAnyPublisher()
+    //     case .weatherDataUnavailable:
+    //         return Fail(error: AppError.weather(.weatherDataUnavailable))
+    //             .eraseToAnyPublisher()
+    //     case .invalidCoordinates:
+    //         return Fail(error: AppError.weather(.invalidCoordinates))
+    //             .eraseToAnyPublisher()
+    //     }
+    // }
 }
 
 // MARK: - Debug Types
 
-/// Types of errors that can be forced for debugging
-enum DebugErrorType {
-    case network
-    case invalidResponse
-    case httpError
-    case decodingError
-    case cacheMiss
-    case cacheExpired
-    case invalidCacheData
-    case locationNotAvailable
-    case weatherDataUnavailable
-    case invalidCoordinates
-}
+// /// Types of errors that can be forced for debugging
+// enum DebugErrorType {
+//     case network
+//     case invalidResponse
+//     case httpError
+//     case decodingError
+//     case cacheMiss
+//     case cacheExpired
+//     case invalidCacheData
+//     case locationNotAvailable
+//     case weatherDataUnavailable
+//     case invalidCoordinates
+// }

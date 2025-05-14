@@ -12,12 +12,15 @@ struct WeatherSearchRequestParameters {
     var numOfResults: Int?       // Optional number of results
 
     func toQueryItems() -> [URLQueryItem] {
+        // Encode the query parameter to handle special characters
+        let encodedQuery = query.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? query
+        
         var items: [URLQueryItem] = [
-            .init(name: "q", value: query)
+            URLQueryItem(name: "q", value: encodedQuery)
         ]
 
         if let numOfResults = numOfResults {
-            items.append(.init(name: "num_of_results", value: "\(numOfResults)"))
+            items.append(URLQueryItem(name: "num_of_results", value: "\(numOfResults)"))
         }
 
         return items

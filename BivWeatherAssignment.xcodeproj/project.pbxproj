@@ -148,6 +148,7 @@
 		73FB20B92DD47B8C00845FD8 /* NetworkManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73FB20A32DD47B8C00845FD8 /* NetworkManagerTests.swift */; };
 		73FB20BA2DD47B8C00845FD8 /* ModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73FB20A12DD47B8C00845FD8 /* ModelTests.swift */; };
 		73FB20BB2DD47B8C00845FD8 /* CityViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73FB20A92DD47B8C00845FD8 /* CityViewModelTests.swift */; };
+		73FB20C12DD4AF7F00845FD8 /* CombineExtensionsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73FB20BF2DD4AF7F00845FD8 /* CombineExtensionsTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -231,6 +232,7 @@
 		73FB20A72DD47B8C00845FD8 /* WeatherServiceImplTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherServiceImplTests.swift; sourceTree = "<group>"; };
 		73FB20A92DD47B8C00845FD8 /* CityViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CityViewModelTests.swift; sourceTree = "<group>"; };
 		73FB20AA2DD47B8C00845FD8 /* HomeViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeViewModelTests.swift; sourceTree = "<group>"; };
+		73FB20BF2DD4AF7F00845FD8 /* CombineExtensionsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CombineExtensionsTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -647,12 +649,21 @@
 		73FB20AC2DD47B8C00845FD8 /* TestCase */ = {
 			isa = PBXGroup;
 			children = (
+				73FB20C02DD4AF7F00845FD8 /* Extensions */,
 				73FB20A22DD47B8C00845FD8 /* Base */,
 				73FB20A52DD47B8C00845FD8 /* Network */,
 				73FB20A82DD47B8C00845FD8 /* Services */,
 				73FB20AB2DD47B8C00845FD8 /* ViewModels */,
 			);
 			path = TestCase;
+			sourceTree = "<group>";
+		};
+		73FB20C02DD4AF7F00845FD8 /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				73FB20BF2DD4AF7F00845FD8 /* CombineExtensionsTests.swift */,
+			);
+			path = Extensions;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -878,6 +889,7 @@
 				73289FAE2DCE14E1000E5622 /* ThemeManager.swift in Sources */,
 				73289FF42DD1B30D000E5622 /* SearchModel.swift in Sources */,
 				73289FB02DCE14E1000E5622 /* CacheManager.swift in Sources */,
+				73FB20C12DD4AF7F00845FD8 /* CombineExtensionsTests.swift in Sources */,
 				73289FB12DCE14E1000E5622 /* KeyboardManager.swift in Sources */,
 				73289FB22DCE14E1000E5622 /* Combine+Extensions.swift in Sources */,
 				73289FB42DCE14E1000E5622 /* NetworkManager.swift in Sources */,

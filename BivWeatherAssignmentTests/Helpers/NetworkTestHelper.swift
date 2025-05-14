@@ -76,23 +76,15 @@ final class NetworkTestHelper {
         return json.data(using: .utf8)!
     }
     
-    
-    
-    // MARK: - Helper Methods
-    func createMockHTTPResponse(statusCode: Int) -> HTTPURLResponse {
-        return HTTPURLResponse(
-            url: URL(string: "https://api.example.com")!,
-            statusCode: statusCode,
-            httpVersion: "HTTP/1.1",
-            headerFields: ["Content-Type": "application/json"]
-        )!
+    func createEmptySearchResponse() -> Data {
+        let json = """
+        {
+            "search_api": {
+                "result": []
+            }
+        }
+        """
+        return json.data(using: .utf8)!
     }
     
-    func createMockError() -> Error {
-        return NSError(
-            domain: "com.example.error",
-            code: -1,
-            userInfo: [NSLocalizedDescriptionKey: "Mock network error"]
-        )
-    }
 } 

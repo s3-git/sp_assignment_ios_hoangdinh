@@ -12,12 +12,15 @@ protocol Coordinator: AnyObject {
 final class AppCoordinator: Coordinator {
     // MARK: - Properties
     let navigationController: UINavigationController
+    
     private let weatherService: WeatherServiceProtocol
+    private let recentCityService: RecentCitiesServiceProtocol
 
     // MARK: - Initialization
-    init(navigationController: UINavigationController, weatherService: WeatherServiceProtocol = WeatherServiceImpl()) {
+    init(navigationController: UINavigationController, weatherService: WeatherServiceProtocol = WeatherServiceImpl(),recentCityService: RecentCitiesServiceProtocol = RecentCitiesServiceImpl()) {
         self.navigationController = navigationController
         self.weatherService = weatherService
+        self.recentCityService = recentCityService
     }
 
     // MARK: - Coordinator Methods
@@ -26,8 +29,7 @@ final class AppCoordinator: Coordinator {
     }
 
     func showHomeAsRoot() {
-        let viewModel = HomeViewModel(weatherService: weatherService)
-        viewModel.coordinator = self // Set coordinator before creating view controller
+        let viewModel = HomeViewModel(weatherService: weatherService,recentCitiesService: recentCityService, coordinator: self)
         let viewController = HomeViewController(viewModel: viewModel)
         navigationController.setViewControllers([viewController], animated: false)
     }

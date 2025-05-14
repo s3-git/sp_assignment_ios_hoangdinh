@@ -53,11 +53,6 @@ class BaseViewModel: ObservableObject, BaseViewModelType {
 
     }
 
-    /// Store cancellable
-    func store(_ cancellable: AnyCancellable) {
-        cancellable.store(in: &cancellables)
-    }
-
     /// Cancel all subscriptions
     func cancelAllSubscriptions() {
         cancellables.removeAll()

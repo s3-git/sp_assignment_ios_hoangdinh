@@ -126,4 +126,108 @@ final class ModelTests: BaseXCTestCase {
         XCTAssertEqual(queryItems.last?.name, "num_of_results")
         XCTAssertEqual(queryItems.last?.value, "10")
     }
+    
+    // MARK: - Edge Cases Tests
+    func testWeatherDataWithMissingFields() {
+        // Given
+        let jsonString = """
+        {
+            "data": {
+                "request": [{"type": "City", "query": "London"}],
+                "nearest_area": [],
+                "current_condition": []
+            }
+        }
+        """
+        let jsonData = jsonString.data(using: .utf8)!
+        
+        // When
+        let weatherModel = try? JSONDecoder().decode(WeatherModel.self, from: jsonData)
+        
+        // Then
+        XCTAssertNotNil(weatherModel)
+        XCTAssertNotNil(weatherModel?.data)
+        XCTAssertNotNil(weatherModel?.data?.nearestArea)
+        XCTAssertNotNil(weatherModel?.data?.currentCondition)
+        XCTAssertTrue(weatherModel?.data?.nearestArea?.isEmpty ?? false)
+        XCTAssertTrue(weatherModel?.data?.currentCondition?.isEmpty ?? false)
+    }
+    
+    func testWeatherDataWithInvalidTemperature() {
+        // Given
+        let jsonString = """
+        {
+            "data": {
+                "request": [{"type": "City", "query": "London"}],
+                "current_condition": [{
+                    "tempC": "invalid",
+                    "tempF": "invalid",
+                    "weatherCode": "113",
+                    "weatherDesc": [{"value": "Sunny"}]
+                }]
+            }
+        }
+        """
+        let jsonData = jsonString.data(using: .utf8)!
+        
+        // When
+        let weatherModel = try? JSONDecoder().decode(WeatherModel.self, from: jsonData)
+        
+        // Then
+        XCTAssertNotNil(weatherModel)
+        XCTAssertNotNil(weatherModel?.data?.currentCondition?.first)
+        XCTAssertNil(Int(weatherModel?.data?.currentCondition?.first?.tempC ?? ""))
+        XCTAssertNil(Int(weatherModel?.data?.currentCondition?.first?.tempF ?? ""))
+    }
+    
+    func testSearchResultWithEmptyArrays() {
+        // Given
+        let jsonString = """
+        {
+            "search_api": {
+                "result": []
+            }
+        }
+        """
+        let jsonData = jsonString.data(using: .utf8)!
+        
+        // When
+        let searchModel = try? JSONDecoder().decode(SearchModel.self, from: jsonData)
+        
+        // Then
+        XCTAssertNotNil(searchModel)
+        XCTAssertTrue(searchModel?.searchAPI?.result?.isEmpty ?? false)
+    }
+    
+    func testWeatherDataWithSpecialCharacters() {
+        // Given
+        let weatherData = WeatherData(
+            request: [Request(type: "City", query: "São Paulo")],
+            nearestArea: [
+                NearestArea(
+                    areaName: [WeatherDesc(value: "São Paulo")],
+                    country: [WeatherDesc(value: "Brasil")],
+                    region: [WeatherDesc(value: "São Paulo")],
+                    latitude: "-23.5505",
+                    longitude: "-46.6333",
+                    population: "12345678",
+                    weatherURL: [WeatherDesc(value: "http://example.com/weather")]
+                )
+            ],
+            timeZone: [],
+            currentCondition: [],
+            weather: [],
+            climateAverages: []
+        )
+        
+        // When
+        let encodedData = try? JSONEncoder().encode(weatherData)
+        let decodedData = try? JSONDecoder().decode(WeatherData.self, from: encodedData!)
+        
+        // Then
+        XCTAssertNotNil(encodedData)
+        XCTAssertNotNil(decodedData)
+        XCTAssertEqual(decodedData?.request?.first?.query, "São Paulo")
+        XCTAssertEqual(decodedData?.nearestArea?.first?.areaName?.first?.value, "São Paulo")
+    }
 } 
