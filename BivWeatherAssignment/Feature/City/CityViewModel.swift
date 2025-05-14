@@ -217,7 +217,6 @@ final class CityViewModel: BaseViewModel {
     // MARK: - Private Properties
     private let city: SearchResult
     private let weatherService: WeatherServiceProtocol
-    private var lastFetchTime: Date?
     private let cacheExpiryInterval: TimeInterval = 60 // 1 minute cache
     var navBarHeight: CGFloat = 0
 
@@ -239,7 +238,6 @@ final class CityViewModel: BaseViewModel {
             .sink(weak: self,
                   receiveValue: { [weak self] _, data in
                 self?.weatherData = data
-                self?.lastFetchTime = Date()
                 self?.state = .success
             }, receiveCompletion: { viewModel, completion in
                 if case .failure(let error) = completion {
