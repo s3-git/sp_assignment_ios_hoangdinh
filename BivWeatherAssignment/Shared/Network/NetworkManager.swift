@@ -3,30 +3,40 @@ import Foundation
 
 /// NetworkManager handles all network requests in the application
 /// Uses Combine framework for reactive programming and CacheManager for response caching
-final class NetworkManager {
+protocol NetworkManagerProtocol {
+    func clearCache()
+    func request<T: Codable>(_ endpoint: Endpoint) -> AnyPublisher<T, AppError>
+    func removeCache(for endpoint: Endpoint)
+}
+
+final class NetworkManager: NetworkManagerProtocol {
     // MARK: - Properties
     private let session: URLSession
     private let baseURL: String
-    private let cacheManager: CacheManager
+    private let cacheManager: CacheManagerProtocol
     private let logger = Logger.shared
+    private let errorHandler: ErrorHandlingServiceProtocol
 
     // MARK: - Initialization
-    init(session: URLSession = .shared, cacheManager: CacheManager = .shared) {
+    init(session: URLSession? = .shared, 
+         cacheManager: CacheManager = .shared,
+         errorHandler: ErrorHandlingServiceProtocol = ErrorHandlingService()) {
         self.baseURL = Environment.shared.baseURL
         self.cacheManager = cacheManager
+        self.errorHandler = errorHandler
 
         // Configure URLSession with caching
         let configuration = URLSessionConfiguration.default
         configuration.timeoutIntervalForRequest = AppConstants.Network.timeoutInterval
 
-        self.session = URLSession(configuration: configuration)
+        self.session = session ?? URLSession(configuration: configuration)
     }
     
     // MARK: - Public Methods
-    func request<T: Decodable>(_ endpoint: Endpoint) -> AnyPublisher<T, NetworkError> {
+    func request<T: Codable>(_ endpoint: Endpoint) -> AnyPublisher<T, AppError> {
         guard let url = endpoint.asURL() else {
-            logger.error("Invalid URL for endpoint: \(endpoint.path)")
-            return Fail(error: NetworkError.invalidURL).eraseToAnyPublisher()
+            
+            return Fail(error: AppError.network(.invalidURL)).eraseToAnyPublisher()
         }
 
         // Check cache first
@@ -34,7 +44,7 @@ final class NetworkManager {
            let decodedData = try? JSONDecoder().decode(T.self, from: cachedData), endpoint.cacheTime != 0 {
             logger.info("Cache hit for URL: \(url.absoluteString)")
             return Just(decodedData)
-                .setFailureType(to: NetworkError.self)
+                .setFailureType(to: AppError.self)
                 .eraseToAnyPublisher()
         }
 
@@ -46,22 +56,26 @@ final class NetworkManager {
         logger.logRequest(request)
 
         return session.dataTaskPublisher(for: request)
-            .mapError { error -> NetworkError in
-                self.logger.error("Network error: \(error.localizedDescription)")
-                return NetworkError.networkError(error)
+            .mapError { error -> AppError in
+                
+                self.errorHandler.logError(error)
+                return AppError.network(.networkError(error))
             }
-            .flatMap { data, response -> AnyPublisher<T, NetworkError> in
+            .flatMap { data, response -> AnyPublisher<T, AppError> in
                 guard let httpResponse = response as? HTTPURLResponse else {
-                    self.logger.error("Invalid response type")
-                    return Fail(error: NetworkError.invalidResponse).eraseToAnyPublisher()
+                    
+                    self.errorHandler.logError(AppError.network(.invalidResponse))
+                    return Fail(error: AppError.network(.invalidResponse)).eraseToAnyPublisher()
                 }
 
                 // Log response
                 self.logger.logResponse(httpResponse, data: data)
 
                 guard (200...299).contains(httpResponse.statusCode) else {
-                    self.logger.error("HTTP error with status code: \(httpResponse.statusCode)")
-                    return Fail(error: NetworkError.httpError(httpResponse.statusCode)).eraseToAnyPublisher()
+                    
+                    let error = AppError.network(.httpError(httpResponse.statusCode))
+                    self.errorHandler.logError(error)
+                    return Fail(error: error).eraseToAnyPublisher()
                 }
 
                 // Cache the successful response
@@ -70,9 +84,10 @@ final class NetworkManager {
 
                 return Just(data)
                     .decode(type: T.self, decoder: JSONDecoder())
-                    .mapError { error -> NetworkError in
-                        self.logger.error("Decoding error: \(error.localizedDescription)")
-                        return NetworkError.decodingError(error)
+                    .mapError { error -> AppError in
+                        
+                        self.errorHandler.logError(error)
+                        return AppError.network(.decodingError(error))
                     }
                     .eraseToAnyPublisher()
             }
@@ -87,22 +102,12 @@ final class NetworkManager {
 
     func removeCache(for endpoint: Endpoint) {
         guard let url = endpoint.asURL() else {
-            logger.error("Invalid URL for cache removal")
+            self.errorHandler.logError(AppError.cache(.cacheClearFailed("Invalid URL for cache removal")))
             return
         }
         logger.info("Removing cache for URL: \(url.absoluteString)")
-        cacheManager.clearRequestCache()
+        cacheManager.removeSpecificCache(forKey: url.absoluteString)
     }
-}
-
-// MARK: - Supporting Types
-enum NetworkError: Error {
-    case invalidURL
-    case invalidResponse
-    case httpError(Int)
-    case networkError(Error)
-    case decodingError(Error)
-    case custom(Error)
 }
 
 enum HTTPMethod: String {

@@ -21,7 +21,7 @@ struct SearchAPI: Codable {
 }
 
 // MARK: - Result
-struct SearchResult: Codable {
+struct SearchResult: Codable, Equatable {
     let areaName, country, region: [AreaName]?
     let latitude, longitude, population: String?
     let weatherURL: [AreaName]?
@@ -33,6 +33,6 @@ struct SearchResult: Codable {
 }
 
 // MARK: - AreaName
-struct AreaName: Codable {
+struct AreaName: Codable, Equatable {
     let value: String?
 }

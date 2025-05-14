@@ -1,7 +1,13 @@
 import Foundation
 
 /// Cache manager for handling request caching with expiration
-class CacheManager {
+protocol CacheManagerProtocol {
+    func cacheResponse(_ data: Data, forKey key: String, expirationTime: TimeInterval)
+    func getCachedResponse(forKey key: String) -> Data?
+    func clearRequestCache()
+    func removeSpecificCache(forKey key: String)
+}
+class CacheManager: CacheManagerProtocol {
     // MARK: - Properties
     static let shared = CacheManager()
     private let requestCache: NSCache<NSString, CachedResponse>
@@ -56,5 +62,8 @@ class CacheManager {
     /// Clear all cached responses
     func clearRequestCache() {
         requestCache.removeAllObjects()
+    }
+    func removeSpecificCache(forKey key: String) {
+        requestCache.removeObject(forKey: key as NSString)
     }
 }

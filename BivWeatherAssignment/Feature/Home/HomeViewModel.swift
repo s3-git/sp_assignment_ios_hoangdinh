@@ -130,17 +130,17 @@ final class HomeViewModel: BaseViewModel {
                 self?.state = .loading
                 self?.lastSearchQuery = query
             })
-            .flatMap { [weak self] query -> AnyPublisher<[SearchResult], NetworkError> in
+            .flatMap { [weak self] query -> AnyPublisher<[SearchResult], AppError> in
                 guard let self = self else {
                     return Just([])
-                        .setFailureType(to: NetworkError.self)
+                        .setFailureType(to: AppError.self)
                         .eraseToAnyPublisher()
                 }
 
                 // Return empty results for empty query or query shorter than minimum length
                 guard !query.isEmpty, query.count >= AppConstants.Validation.minSearchLength else {
                     return Just([])
-                        .setFailureType(to: NetworkError.self)
+                        .setFailureType(to: AppError.self)
                         .eraseToAnyPublisher()
                 }
 
