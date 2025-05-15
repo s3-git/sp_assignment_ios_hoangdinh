@@ -1,7 +1,6 @@
 import Foundation
 import OSLog
 
-/// Logger for handling app logging
 class Logger {
     // MARK: - Properties
     static let shared = Logger()
@@ -22,27 +21,22 @@ class Logger {
     }
 
     // MARK: - Public Methods
-    /// Log debug message
     func debug(_ message: String, file: String = #file, function: String = #function, line: Int = #line) {
         log(message, level: .debug, file: file, function: function, line: line)
     }
 
-    /// Log info message
     func info(_ message: String, file: String = #file, function: String = #function, line: Int = #line) {
         log(message, level: .info, file: file, function: function, line: line)
     }
 
-    /// Log warning message
     func warning(_ message: String, file: String = #file, function: String = #function, line: Int = #line) {
         log(message, level: .warning, file: file, function: function, line: line)
     }
 
-    /// Log error message
     func error(_ message: String, file: String = #file, function: String = #function, line: Int = #line) {
         log(message, level: .error, file: file, function: function, line: line)
     }
 
-    /// Log critical message
     func critical(_ message: String, file: String = #file, function: String = #function, line: Int = #line) {
         log(message, level: .critical, file: file, function: function, line: line)
     }
@@ -80,7 +74,6 @@ extension Logger.Level {
 
 // MARK: - Convenience Methods
 extension Logger {
-    /// Log network request
     func logRequest(_ request: URLRequest) {
         debug("""
         🌐 Request:
@@ -91,7 +84,6 @@ extension Logger {
         """)
     }
 
-    /// Log network response
     func logResponse(_ response: HTTPURLResponse, data: Data?) {
         debug("""
         📥 Response:
@@ -101,7 +93,6 @@ extension Logger {
         """)
     }
 
-    /// Log error
     func logError(_ error: Error) {
         self.error("""
         Error: \(error.localizedDescription)

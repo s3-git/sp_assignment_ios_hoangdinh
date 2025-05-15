@@ -1,14 +1,12 @@
 import SwiftUI
 import UIKit
 
-/// Protocol defining coordinator capabilities
 protocol Coordinator: AnyObject {
     var navigationController: UINavigationController { get }
     func start()
     func showCityDetail(for city: SearchResult)
 }
 
-/// Main app coordinator
 final class AppCoordinator: Coordinator {
     // MARK: - Properties
     let navigationController: UINavigationController
@@ -17,7 +15,7 @@ final class AppCoordinator: Coordinator {
     private let recentCityService: RecentCitiesServiceProtocol
 
     // MARK: - Initialization
-    init(navigationController: UINavigationController, weatherService: WeatherServiceProtocol = WeatherServiceImpl(),recentCityService: RecentCitiesServiceProtocol = RecentCitiesServiceImpl()) {
+    init(navigationController: UINavigationController, weatherService: WeatherServiceProtocol = WeatherServiceImpl(), recentCityService: RecentCitiesServiceProtocol = RecentCitiesServiceImpl()) {
         self.navigationController = navigationController
         self.weatherService = weatherService
         self.recentCityService = recentCityService
@@ -29,7 +27,7 @@ final class AppCoordinator: Coordinator {
     }
 
     func showHomeAsRoot() {
-        let viewModel = HomeViewModel(weatherService: weatherService,recentCitiesService: recentCityService, coordinator: self)
+        let viewModel = HomeViewModel(weatherService: weatherService, recentCitiesService: recentCityService, coordinator: self)
         let viewController = HomeViewController(viewModel: viewModel)
         navigationController.setViewControllers([viewController], animated: false)
     }

@@ -1,7 +1,6 @@
 import Foundation
 
 // MARK: - Weather Protocols
-/// Location information protocol
 public protocol LocationInfoPresenter {
     var areaName: String { get }
     var regionName: String { get }
@@ -9,7 +8,6 @@ public protocol LocationInfoPresenter {
     var localTime: String { get }
 }
 
-/// Current weather conditions protocol
 public protocol CurrentWeatherPresenter {
     var weatherDesc: String { get }
     var imageURL: String { get }
@@ -17,7 +15,6 @@ public protocol CurrentWeatherPresenter {
     var feelsLike: String { get }
 }
 
-/// Atmospheric conditions protocol
 public protocol AtmosphericConditionsPresenter {
     var humidity: String { get }
     var pressure: String { get }
@@ -26,24 +23,20 @@ public protocol AtmosphericConditionsPresenter {
     var precipitation: String { get }
 }
 
-/// Wind information protocol
 public protocol WindInfoPresenter {
     var windSpeed: String { get }
     var windDirection: String { get }
 }
 
-/// Additional weather metrics protocol
 public protocol AdditionalWeatherInfoPresenter {
     var uvIndex: String { get }
     var observationTime: String { get }
 }
 
-/// Forecast protocol
 public protocol ForecastPresenter {
     var forecastDays: [ForecastDay] { get }
 }
 
-/// Combined weather presenter protocol
 public protocol WeatherPresenterProtocol: LocationInfoPresenter,
                                         CurrentWeatherPresenter,
                                         AtmosphericConditionsPresenter,

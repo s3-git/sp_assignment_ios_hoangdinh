@@ -1,6 +1,5 @@
 import UIKit
 
-/// Base view that provides common functionality for all UIKit views
 class BaseViewController: UIViewController {
     // MARK: - Properties
     private var viewState: ViewState = .success {

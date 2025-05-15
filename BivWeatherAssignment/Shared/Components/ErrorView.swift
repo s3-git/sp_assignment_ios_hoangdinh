@@ -16,11 +16,11 @@ struct ErrorView: View {
         VStack(spacing: AppConstants.UserInterface.padding) {
             Image(systemName: "exclamationmark.triangle")
                 .font(.system(size: 48))
-                .foregroundStyle(ThemeManager.shared.errorColor.toColor)
+                .foregroundStyle(ThemeManager.Color.errorColor.toColor)
 
             Text(error)
                 .font(Font(ThemeManager.Fonts.body))
-                .foregroundStyle(ThemeManager.shared.textColor.toColor)
+                .foregroundStyle(ThemeManager.Color.textColor.toColor)
                 .multilineTextAlignment(.center)
 
             Button(action: retryAction) {
@@ -29,15 +29,15 @@ struct ErrorView: View {
                     .foregroundColor(.white)
                     .padding(.horizontal, AppConstants.UserInterface.padding * 2)
                     .padding(.vertical, AppConstants.UserInterface.padding * 0.75)
-                    .background(ThemeManager.shared.accentColor.toColor)
+                    .background(ThemeManager.Color.accentColor.toColor)
                     .cornerRadius(AppConstants.UserInterface.cornerRadius * 0.5)
             }
         }
         .padding(AppConstants.UserInterface.padding)
-        .background(ThemeManager.shared.backgroundColor.toColor)
+        .background(ThemeManager.Color.backgroundColor.toColor)
         .cornerRadius(AppConstants.UserInterface.cornerRadius)
         .shadow(
-            color: ThemeManager.shared.shadowColor.toColor.opacity(0.1),
+            color: ThemeManager.Color.shadowColor.toColor.opacity(0.1),
             radius: AppConstants.UserInterface.padding * 0.625,
             x: 0,
             y: AppConstants.UserInterface.padding * 0.3125

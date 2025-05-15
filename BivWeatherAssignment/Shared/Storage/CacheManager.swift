@@ -1,6 +1,5 @@
 import Foundation
 
-/// Cache manager for handling request caching with expiration
 protocol CacheManagerProtocol {
     func cacheResponse(_ data: Data, forKey key: String, expirationTime: TimeInterval)
     func getCachedResponse(forKey key: String) -> Data?
@@ -32,19 +31,11 @@ class CacheManager: CacheManagerProtocol {
     }
 
     // MARK: - Request Cache Methods
-    /// Cache a network response
-    /// - Parameters:
-    ///   - data: The response data to cache
-    ///   - key: The cache key
-    ///   - expirationTime: Time in seconds until the cache expires
     func cacheResponse(_ data: Data, forKey key: String, expirationTime: TimeInterval) {
         let cachedResponse = CachedResponse(data: data, timestamp: Date(), expirationTime: expirationTime)
         requestCache.setObject(cachedResponse, forKey: key as NSString)
     }
 
-    /// Get a cached response if it exists and hasn't expired
-    /// - Parameter key: The cache key
-    /// - Returns: The cached data if valid, nil otherwise
     func getCachedResponse(forKey key: String) -> Data? {
         guard let cachedResponse = requestCache.object(forKey: key as NSString) else { return nil }
 
@@ -59,7 +50,6 @@ class CacheManager: CacheManagerProtocol {
         return cachedResponse.data
     }
 
-    /// Clear all cached responses
     func clearRequestCache() {
         requestCache.removeAllObjects()
     }

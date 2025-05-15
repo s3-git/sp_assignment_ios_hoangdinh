@@ -3,7 +3,6 @@ import Foundation
 
 // MARK: - Publisher Extensions
 extension Publisher where Failure == Never {
-    /// Sink with weak reference to avoid retain cycles
     func sink<Root: AnyObject>(
         weak object: Root,
         receiveValue: @escaping (Root, Output) -> Void
@@ -16,7 +15,6 @@ extension Publisher where Failure == Never {
 }
 
 extension Publisher {
-    /// Sink with weak reference and completion handler
     func sink<Root: AnyObject>(
         weak object: Root,
         receiveValue: @escaping (Root, Output) -> Void,
@@ -37,7 +35,6 @@ extension Publisher {
 
 // MARK: - CurrentValueSubject Extensions
 extension CurrentValueSubject where Output: Equatable {
-    /// Update value if different
     func updateIfNeeded(_ newValue: Output) {
         if value != newValue {
             send(newValue)
@@ -47,7 +44,6 @@ extension CurrentValueSubject where Output: Equatable {
 
 // MARK: - PassthroughSubject Extensions
 extension PassthroughSubject {
-    /// Send value if not nil
     func sendIfNotNil(_ value: Output?) {
         if let value = value {
             send(value)

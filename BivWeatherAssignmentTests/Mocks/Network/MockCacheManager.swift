@@ -5,10 +5,8 @@
 //  Created by hoang.dinh on 5/14/25.
 //
 
-
 import Foundation
 
-/// Mock implementation of CacheManager for testing
 final class MockCacheManager: CacheManagerProtocol, MockProtocol {
     
     // MARK: - Properties

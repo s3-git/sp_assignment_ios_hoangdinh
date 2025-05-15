@@ -1,7 +1,6 @@
 import SwiftUI
 import UIKit
 
-/// A reusable toast component that works with both UIKit and SwiftUI
 public final class Toast {
     // MARK: - Properties
     private static var window: UIWindow?
@@ -43,10 +42,6 @@ public final class Toast {
     
     // MARK: - Public Methods
     
-    /// Show toast message in UIKit
-    /// - Parameters:
-    ///   - message: Message to display
-    ///   - configuration: Toast configuration
     public static func show(
         message: String,
         configuration: Configuration = .init()
@@ -59,10 +54,6 @@ public final class Toast {
         }
     }
     
-    /// Show toast message in SwiftUI
-    /// - Parameters:
-    ///   - message: Message to display
-    ///   - configuration: Toast configuration
     public static func showInSwiftUI(
         message: String,
         configuration: Configuration = Configuration()

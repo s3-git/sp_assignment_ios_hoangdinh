@@ -20,25 +20,25 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         // Configure navigation bar appearance
         let appearance = UINavigationBarAppearance()
         appearance.configureWithOpaqueBackground()
-        appearance.backgroundColor = ThemeManager.shared.backgroundColor
-        appearance.titleTextAttributes = [.foregroundColor: ThemeManager.shared.textColor]
-        appearance.largeTitleTextAttributes = [.foregroundColor: ThemeManager.shared.textColor]
+        appearance.backgroundColor = ThemeManager.Color.backgroundColor
+        appearance.titleTextAttributes = [.foregroundColor: ThemeManager.Color.textColor]
+        appearance.largeTitleTextAttributes = [.foregroundColor: ThemeManager.Color.textColor]
 
         UINavigationBar.appearance().standardAppearance = appearance
         UINavigationBar.appearance().scrollEdgeAppearance = appearance
         UINavigationBar.appearance().compactAppearance = appearance
-        UINavigationBar.appearance().tintColor = ThemeManager.shared.accentColor
+        UINavigationBar.appearance().tintColor = ThemeManager.Color.accentColor
 
         // Configure search bar appearance
         let searchBarAppearance = UISearchBar.appearance()
-        searchBarAppearance.tintColor = ThemeManager.shared.accentColor
-        searchBarAppearance.barTintColor = ThemeManager.shared.backgroundColor
+        searchBarAppearance.tintColor = ThemeManager.Color.accentColor
+        searchBarAppearance.barTintColor = ThemeManager.Color.backgroundColor
 
         // Configure table view appearance
-        UITableView.appearance().backgroundColor = ThemeManager.shared.backgroundColor
-        UITableViewCell.appearance().backgroundColor = ThemeManager.shared.backgroundColor
+        UITableView.appearance().backgroundColor = ThemeManager.Color.backgroundColor
+        UITableViewCell.appearance().backgroundColor = ThemeManager.Color.backgroundColor
 
         // Configure label appearance
-        UILabel.appearance().textColor = ThemeManager.shared.textColor
+        UILabel.appearance().textColor = ThemeManager.Color.textColor
     }
 }

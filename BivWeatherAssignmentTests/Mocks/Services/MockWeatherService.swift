@@ -1,7 +1,6 @@
 import Combine
 import Foundation
 
-/// Mock implementation of WeatherServiceProtocol for testing
 final class MockWeatherService: WeatherServiceProtocol, MockProtocol {
     // MARK: - Properties
     var lastSearchQuery: WeatherSearchRequestParameters?
@@ -15,22 +14,22 @@ final class MockWeatherService: WeatherServiceProtocol, MockProtocol {
     }
         
     // MARK: - WeatherServiceProtocol
-    func searchCities(query: WeatherSearchRequestParameters) -> AnyPublisher<[SearchResult], AppError> {
+    func searchCities(query: WeatherSearchRequestParameters) -> AnyPublisher<[SearchResult]?, NetworkError> {
         lastSearchQuery = query
         
         return mockNetworkManager.request(WeatherRouter.searchCity(query: query))
-            .map { (response: SearchModel) in
-                response.searchAPI?.result?.compactMap({ $0 }) ?? []
+            .compactMap { (response: SearchModel) in
+                response.searchAPI?.result?.compactMap({ $0 })
             }
             .eraseToAnyPublisher()
     }
     
-    func getWeather(query: WeatherRequestParameters, forceRefresh: Bool) -> AnyPublisher<WeatherData, AppError> {
+    func getWeather(query: WeatherRequestParameters, forceRefresh: Bool) -> AnyPublisher<WeatherData?, NetworkError> {
         forceRefreshCalled = forceRefresh
         
         return mockNetworkManager.request(WeatherRouter.getWeather(query: query, forceRefresh: forceRefresh))
-            .map { (response: WeatherModel) in
-                response.data ?? WeatherData()
+            .compactMap { (response: WeatherModel) in
+                response.data
             }
             .eraseToAnyPublisher()
     }

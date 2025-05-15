@@ -1,10 +1,13 @@
 import Foundation
 
-/// App-wide constants
 enum AppConstants {
     // MARK: - API
+    struct Environment {
+        static let apiKey: String = "912f884e51f64c66b5643355251205"
+        static let baseURL: String = "https://api.worldweatheronline.com/premium/v1"
+    }
+
     enum Network {
-        static let baseURL = "https://api.worldweatheronline.com/premium/v1"
         static let timeoutInterval: TimeInterval = 30
         static let memoryCacheSize = 50_000_000 // 50MB
         static let diskCacheSize = 100_000_000  // 100MB
@@ -40,7 +43,6 @@ enum AppConstants {
         static let minSearchLength = 2
         static let maxSearchLength = 50
     }
-
 
     // MARK: - Keys
     enum Assets {

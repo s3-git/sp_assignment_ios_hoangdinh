@@ -2,11 +2,10 @@
 import Combine
 import Foundation
 
-/// Mock implementation of NetworkManager for testing
 final class MockNetworkManager: NetworkManagerProtocol, MockProtocol {
     // MARK: - Properties
     var shouldFail = false
-    var mockError: AppError = .network(.invalidResponse)
+    var mockError: NetworkError = .invalidResponse
     var lastRequest: Endpoint?
     var isRemoveAllCacheCalled = false
     
@@ -21,7 +20,7 @@ final class MockNetworkManager: NetworkManagerProtocol, MockProtocol {
     }
     
     // MARK: - NetworkManagerProtocol
-    func request<T: Codable>(_ endpoint: Endpoint) -> AnyPublisher<T, AppError> {
+    func request<T: Codable>(_ endpoint: Endpoint) -> AnyPublisher<T, NetworkError> {
         lastRequest = endpoint
         
         if shouldFail {
@@ -34,7 +33,7 @@ final class MockNetworkManager: NetworkManagerProtocol, MockProtocol {
            let cachedData = cacheManager.getCachedResponse(forKey: url.absoluteString),
            let decodedData = try? JSONDecoder().decode(T.self, from: cachedData) {
             return Just(decodedData)
-                .setFailureType(to: AppError.self)
+                .setFailureType(to: NetworkError.self)
                 .eraseToAnyPublisher()
         }
         
@@ -47,11 +46,11 @@ final class MockNetworkManager: NetworkManagerProtocol, MockProtocol {
             }
             
             return Just(decodedResponse)
-                .setFailureType(to: AppError.self)
+                .setFailureType(to: NetworkError.self)
                 .eraseToAnyPublisher()
         }
         
-        return Fail(error: .network(.invalidResponse)).eraseToAnyPublisher()
+        return Fail(error: .invalidResponse).eraseToAnyPublisher()
     }
     
     func clearCache() {
@@ -83,7 +82,7 @@ final class MockNetworkManager: NetworkManagerProtocol, MockProtocol {
     // MARK: - MockProtocol
     func reset() {
         shouldFail = false
-        mockError = .network(.invalidResponse)
+        mockError = .invalidResponse
         lastRequest = nil
         mockResponse = nil
     }
@@ -93,6 +92,6 @@ final class MockNetworkManager: NetworkManagerProtocol, MockProtocol {
 enum MockResponseType {
     case weather
     case search
-    case error(AppError)
+    case error(NetworkError)
     case custom(Data?)
 }

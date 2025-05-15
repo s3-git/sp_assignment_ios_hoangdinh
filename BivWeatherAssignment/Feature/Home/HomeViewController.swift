@@ -1,7 +1,6 @@
 import Combine
 import UIKit
 
-/// Home screen view controller
 final class HomeViewController: BaseViewController {
     // MARK: - Properties
     private let viewModel: HomeViewModel
@@ -20,17 +19,17 @@ final class HomeViewController: BaseViewController {
         // Make search bar transparent and more beautiful
         searchBar.backgroundImage = UIImage()
         searchBar.backgroundColor = .clear
-        searchBar.searchTextField.backgroundColor = ThemeManager.shared.textColor.withAlphaComponent(0.1)
+        searchBar.searchTextField.backgroundColor = ThemeManager.Color.textColor.withAlphaComponent(0.1)
         searchBar.searchTextField.layer.cornerRadius = 10
         searchBar.searchTextField.clipsToBounds = true
 
         // Update search icon color
         if let searchIconView = searchBar.searchTextField.leftView as? UIImageView {
-            searchIconView.tintColor = ThemeManager.shared.textColor.withAlphaComponent(0.6)
+            searchIconView.tintColor = ThemeManager.Color.textColor.withAlphaComponent(0.6)
         }
 
         // Add padding to search text field
-        searchBar.searchTextField.leftView?.tintColor = ThemeManager.shared.textColor.withAlphaComponent(0.6)
+        searchBar.searchTextField.leftView?.tintColor = ThemeManager.Color.textColor.withAlphaComponent(0.6)
         searchBar.searchTextPositionAdjustment = UIOffset(horizontal: 8, vertical: 0)
 
         return searchBar
@@ -197,8 +196,8 @@ final class HomeViewController: BaseViewController {
     private func updateClearButtonVisibility(_ showingRecent: Bool) {
         navigationItem.rightBarButtonItem?.isEnabled = showingRecent
         navigationItem.rightBarButtonItem?.tintColor = showingRecent ? 
-            ThemeManager.shared.textColor : 
-            ThemeManager.shared.textColor.withAlphaComponent(0.3)
+            ThemeManager.Color.textColor : 
+            ThemeManager.Color.textColor.withAlphaComponent(0.3)
     }
 
     private func updateTableViewState() {
@@ -208,30 +207,30 @@ final class HomeViewController: BaseViewController {
     }
 
     private func applyTheme() {
-        emptyView.backgroundColor = ThemeManager.shared.backgroundColor
-        view.backgroundColor = ThemeManager.shared.backgroundColor
+        emptyView.backgroundColor = ThemeManager.Color.backgroundColor
+        view.backgroundColor = ThemeManager.Color.backgroundColor
         searchBar.barTintColor = .clear
         searchBar.backgroundColor = .clear
-        searchBar.searchTextField.backgroundColor = ThemeManager.shared.textColor.withAlphaComponent(0.1)
-        searchBar.tintColor = ThemeManager.shared.textColor
-        searchBar.searchTextField.textColor = ThemeManager.shared.textColor
+        searchBar.searchTextField.backgroundColor = ThemeManager.Color.textColor.withAlphaComponent(0.1)
+        searchBar.tintColor = ThemeManager.Color.textColor
+        searchBar.searchTextField.textColor = ThemeManager.Color.textColor
 
         // Update search icon color when theme changes
         if let searchIconView = searchBar.searchTextField.leftView as? UIImageView {
-            searchIconView.tintColor = ThemeManager.shared.textColor.withAlphaComponent(0.6)
+            searchIconView.tintColor = ThemeManager.Color.textColor.withAlphaComponent(0.6)
         }
 
         // Update placeholder color
         searchBar.searchTextField.attributedPlaceholder = NSAttributedString(
             string: "Search cities...",
             attributes: [
-                .foregroundColor: ThemeManager.shared.textColor.withAlphaComponent(0.6),
+                .foregroundColor: ThemeManager.Color.textColor.withAlphaComponent(0.6),
                 .font: ThemeManager.Fonts.caption
             ]
         )
 
-        tableView.backgroundColor = ThemeManager.shared.backgroundColor
-        emptyLabel.textColor = ThemeManager.shared.textColor
+        tableView.backgroundColor = ThemeManager.Color.backgroundColor
+        emptyLabel.textColor = ThemeManager.Color.textColor
         tableView.reloadData()
     }
 
@@ -305,7 +304,7 @@ extension HomeViewController: UITableViewDataSource {
             isRecentCity: viewModel.showingRecentCities
         )
         
-        cell.backgroundColor = ThemeManager.shared.backgroundColor
+        cell.backgroundColor = ThemeManager.Color.backgroundColor
         return cell
     }
 
@@ -346,18 +345,4 @@ extension HomeViewController: UISearchBarDelegate {
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
         searchBar.resignFirstResponder()
     }
-
-//    func searchBarTextDidBeginEditing(_ searchBar: UISearchBar) {
-//        searchBar.setShowsCancelButton(true, animated: true)
-//    }
-//
-//    func searchBarTextDidEndEditing(_ searchBar: UISearchBar) {
-//        searchBar.setShowsCancelButton(false, animated: true)
-//    }
-//
-//    func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
-//        searchBar.text = ""
-//        searchBar.resignFirstResponder()
-//        viewModel.searchText = ""
-//    }
 }

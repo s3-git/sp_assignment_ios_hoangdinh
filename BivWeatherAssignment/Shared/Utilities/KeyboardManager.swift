@@ -1,7 +1,5 @@
 import Combine
 import SwiftUI
-
-/// Manager for handling keyboard events
 class KeyboardManager: ObservableObject {
     // MARK: - Published Properties
     @Published var keyboardHeight: CGFloat = 0
@@ -45,7 +43,6 @@ class KeyboardManager: ObservableObject {
 
 // MARK: - View Extension
 extension View {
-    /// Apply keyboard avoidance
     func keyboardAware() -> some View {
         self.modifier(KeyboardAwareModifier())
     }
@@ -64,12 +61,10 @@ struct KeyboardAwareModifier: ViewModifier {
 
 // MARK: - View Extension
 extension View {
-    /// Dismiss keyboard
     func dismissKeyboard() {
         UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
     }
 
-    /// Hide keyboard on tap outside
     func hideKeyboardOnTapOutside() -> some View {
         self.onTapGesture {
             dismissKeyboard()

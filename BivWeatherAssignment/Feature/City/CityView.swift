@@ -1,6 +1,5 @@
 import SwiftUI
 
-/// View for displaying city weather information
 struct CityView: View {
     // MARK: - Properties
     @StateObject private var viewModel: CityViewModel
@@ -52,15 +51,14 @@ struct CityView: View {
     }
 }
 
-/// View for displaying weather content
 struct WeatherContentView: View {
     // MARK: - Properties
-    private let weatherData: WeatherPresenterProtocol
+    private let weatherData: WeatherData
     @State private var isRefreshing = false
     var onRefresh: () -> Void
     
     // MARK: - Initialization
-    init(weatherData: WeatherPresenterProtocol, onRefresh: @escaping () -> Void) {
+    init(weatherData: WeatherData, onRefresh: @escaping () -> Void) {
         self.weatherData = weatherData
         self.onRefresh = onRefresh
     }
@@ -81,11 +79,6 @@ struct WeatherContentView: View {
                 // MARK: - Atmospheric and Additional Info
                 atmosphericCard
                 additionalInfoCard
-                
-                // MARK: - Hourly Forecast
-                if !weatherData.forecastDays.isEmpty {
-                    hourlyForecastCard
-                }
             }
         }
         .refreshable {
@@ -106,17 +99,17 @@ struct WeatherContentView: View {
             HStack {
                 Image(systemName: "mappin.circle.fill")
                     .font(.system(size: 20))
-                    .foregroundStyle(ThemeManager.shared.textColor.toColor)
+                    .foregroundStyle(ThemeManager.Color.textColor.toColor)
                 
                 Text(weatherData.areaName)
-                    .foregroundStyle(ThemeManager.shared.textColor.toColor)
+                    .foregroundStyle(ThemeManager.Color.textColor.toColor)
                     .font(Font(ThemeManager.Fonts.title))
                     .fontWeight(.bold)
             }
             
             Text("\(weatherData.regionName) • \(weatherData.countryName)")
                 .font(Font(ThemeManager.Fonts.caption))
-                .foregroundStyle(ThemeManager.shared.textColor.toColor.opacity(0.7))
+                .foregroundStyle(ThemeManager.Color.textColor.toColor.opacity(0.7))
             
             // Weather Icon and Description
             if let weatherIconURL = URL(string: weatherData.imageURL) {
@@ -133,12 +126,12 @@ struct WeatherContentView: View {
             
             Text(weatherData.weatherDesc)
                 .font(Font(ThemeManager.Fonts.headline))
-                .foregroundStyle(ThemeManager.shared.textColor.toColor)
+                .foregroundStyle(ThemeManager.Color.textColor.toColor)
         }
         .padding()
         .background(
             RoundedRectangle(cornerRadius: 20)
-                .fill(ThemeManager.shared.textColor.toColor.opacity(0.05))
+                .fill(ThemeManager.Color.textColor.toColor.opacity(0.05))
         )
     }
     
@@ -185,19 +178,6 @@ struct WeatherContentView: View {
             VStack(spacing: 8) {
                 WeatherRow(icon: "sun.max.fill", value: weatherData.uvIndex, label: "UV")
                 WeatherRow(icon: "clock.fill", value: weatherData.localTime, label: "Time")
-            }
-        }
-    }
-    
-    // MARK: - Hourly Forecast Card
-    private var hourlyForecastCard: some View {
-        WeatherInfoCard(title: "Today's Forecast", systemImage: "clock") {
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 12) {
-                    ForEach(weatherData.forecastDays[0].hourlyForecasts, id: \.time) { hourly in
-                        HourlyForecastView(forecast: hourly)
-                    }
-                }
             }
         }
     }

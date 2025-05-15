@@ -213,7 +213,6 @@ final class HomeViewModelTests: BaseXCTestCase {
             }
             
             let viewController = viewControllers[index + 1]
-            XCTAssertTrue(viewController is UIViewController)
             XCTAssertEqual(viewController.title, city.areaName?.first?.value)
         }
     }
@@ -319,7 +318,7 @@ final class HomeViewModelTests: BaseXCTestCase {
         // Given
         let expectation = expectation(description: "Error state flow")
         expectation.expectedFulfillmentCount = 2 // Loading then Error
-        let error = AppError.search(.searchLimitExceeded)
+        let error = NetworkError.invalidResponse
         mockWeatherService.setMockResponse(.error(error))
         
         // When

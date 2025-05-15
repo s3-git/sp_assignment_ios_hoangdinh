@@ -1,7 +1,6 @@
 @testable import BivWeatherAssignment
 import Foundation
 
-/// Mock implementation of RecentCitiesServiceProtocol for testing
 final class MockRecentCitiesService: RecentCitiesServiceProtocol, MockProtocol {
     // MARK: - Properties
     var shouldFail = false
@@ -50,14 +49,10 @@ final class MockRecentCitiesService: RecentCitiesServiceProtocol, MockProtocol {
     }
     
     // MARK: - Test Helpers
-    /// Set mock data for testing
-    /// - Parameter cities: Array of cities to set as mock data
     func setMockData(_ cities: [SearchResult]) {
         mockRecentCities = cities
     }
     
-    /// Get current mock data count
-    /// - Returns: Number of cities in mock data
     func getMockDataCount() -> Int {
         return mockRecentCities.count
     }

@@ -1,7 +1,5 @@
 import Foundation
 
-/// Router for weather API endpoints
-///
 typealias Coordinates = (lat: String, lng: String)
 enum WeatherRouter: Endpoint {
     case searchCity(query: WeatherSearchRequestParameters)
@@ -34,7 +32,7 @@ enum WeatherRouter: Endpoint {
     // MARK: - Query Parameters
     var queryItems: [URLQueryItem] {
         var items = [
-            URLQueryItem(name: "key", value: Environment.shared.apiKey),
+            URLQueryItem(name: "key", value: AppConstants.Environment.apiKey),
             URLQueryItem(name: "format", value: "json")
         ]
 
@@ -60,7 +58,7 @@ enum WeatherRouter: Endpoint {
 
     // MARK: - URL Construction
     func asURL() -> URL? {
-        var components = URLComponents(string: Environment.shared.baseURL + path)
+        var components = URLComponents(string: AppConstants.Environment.baseURL + path)
         components?.queryItems = queryItems
         return components?.url
     }

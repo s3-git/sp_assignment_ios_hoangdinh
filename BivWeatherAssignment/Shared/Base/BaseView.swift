@@ -1,6 +1,5 @@
 import SwiftUI
 
-/// Represents the different states a view can be in
 enum ViewState: Equatable {
     case initial
     case loading
@@ -22,8 +21,6 @@ enum ViewState: Equatable {
         }
     }
 }
-
-/// Base view that provides common functionality for all views
 struct BaseView<Content: View>: View {
     // MARK: - Properties
     let content: Content
@@ -47,13 +44,4 @@ struct BaseView<Content: View>: View {
         }
     }
     
-}
-
-// MARK: - Preview Provider
-struct BaseView_Previews: PreviewProvider {
-    static var previews: some View {
-        BaseView {
-            Text("Hello, World!")
-        }
-    }
 }

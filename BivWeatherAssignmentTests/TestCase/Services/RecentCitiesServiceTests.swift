@@ -111,7 +111,6 @@ final class RecentCitiesServiceTests: XCTestCase {
         XCTAssertEqual(recentCities.first?.areaName?.first?.value, "London")
     }
     
-    
     // MARK: - removeRecentCity Tests
     
     func testRemoveRecentCity_ShouldRemoveSpecificCity() {

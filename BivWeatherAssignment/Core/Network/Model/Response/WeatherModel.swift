@@ -7,67 +7,32 @@ struct WeatherModel: Codable {
 
 // MARK: - DataClass
 struct WeatherData: Codable {
-    let request: [Request]?
     let nearestArea: [NearestArea]?
     let timeZone: [TimeZone]?
     let currentCondition: [CurrentCondition]?
-    let weather: [Weather]?
-    let climateAverages: [ClimateAverage]?
-
-    init(request: [Request]? = [], nearestArea: [NearestArea]? = [], timeZone: [TimeZone]? = [], currentCondition: [CurrentCondition]? = [], weather: [Weather]? = [], climateAverages: [ClimateAverage]? = []) {
-        self.request = request
-        self.nearestArea = nearestArea
-        self.timeZone = timeZone
-        self.currentCondition = currentCondition
-        self.weather = weather
-        self.climateAverages = climateAverages
-    }
 
     enum CodingKeys: String, CodingKey {
-        case request
         case nearestArea = "nearest_area"
         case timeZone = "time_zone"
         case currentCondition = "current_condition"
-        case weather
-        case climateAverages = "ClimateAverages"
-    }
-}
-
-// MARK: - ClimateAverage
-struct ClimateAverage: Codable {
-    let month: [Month]?
-}
-
-// MARK: - Month
-struct Month: Codable {
-    let index, name, avgMinTemp, avgMinTempF: String?
-    let absMaxTemp, absMaxTempF, avgDailyRainfall: String?
-
-    enum CodingKeys: String, CodingKey {
-        case index, name, avgMinTemp
-        case avgMinTempF = "avgMinTemp_F"
-        case absMaxTemp
-        case absMaxTempF = "absMaxTemp_F"
-        case avgDailyRainfall
     }
 }
 
 // MARK: - CurrentCondition
 struct CurrentCondition: Codable {
-    let observationTime, tempC, tempF, weatherCode: String?
+    let observationTime, tempC, tempF: String?
     let weatherIconURL, weatherDesc: [WeatherDesc]?
-    let windspeedMiles, windspeedKmph, winddirDegree, winddir16Point: String?
-    let precipMM, precipInches, humidity, visibility: String?
-    let visibilityMiles, pressure, pressureInches, cloudcover: String?
+    let  windspeedKmph, winddirDegree, winddir16Point: String?
+    let precipMM, humidity, visibility: String?
+    let pressure, cloudcover: String?
     let feelsLikeC, feelsLikeF, uvIndex: String?
 
     enum CodingKeys: String, CodingKey {
         case observationTime = "observation_time"
         case tempC = "temp_C"
         case tempF = "temp_F"
-        case weatherCode
         case weatherIconURL = "weatherIconUrl"
-        case weatherDesc, windspeedMiles, windspeedKmph, winddirDegree, winddir16Point, precipMM, precipInches, humidity, visibility, visibilityMiles, pressure, pressureInches, cloudcover
+        case weatherDesc, windspeedKmph, winddirDegree, winddir16Point, precipMM, humidity, visibility, pressure, cloudcover
         case feelsLikeC = "FeelsLikeC"
         case feelsLikeF = "FeelsLikeF"
         case uvIndex
@@ -82,83 +47,85 @@ struct WeatherDesc: Codable {
 // MARK: - NearestArea
 struct NearestArea: Codable {
     let areaName, country, region: [WeatherDesc]?
-    let latitude, longitude, population: String?
-    let weatherURL: [WeatherDesc]?
-
-    enum CodingKeys: String, CodingKey {
-        case areaName, country, region, latitude, longitude, population
-        case weatherURL = "weatherUrl"
-    }
-}
-
-// MARK: - Request
-struct Request: Codable {
-    let type, query: String?
 }
 
 // MARK: - TimeZone
 struct TimeZone: Codable {
-    let localtime, utcOffset, zone: String?
+    let localtime: String?
 }
 
-// MARK: - Weather
-struct Weather: Codable {
-    let date: String?
-    let astronomy: [Astronomy]?
-    let maxtempC, maxtempF, mintempC, mintempF: String?
-    let avgtempC, avgtempF, totalSnowCM, sunHour: String?
-    let uvIndex: String?
-    let hourly: [Hourly]?
+// MARK: - WeatherData Extension
 
-    enum CodingKeys: String, CodingKey {
-        case date, astronomy, maxtempC, maxtempF, mintempC, mintempF, avgtempC, avgtempF
-        case totalSnowCM = "totalSnow_cm"
-        case sunHour, uvIndex, hourly
+extension WeatherData {
+    // MARK: - Location Information
+    var areaName: String {
+        self.nearestArea?.first?.areaName?.first?.value ?? "Unknown Area"
     }
-}
-
-// MARK: - Astronomy
-struct Astronomy: Codable {
-    let sunrise, sunset, moonrise, moonset: String?
-    let moonPhase, moonIllumination: String?
-
-    enum CodingKeys: String, CodingKey {
-        case sunrise, sunset, moonrise, moonset
-        case moonPhase = "moon_phase"
-        case moonIllumination = "moon_illumination"
+    
+    var regionName: String {
+        self.nearestArea?.first?.region?.first?.value ?? "Unknown Region"
     }
-}
-
-// MARK: - Hourly
-struct Hourly: Codable {
-    let time, tempC, tempF, windspeedMiles: String?
-    let windspeedKmph, winddirDegree, winddir16Point, weatherCode: String?
-    let weatherIconURL, weatherDesc: [WeatherDesc]?
-    let precipMM, precipInches, humidity, visibility: String?
-    let visibilityMiles, pressure, pressureInches, cloudcover: String?
-    let heatIndexC, heatIndexF, dewPointC, dewPointF: String?
-    let windChillC, windChillF, windGustMiles, windGustKmph: String?
-    let feelsLikeC, feelsLikeF, chanceofrain, chanceofremdry: String?
-    let chanceofwindy, chanceofovercast, chanceofsunshine, chanceoffrost: String?
-    let chanceofhightemp, chanceoffog, chanceofsnow, chanceofthunder: String?
-    let uvIndex, shortRAD, diffRAD: String?
-
-    enum CodingKeys: String, CodingKey {
-        case time, tempC, tempF, windspeedMiles, windspeedKmph, winddirDegree, winddir16Point, weatherCode
-        case weatherIconURL = "weatherIconUrl"
-        case weatherDesc, precipMM, precipInches, humidity, visibility, visibilityMiles, pressure, pressureInches, cloudcover
-        case heatIndexC = "HeatIndexC"
-        case heatIndexF = "HeatIndexF"
-        case dewPointC = "DewPointC"
-        case dewPointF = "DewPointF"
-        case windChillC = "WindChillC"
-        case windChillF = "WindChillF"
-        case windGustMiles = "WindGustMiles"
-        case windGustKmph = "WindGustKmph"
-        case feelsLikeC = "FeelsLikeC"
-        case feelsLikeF = "FeelsLikeF"
-        case chanceofrain, chanceofremdry, chanceofwindy, chanceofovercast, chanceofsunshine, chanceoffrost, chanceofhightemp, chanceoffog, chanceofsnow, chanceofthunder, uvIndex
-        case shortRAD = "shortRad"
-        case diffRAD = "diffRad"
+    
+    var countryName: String {
+        self.nearestArea?.first?.country?.first?.value ?? "Unknown Country"
     }
+    
+    var localTime: String {
+        self.timeZone?.first?.localtime ?? "Unknown TimeZone"
+    }
+    
+    // MARK: - Current Weather
+    var weatherDesc: String {
+        self.currentCondition?.first?.weatherDesc?.first?.value ?? "Unknown Weather"
+    }
+    
+    var imageURL: String {
+        self.currentCondition?.first?.weatherIconURL?.first?.value ?? ""
+    }
+    
+    var temperature: String {
+        "\(self.currentCondition?.first?.tempC ?? "Unknown")°C, \(self.currentCondition?.first?.tempF ?? "Unknown")°F"
+    }
+    
+    var humidity: String {
+        "\(self.currentCondition?.first?.humidity ?? "Unknown")%"
+    }
+    
+    var feelsLike: String {
+        "Feels like \(self.currentCondition?.first?.feelsLikeC ?? "Unknown")°C, \(self.currentCondition?.first?.feelsLikeF ?? "Unknown")°F"
+    }
+    
+    var windSpeed: String {
+        "\(self.currentCondition?.first?.windspeedKmph ?? "Unknown") km/h"
+    }
+    
+    var windDirection: String {
+        "\(self.currentCondition?.first?.winddir16Point ?? "Unknown") (\(self.currentCondition?.first?.winddirDegree ?? "Unknown")°)"
+    }
+    
+    var pressure: String {
+        "\(self.currentCondition?.first?.pressure ?? "Unknown") mb"
+    }
+    
+    var visibility: String {
+        "\(self.currentCondition?.first?.visibility ?? "Unknown") km"
+    }
+    
+    var uvIndex: String {
+        "UV Index: \(self.currentCondition?.first?.uvIndex ?? "Unknown")"
+    }
+    
+    var precipitation: String {
+        "\(self.currentCondition?.first?.precipMM ?? "Unknown") mm"
+    }
+    
+    var cloudCover: String {
+        "\(self.currentCondition?.first?.cloudcover ?? "Unknown")%"
+    }
+    
+    // MARK: - Observation Details
+    var observationTime: String {
+        "Observed at: \(self.currentCondition?.first?.observationTime ?? "Unknown")"
+    }
+    
 }

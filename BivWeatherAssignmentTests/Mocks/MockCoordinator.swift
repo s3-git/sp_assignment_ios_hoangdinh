@@ -2,7 +2,6 @@ import Foundation
 import SwiftUI
 import UIKit
 
-/// Mock implementation of Coordinator for testing
 final class MockCoordinator: Coordinator, MockProtocol {
     // MARK: - Properties
     let navigationController: UINavigationController

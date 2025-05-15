@@ -8,7 +8,8 @@ final class WeatherRouterTests: BaseXCTestCase {
     // MARK: - Search City Tests
     func testSearchCityEndpoint() {
         // Given
-        let query = WeatherSearchRequestParameters(query: "London", numOfResults: 10)
+        
+        let query = WeatherSearchRequestParameters(query: "Lond", numOfResults: 10)
         let router = WeatherRouter.searchCity(query: query)
         
         // When
@@ -17,7 +18,7 @@ final class WeatherRouterTests: BaseXCTestCase {
         // Then
         XCTAssertNotNil(url)
         XCTAssertTrue(url?.absoluteString.contains("/search.ashx") ?? false)
-        XCTAssertTrue(url?.absoluteString.contains("q=London") ?? false)
+        XCTAssertTrue(url?.absoluteString.contains("q=Lond") ?? false)
         XCTAssertTrue(url?.absoluteString.contains("num_of_results=10") ?? false)
         XCTAssertTrue(url?.absoluteString.contains("format=json") ?? false)
     }
@@ -25,7 +26,8 @@ final class WeatherRouterTests: BaseXCTestCase {
     // MARK: - Get Weather Tests
     func testGetWeatherEndpoint() {
         // Given
-        let query = WeatherRequestParameters(query: "51.5074,-0.1278")
+        let coordinates = "51.5074,-0.127"
+        let query = WeatherRequestParameters(query: coordinates)
         let router = WeatherRouter.getWeather(query: query, forceRefresh: false)
         
         // When
@@ -34,15 +36,16 @@ final class WeatherRouterTests: BaseXCTestCase {
         // Then
         XCTAssertNotNil(url)
         XCTAssertTrue(url?.absoluteString.contains("/weather.ashx") ?? false)
-        XCTAssertTrue(url?.absoluteString.contains("q=51.5074,-0.1278") ?? false)
+        XCTAssertTrue(url?.absoluteString.contains("q=\(coordinates)") ?? false)
         XCTAssertTrue(url?.absoluteString.contains("format=json") ?? false)
     }
     
     // MARK: - Cache Time Tests
     func testCacheTimeConfiguration() {
         // Given
-        let searchQuery = WeatherSearchRequestParameters(query: "London")
-        let weatherQuery = WeatherRequestParameters(query: "51.5074,-0.1278")
+        let coordinates = "51.507,-0.1278"
+        let searchQuery = WeatherSearchRequestParameters(query: "Londo")
+        let weatherQuery = WeatherRequestParameters(query: coordinates)
         
         // When
         let searchRouter = WeatherRouter.searchCity(query: searchQuery)
@@ -59,7 +62,7 @@ final class WeatherRouterTests: BaseXCTestCase {
     func testHTTPMethods() {
         // Given
         let searchQuery = WeatherSearchRequestParameters(query: "London")
-        let weatherQuery = WeatherRequestParameters(query: "51.5074,-0.1278")
+        let weatherQuery = WeatherRequestParameters(query: "51.507,-0.127")
         
         // When
         let searchRouter = WeatherRouter.searchCity(query: searchQuery)
@@ -73,7 +76,7 @@ final class WeatherRouterTests: BaseXCTestCase {
     // MARK: - Headers Tests
     func testHeaders() {
         // Given
-        let searchQuery = WeatherSearchRequestParameters(query: "London")
+        let searchQuery = WeatherSearchRequestParameters(query: "Londono")
         let router = WeatherRouter.searchCity(query: searchQuery)
         
         // When
@@ -84,31 +87,4 @@ final class WeatherRouterTests: BaseXCTestCase {
         XCTAssertEqual(headers["Accept"], "application/json")
     }
     
-    // MARK: - Error Handling Tests
-    func testNetworkErrorMapping() {
-        // Given
-        let networkError = NetworkError.invalidResponse
-        let appError = networkError.toAppError()
-        
-        // Then
-        XCTAssertEqual(appError.localizedDescription, AppError.network(.invalidResponse).localizedDescription)
-    }
-    
-    func testTimeoutErrorHandling() {
-        // Given
-        let timeoutError = NetworkError.timeout
-        let appError = timeoutError.toAppError()
-        
-        // Then
-        XCTAssertEqual(appError.localizedDescription, AppError.network(.timeout).localizedDescription)
-    }
-    
-    func testInvalidDataErrorHandling() {
-        // Given
-        let invalidDataError = NetworkError.invalidResponse
-        let appError = invalidDataError.toAppError()
-        
-        // Then
-        XCTAssertEqual(appError.localizedDescription, AppError.network(.invalidResponse).localizedDescription)
-    }
 } 

@@ -1,6 +1,5 @@
 import Foundation
 
-/// Helper class for network testing
 final class NetworkTestHelper {
     // MARK: - Properties
     static let shared = NetworkTestHelper()
@@ -64,10 +63,11 @@ final class NetworkTestHelper {
         {
             "data": {
                 "request": [],
-                "request": [],
-                "request": [],
-                "request": [],
-                "request": [],
+                "nearest_area": [],
+                "time_zone": [],
+                "current_condition": [],
+                "weather": [],
+                "ClimateAverages": [],
             }
         }
         """

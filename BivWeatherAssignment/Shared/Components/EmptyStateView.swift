@@ -36,16 +36,16 @@ struct EmptyStateView: View {
         VStack(spacing: AppConstants.UserInterface.padding) {
             Image(systemName: systemImage)
                 .font(.system(size: 50))
-                .foregroundStyle(ThemeManager.shared.textColor.toColor)
+                .foregroundStyle(ThemeManager.Color.textColor.toColor)
             
             Text(title)
                 .font(Font(ThemeManager.Fonts.headline))
                 .multilineTextAlignment(.center)
-                .foregroundStyle(ThemeManager.shared.textColor.toColor)
+                .foregroundStyle(ThemeManager.Color.textColor.toColor)
             
             Text(message)
                 .font(Font(ThemeManager.Fonts.body))
-                .foregroundStyle(ThemeManager.shared.textColor.toColor.opacity(0.7))
+                .foregroundStyle(ThemeManager.Color.textColor.toColor.opacity(0.7))
                 .multilineTextAlignment(.center)
                 .padding(.horizontal)
             
@@ -56,7 +56,7 @@ struct EmptyStateView: View {
                         .foregroundColor(.white)
                         .padding(.horizontal, AppConstants.UserInterface.padding * 1.5)
                         .padding(.vertical, AppConstants.UserInterface.padding * 0.75)
-                        .background(ThemeManager.shared.accentColor.toColor)
+                        .background(ThemeManager.Color.accentColor.toColor)
                         .cornerRadius(AppConstants.UserInterface.cornerRadius * 0.5)
                 }
                 .padding(.top, AppConstants.UserInterface.padding * 0.5)

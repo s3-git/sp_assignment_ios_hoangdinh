@@ -1,6 +1,5 @@
 import UIKit
 
-/// Cell for displaying city information with enhanced layout
 final class CityCell: UITableViewCell {
     // MARK: - Properties
     static let identifier = "CityCell"
@@ -11,7 +10,7 @@ final class CityCell: UITableViewCell {
     // MARK: - UI Components
     private lazy var containerView: UIView = {
         let view = UIView()
-        view.backgroundColor = ThemeManager.shared.backgroundColor.withAlphaComponent(0.6)
+        view.backgroundColor = ThemeManager.Color.backgroundColor.withAlphaComponent(0.6)
         view.layer.cornerRadius = 12
         view.layer.shadowColor = UIColor.black.cgColor
         view.layer.shadowOffset = CGSize(width: 0, height: 2)
@@ -44,7 +43,7 @@ final class CityCell: UITableViewCell {
 
     private lazy var locationIcon: UIImageView = {
         let imageView = UIImageView(image: UIImage(systemName: "mappin.circle.fill"))
-        imageView.tintColor = ThemeManager.shared.textColor
+        imageView.tintColor = ThemeManager.Color.textColor
         imageView.contentMode = .scaleAspectFit
         imageView.translatesAutoresizingMaskIntoConstraints = false
         return imageView
@@ -63,7 +62,7 @@ final class CityCell: UITableViewCell {
     private lazy var removeButton: UIButton = {
         let button = UIButton(type: .system)
         button.setImage(UIImage(systemName: "xmark.circle.fill"), for: .normal)
-        button.tintColor = ThemeManager.shared.textColor.withAlphaComponent(0.6)
+        button.tintColor = ThemeManager.Color.textColor.withAlphaComponent(0.6)
         button.translatesAutoresizingMaskIntoConstraints = false
         button.addTarget(self, action: #selector(removeButtonTapped), for: .touchUpInside)
         button.accessibilityIdentifier = "removeCityButton"
@@ -134,7 +133,7 @@ final class CityCell: UITableViewCell {
         guard populationIcon == nil, populationLabel == nil else { return }
         
         let icon = UIImageView(image: UIImage(systemName: "person.3.fill"))
-        icon.tintColor = ThemeManager.shared.textColor.withAlphaComponent(0.8)
+        icon.tintColor = ThemeManager.Color.textColor.withAlphaComponent(0.8)
         icon.contentMode = .scaleAspectFit
         icon.translatesAutoresizingMaskIntoConstraints = false
         
@@ -161,35 +160,12 @@ final class CityCell: UITableViewCell {
         populationLabel = label
     }
 
-    /// Format population number with proper suffix (K, M, B)
-    private func formatPopulation(_ population: Int) -> String {
-        let number = Double(population)
-        let thousand = number / 1000
-        let million = number / 1000000
-        let billion = number / 1000000000
-
-        if billion >= 1.0 {
-            return String(format: "%.1fB", billion)
-        } else if million >= 1.0 {
-            return String(format: "%.1fM", million)
-        } else if thousand >= 1.0 {
-            return String(format: "%.1fK", thousand)
-        } else {
-            return "\(population)"
-        }
-    }
-
     // MARK: - Actions
     @objc private func removeButtonTapped() {
         onRemove?()
     }
 
     // MARK: - Public Methods
-    /// Configure cell with city data
-    /// - Parameters:
-    ///   - city: City model to display
-    ///   - onRemove: Callback for remove action
-    ///   - isRecentCity: Whether this cell is in recent cities list
     func configure(with city: SearchResult, onRemove: (() -> Void)? = nil, isRecentCity: Bool = false) {
         self.onRemove = onRemove
         self.isRecentCity = isRecentCity
@@ -198,8 +174,8 @@ final class CityCell: UITableViewCell {
         removeButton.isHidden = !isRecentCity
         removeButton.isUserInteractionEnabled = isRecentCity
         removeButton.tintColor = isRecentCity ? 
-            ThemeManager.shared.textColor.withAlphaComponent(0.6) : 
-            ThemeManager.shared.textColor.withAlphaComponent(0.3)
+            ThemeManager.Color.textColor.withAlphaComponent(0.6) : 
+            ThemeManager.Color.textColor.withAlphaComponent(0.3)
         
         cityLabel.text = city.areaName?.first?.value
         regionLabel.text = city.region?.first?.value
@@ -212,9 +188,9 @@ final class CityCell: UITableViewCell {
         }
 
         // Configure population
-        if let population = Int(city.population ?? "") {
+        if let population = Double(city.population ?? "") {
             setupPopulationViews()
-            populationLabel?.text = formatPopulation(population)
+            populationLabel?.text = population.formatPopulation()
             populationIcon?.isHidden = false
             populationLabel?.isHidden = false
         } else {
@@ -223,14 +199,14 @@ final class CityCell: UITableViewCell {
         }
 
         // Apply theme colors
-        containerView.backgroundColor = ThemeManager.shared.backgroundColor.withAlphaComponent(0.6)
-        locationIcon.tintColor = ThemeManager.shared.textColor
-        cityLabel.textColor = ThemeManager.shared.textColor
-        regionLabel.textColor = ThemeManager.shared.textColor.withAlphaComponent(0.8)
-        countryLabel.textColor = ThemeManager.shared.textColor.withAlphaComponent(0.8)
-        latLongLabel.textColor = ThemeManager.shared.textColor.withAlphaComponent(0.6)
-        populationIcon?.tintColor = ThemeManager.shared.textColor.withAlphaComponent(0.8)
-        populationLabel?.textColor = ThemeManager.shared.textColor.withAlphaComponent(0.8)
+        containerView.backgroundColor = ThemeManager.Color.backgroundColor.withAlphaComponent(0.6)
+        locationIcon.tintColor = ThemeManager.Color.textColor
+        cityLabel.textColor = ThemeManager.Color.textColor
+        regionLabel.textColor = ThemeManager.Color.textColor.withAlphaComponent(0.8)
+        countryLabel.textColor = ThemeManager.Color.textColor.withAlphaComponent(0.8)
+        latLongLabel.textColor = ThemeManager.Color.textColor.withAlphaComponent(0.6)
+        populationIcon?.tintColor = ThemeManager.Color.textColor.withAlphaComponent(0.8)
+        populationLabel?.textColor = ThemeManager.Color.textColor.withAlphaComponent(0.8)
     }
 
     override func prepareForReuse() {

@@ -1,31 +1,22 @@
 import Combine
 import Foundation
 
-/// NetworkManager handles all network requests in the application
-/// Uses Combine framework for reactive programming and CacheManager for response caching
 protocol NetworkManagerProtocol {
     func clearCache()
-    func request<T: Codable>(_ endpoint: Endpoint) -> AnyPublisher<T, AppError>
+    func request<T: Codable>(_ endpoint: Endpoint) -> AnyPublisher<T, NetworkError>
     func removeCache(for endpoint: Endpoint)
 }
 
 final class NetworkManager: NetworkManagerProtocol {
     // MARK: - Properties
     private let session: URLSession
-    private let baseURL: String
     private let cacheManager: CacheManagerProtocol
-    private let logger: Logger
-    private let errorHandler: ErrorHandlingServiceProtocol
+    private let logger: Logger = .shared
 
     // MARK: - Initialization
     init(session: URLSession? = .shared, 
-         cacheManager: CacheManagerProtocol = CacheManager.shared,
-         logger: Logger = Logger.shared,
-         errorHandler: ErrorHandlingServiceProtocol = ErrorHandlingService()) {
-        self.baseURL = Environment.shared.baseURL
+         cacheManager: CacheManagerProtocol = CacheManager.shared) {
         self.cacheManager = cacheManager
-        self.logger = logger
-        self.errorHandler = errorHandler
 
         // Configure URLSession with caching
         let configuration = URLSessionConfiguration.default
@@ -35,10 +26,10 @@ final class NetworkManager: NetworkManagerProtocol {
     }
     
     // MARK: - Public Methods
-    func request<T: Codable>(_ endpoint: Endpoint) -> AnyPublisher<T, AppError> {
+    func request<T: Codable>(_ endpoint: Endpoint) -> AnyPublisher<T, NetworkError> {
         guard let url = endpoint.asURL() else {
-            let error = AppError.network(.invalidURL)
-            errorHandler.logError(error)
+            let error = NetworkError.invalidURL
+            logger.error(error.localizedDescription)
             return Fail(error: error).eraseToAnyPublisher()
         }
 
@@ -47,7 +38,7 @@ final class NetworkManager: NetworkManagerProtocol {
            let decodedData = try? JSONDecoder().decode(T.self, from: cachedData), endpoint.cacheTime != 0 {
             logger.info("Cache hit for URL: \(url.absoluteString)")
             return Just(decodedData)
-                .setFailureType(to: AppError.self)
+                .setFailureType(to: NetworkError.self)
                 .eraseToAnyPublisher()
         }
 
@@ -59,30 +50,30 @@ final class NetworkManager: NetworkManagerProtocol {
         logger.logRequest(request)
 
         return session.dataTaskPublisher(for: request)
-            .mapError { [weak self] error -> AppError in
-                var appError = AppError.network(.custom(error))
+            .mapError { [weak self] error -> NetworkError in
+                var networkError: NetworkError = NetworkError.custom(error)
 
-                guard let self = self else { return appError }
+                guard let self = self else { return networkError }
 
                 switch error.code {
                     case .timedOut:
-                        appError = .network(.timeout)
+                        networkError = .timeout
                     case .secureConnectionFailed:
-                        appError = .network(.sslError(error))
+                        networkError = .sslError(error)
                     default:
-                        appError = .network(.networkError(error))
+                        networkError = .networkError(error)
                 }
-                self.errorHandler.logError(appError)
-                return appError
+                self.logger.error(networkError.localizedDescription)
+                return networkError
             }
-            .flatMap { [weak self] data, response -> AnyPublisher<T, AppError> in
+            .flatMap { [weak self] data, response -> AnyPublisher<T, NetworkError> in
                 guard let self = self else {
-                    return Fail(error: AppError.network(.custom(NSError(domain: "", code: -1)))).eraseToAnyPublisher()
+                    return Fail(error: NetworkError.custom(NSError(domain: "", code: -1))).eraseToAnyPublisher()
                 }
                 
                 guard let httpResponse = response as? HTTPURLResponse else {
-                    let error = AppError.network(.invalidResponse)
-                    self.errorHandler.logError(error)
+                    let error = NetworkError.invalidResponse
+                    self.logger.error(error.localizedDescription)
                     return Fail(error: error).eraseToAnyPublisher()
                 }
 
@@ -98,21 +89,21 @@ final class NetworkManager: NetworkManagerProtocol {
                     
                     return Just(data)
                         .decode(type: T.self, decoder: JSONDecoder())
-                        .mapError { error -> AppError in
-                            let appError = AppError.network(.decodingError(error))
-                            self.errorHandler.logError(appError)
-                            return appError
+                        .mapError { error -> NetworkError in
+                            let networkError: NetworkError = .decodingError(error)
+                            self.logger.error(networkError.localizedDescription)
+                            return networkError
                         }
                         .eraseToAnyPublisher()
                         
                 case 429:
-                    let error = AppError.network(.rateLimitExceeded)
-                    self.errorHandler.logError(error)
+                    let error = NetworkError.rateLimitExceeded
+                    self.logger.error(error.localizedDescription)
                     return Fail(error: error).eraseToAnyPublisher()
                     
                 default:
-                    let error = AppError.network(.httpError(httpResponse.statusCode))
-                    self.errorHandler.logError(error)
+                    let error = NetworkError.httpError(httpResponse.statusCode)
+                    self.logger.error(error.localizedDescription)
                     return Fail(error: error).eraseToAnyPublisher()
                 }
             }
@@ -127,8 +118,8 @@ final class NetworkManager: NetworkManagerProtocol {
 
     func removeCache(for endpoint: Endpoint) {
         guard let url = endpoint.asURL() else {
-            let error = AppError.cache(.cacheClearFailed("Invalid URL for cache removal"))
-            errorHandler.logError(error)
+            let error = NetworkError.invalidURL
+            logger.error(error.localizedDescription)
             return
         }
         logger.info("Removing cache for URL: \(url.absoluteString)")

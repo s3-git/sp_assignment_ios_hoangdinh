@@ -59,7 +59,7 @@ final class CityViewModelTests: BaseXCTestCase {
     
     func testFetchWeatherData_Error() {
         // Given
-        let errorExpectation = AppError.weather(.weatherDataUnavailable)
+        let errorExpectation = NetworkError.invalidResponse
         let expectation = XCTestExpectation(description: errorExpectation.localizedDescription)
         mockWeatherService.setMockResponse(.error(errorExpectation))
         
@@ -144,23 +144,6 @@ final class CityViewModelTests: BaseXCTestCase {
                 XCTAssertNotNil(weatherData?.weatherDesc)
                 XCTAssertNotNil(weatherData?.imageURL)
                 
-                // Forecast Data
-                XCTAssertNotNil(weatherData?.forecastDays)
-                if let firstForecastDay = weatherData?.forecastDays.first {
-                    XCTAssertNotNil(firstForecastDay.date)
-                    XCTAssertNotNil(firstForecastDay.maxTemp)
-                    XCTAssertNotNil(firstForecastDay.minTemp)
-                    XCTAssertNotNil(firstForecastDay.hourlyForecasts)
-                    
-                    // Safely check hourly forecasts
-                    if let firstHourlyForecast = firstForecastDay.hourlyForecasts.first {
-                        XCTAssertNotNil(firstHourlyForecast.time)
-                        XCTAssertNotNil(firstHourlyForecast.temperature)
-                        XCTAssertNotNil(firstHourlyForecast.weatherDesc)
-                        XCTAssertNotNil(firstHourlyForecast.weatherIconURL)
-                    }
-                }
-                
                 expectation.fulfill()
             }
             .store(in: &cancellables)
@@ -202,7 +185,7 @@ final class CityViewModelTests: BaseXCTestCase {
         // Given
         let expectation = XCTestExpectation(description: "Error state transitions")
         expectation.expectedFulfillmentCount = 3 // Initial -> Loading -> Error
-        let error = AppError.weather(.weatherDataUnavailable)
+        let error = NetworkError.invalidResponse
         mockWeatherService.setMockResponse(.error(error))
         
         // When
@@ -265,41 +248,6 @@ final class CityViewModelTests: BaseXCTestCase {
                 // Additional Weather Info
                 XCTAssertNotNil(weatherData?.uvIndex)
                 XCTAssertNotNil(weatherData?.observationTime)
-                
-                // Forecast
-                XCTAssertNotNil(weatherData?.forecastDays)
-                if let firstForecastDay = weatherData?.forecastDays.first {
-                    XCTAssertNotNil(firstForecastDay.date)
-                    XCTAssertNotNil(firstForecastDay.maxTemp)
-                    XCTAssertNotNil(firstForecastDay.minTemp)
-                    XCTAssertNotNil(firstForecastDay.avgTemp)
-                    XCTAssertNotNil(firstForecastDay.sunHours)
-                    XCTAssertNotNil(firstForecastDay.uvIndex)
-                    XCTAssertNotNil(firstForecastDay.sunrise)
-                    XCTAssertNotNil(firstForecastDay.sunset)
-                    XCTAssertNotNil(firstForecastDay.moonrise)
-                    XCTAssertNotNil(firstForecastDay.moonset)
-                    XCTAssertNotNil(firstForecastDay.moonPhase)
-                    XCTAssertNotNil(firstForecastDay.moonIllumination)
-                    XCTAssertNotNil(firstForecastDay.hourlyForecasts)
-                    
-                    if let firstHourlyForecast = firstForecastDay.hourlyForecasts.first {
-                        XCTAssertNotNil(firstHourlyForecast.time)
-                        XCTAssertNotNil(firstHourlyForecast.temperature)
-                        XCTAssertNotNil(firstHourlyForecast.weatherDesc)
-                        XCTAssertNotNil(firstHourlyForecast.weatherIconURL)
-                        XCTAssertNotNil(firstHourlyForecast.precipitation)
-                        XCTAssertNotNil(firstHourlyForecast.humidity)
-                        XCTAssertNotNil(firstHourlyForecast.cloudCover)
-                        XCTAssertNotNil(firstHourlyForecast.windSpeed)
-                        XCTAssertNotNil(firstHourlyForecast.windDirection)
-                        XCTAssertNotNil(firstHourlyForecast.feelsLike)
-                        XCTAssertNotNil(firstHourlyForecast.chanceOfRain)
-                        XCTAssertNotNil(firstHourlyForecast.chanceOfSnow)
-                        XCTAssertNotNil(firstHourlyForecast.visibility)
-                        XCTAssertNotNil(firstHourlyForecast.uvIndex)
-                    }
-                }
                 
                 expectation.fulfill()
             }
@@ -469,64 +417,6 @@ final class CityViewModelTests: BaseXCTestCase {
                 // Additional Weather Info
                 XCTAssertTrue(weatherData?.uvIndex.contains("UV Index") ?? false)
                 XCTAssertTrue(weatherData?.observationTime.contains("Observed at") ?? false)
-                
-                expectation.fulfill()
-            }
-            .store(in: &cancellables)
-        
-        sut.fetchWeatherData()
-        wait(for: [expectation], timeout: 1.0)
-    }
-    
-    func testWeatherData_Forecast() {
-        // Given
-        let expectation = XCTestExpectation(description: "Forecast validation")
-        mockWeatherService.setMockResponse(.weather)
-        
-        // When
-        sut.$weatherData
-            .dropFirst()
-            .sink { weatherData in
-                // Then
-                XCTAssertNotNil(weatherData?.forecastDays)
-                XCTAssertFalse(weatherData?.forecastDays.isEmpty ?? false)
-                
-                if let firstForecastDay = weatherData?.forecastDays.first {
-                    // Forecast Day Info
-                    XCTAssertNotEqual(firstForecastDay.date, "Unknown")
-                    XCTAssertTrue(firstForecastDay.maxTemp.contains("°C"))
-                    XCTAssertTrue(firstForecastDay.minTemp.contains("°C"))
-                    XCTAssertTrue(firstForecastDay.avgTemp.contains("°C"))
-                    XCTAssertTrue(firstForecastDay.sunHours.contains("hours"))
-                    XCTAssertTrue(firstForecastDay.uvIndex.contains("UV Index"))
-                    
-                    // Astronomy Info
-                    XCTAssertNotEqual(firstForecastDay.sunrise, "Unknown")
-                    XCTAssertNotEqual(firstForecastDay.sunset, "Unknown")
-                    XCTAssertNotEqual(firstForecastDay.moonrise, "Unknown")
-                    XCTAssertNotEqual(firstForecastDay.moonset, "Unknown")
-                    XCTAssertNotEqual(firstForecastDay.moonPhase, "Unknown")
-                    XCTAssertTrue(firstForecastDay.moonIllumination.contains("%"))
-                    
-                    // Hourly Forecasts
-                    XCTAssertFalse(firstForecastDay.hourlyForecasts.isEmpty)
-                    if let firstHourlyForecast = firstForecastDay.hourlyForecasts.first {
-                        XCTAssertTrue(firstHourlyForecast.time.contains(":"))
-                        XCTAssertTrue(firstHourlyForecast.temperature.contains("°C"))
-                        XCTAssertNotEqual(firstHourlyForecast.weatherDesc, "Unknown")
-                        XCTAssertFalse(firstHourlyForecast.weatherIconURL.isEmpty)
-                        XCTAssertTrue(firstHourlyForecast.precipitation.contains("mm"))
-                        XCTAssertTrue(firstHourlyForecast.humidity.contains("%"))
-                        XCTAssertTrue(firstHourlyForecast.cloudCover.contains("%"))
-                        XCTAssertTrue(firstHourlyForecast.windSpeed.contains("km/h"))
-                        XCTAssertTrue(firstHourlyForecast.windDirection.contains("("))
-                        XCTAssertTrue(firstHourlyForecast.feelsLike.contains("°C"))
-                        XCTAssertTrue(firstHourlyForecast.chanceOfRain.contains("%"))
-                        XCTAssertTrue(firstHourlyForecast.chanceOfSnow.contains("%"))
-                        XCTAssertTrue(firstHourlyForecast.visibility.contains("km"))
-                        XCTAssertNotEqual(firstHourlyForecast.uvIndex, "Unknown")
-                    }
-                }
                 
                 expectation.fulfill()
             }

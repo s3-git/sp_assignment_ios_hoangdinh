@@ -1,64 +1,45 @@
 import Combine
 import Foundation
 
-/// Base protocol for all ViewModels in the application
 protocol BaseViewModelType: AnyObject {
-
-    /// The current state of the ViewModel
+    
     var state: ViewState { get }
-
-    /// Set of cancellables for managing subscriptions
+    
     var cancellables: Set<AnyCancellable> { get set }
-
-    /// Setup bindings for the view model
+    
     func setupBindings()
-
-    /// Handle errors in a consistent way
-    func handleError(_ error: Error)
+    
+    func handleError(_ error: NetworkError)
 }
 
-/// Base view model that provides common functionality for all view models
 class BaseViewModel: ObservableObject, BaseViewModelType {
     // MARK: - Published Properties
     @Published var state: ViewState
-
+    
     var cancellables = Set<AnyCancellable>()
-
-    // MARK: - Dependencies
-    private let errorHandler: ErrorHandlingServiceProtocol
-
+    
     // MARK: - Initialization
-    init(initialState: ViewState = .initial,
-         errorHandler: ErrorHandlingServiceProtocol = ErrorHandlingService()) {
+    init(initialState: ViewState = .initial) {
         self.state = initialState
-        self.errorHandler = errorHandler
         setupBindings()
     }
-
+    
     // MARK: - Public Methods
-    /// Setup bindings for the view model
     func setupBindings() {
         // Override in subclasses
     }
-
-    /// Handle errors in a consistent way
-    func handleError(_ error: Error) {
-        let errorMessage = errorHandler.handle(error)
-
+    
+    func handleError(_ error: NetworkError) {
+        
         // Update state with error and recovery suggestion
-        self.state = .error(errorMessage)
-
-        // Log error
-        errorHandler.logError(error)
-
+        self.state = .error(error.localizedDescription)
+        
     }
-
-    /// Cancel all subscriptions
+    
     func cancelAllSubscriptions() {
         cancellables.removeAll()
     }
-
-
+    
     // MARK: - Deinitialization
     deinit {
         cancelAllSubscriptions()
