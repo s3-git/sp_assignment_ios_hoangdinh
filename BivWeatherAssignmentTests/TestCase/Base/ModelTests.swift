@@ -3,6 +3,104 @@ import XCTest
 
 final class ModelTests: BaseXCTestCase {
     
+    // MARK: - WeatherModel Tests
+    func testWeatherModelDecoding() {
+        // Given
+        let jsonString = """
+        {
+            "data": {
+                "nearest_area": [{
+                    "areaName": [{"value": "London"}],
+                    "country": [{"value": "UK"}],
+                    "region": [{"value": "Greater London"}]
+                }],
+                "time_zone": [{"localtime": "2024-05-15 12:00"}],
+                "current_condition": [{
+                    "observation_time": "12:00 PM",
+                    "temp_C": "20",
+                    "temp_F": "68",
+                    "weatherIconUrl": [{"value": "http://example.com/icon.png"}],
+                    "weatherDesc": [{"value": "Sunny"}],
+                    "windspeedKmph": "10",
+                    "winddirDegree": "180",
+                    "winddir16Point": "S",
+                    "precipMM": "0",
+                    "humidity": "60",
+                    "visibility": "10",
+                    "pressure": "1013",
+                    "cloudcover": "20",
+                    "FeelsLikeC": "22",
+                    "FeelsLikeF": "72",
+                    "uvIndex": "5"
+                }]
+            }
+        }
+        """
+        let jsonData = jsonString.data(using: .utf8)!
+        
+        // When
+        let weatherModel = try? JSONDecoder().decode(WeatherModel.self, from: jsonData)
+        
+        // Then
+        XCTAssertNotNil(weatherModel)
+        XCTAssertNotNil(weatherModel?.data)
+        XCTAssertEqual(weatherModel?.data?.areaName, "London")
+        XCTAssertEqual(weatherModel?.data?.regionName, "Greater London")
+        XCTAssertEqual(weatherModel?.data?.countryName, "UK")
+        XCTAssertEqual(weatherModel?.data?.localTime, "2024-05-15 12:00")
+        XCTAssertEqual(weatherModel?.data?.weatherDesc, "Sunny")
+        XCTAssertEqual(weatherModel?.data?.imageURL, "http://example.com/icon.png")
+        XCTAssertEqual(weatherModel?.data?.temperature, "20°C, 68°F")
+        XCTAssertEqual(weatherModel?.data?.humidity, "60%")
+        XCTAssertEqual(weatherModel?.data?.feelsLike, "Feels like 22°C, 72°F")
+        XCTAssertEqual(weatherModel?.data?.windSpeed, "10 km/h")
+        XCTAssertEqual(weatherModel?.data?.windDirection, "S (180°)")
+        XCTAssertEqual(weatherModel?.data?.pressure, "1013 mb")
+        XCTAssertEqual(weatherModel?.data?.visibility, "10 km")
+        XCTAssertEqual(weatherModel?.data?.uvIndex, "UV Index: 5")
+        XCTAssertEqual(weatherModel?.data?.precipitation, "0 mm")
+        XCTAssertEqual(weatherModel?.data?.cloudCover, "20%")
+        XCTAssertEqual(weatherModel?.data?.observationTime, "Observed at: 12:00 PM")
+    }
+    
+    func testWeatherModelWithMissingData() {
+        // Given
+        let jsonString = """
+        {
+            "data": {
+                "nearest_area": [],
+                "time_zone": [],
+                "current_condition": []
+            }
+        }
+        """
+        let jsonData = jsonString.data(using: .utf8)!
+        
+        // When
+        let weatherModel = try? JSONDecoder().decode(WeatherModel.self, from: jsonData)
+        
+        // Then
+        XCTAssertNotNil(weatherModel)
+        XCTAssertNotNil(weatherModel?.data)
+        XCTAssertEqual(weatherModel?.data?.areaName, "Unknown Area")
+        XCTAssertEqual(weatherModel?.data?.regionName, "Unknown Region")
+        XCTAssertEqual(weatherModel?.data?.countryName, "Unknown Country")
+        XCTAssertEqual(weatherModel?.data?.localTime, "Unknown TimeZone")
+        XCTAssertEqual(weatherModel?.data?.weatherDesc, "Unknown Weather")
+        XCTAssertEqual(weatherModel?.data?.imageURL, "")
+        XCTAssertEqual(weatherModel?.data?.temperature, "Unknown°C, Unknown°F")
+        XCTAssertEqual(weatherModel?.data?.humidity, "Unknown%")
+        XCTAssertEqual(weatherModel?.data?.feelsLike, "Feels like Unknown°C, Unknown°F")
+        XCTAssertEqual(weatherModel?.data?.windSpeed, "Unknown km/h")
+        XCTAssertEqual(weatherModel?.data?.windDirection, "Unknown (Unknown°)")
+        XCTAssertEqual(weatherModel?.data?.pressure, "Unknown mb")
+        XCTAssertEqual(weatherModel?.data?.visibility, "Unknown km")
+        XCTAssertEqual(weatherModel?.data?.uvIndex, "UV Index: Unknown")
+        XCTAssertEqual(weatherModel?.data?.precipitation, "Unknown mm")
+        XCTAssertEqual(weatherModel?.data?.cloudCover, "Unknown%")
+        XCTAssertEqual(weatherModel?.data?.observationTime, "Observed at: Unknown")
+    }
+    
     // MARK: - WeatherData Tests
     func testWeatherDataDecoding() {
         // Given
@@ -246,4 +344,5 @@ final class ModelTests: BaseXCTestCase {
 //        XCTAssertEqual(decodedData?.request?.first?.query, "São Paulo")
 //        XCTAssertEqual(decodedData?.nearestArea?.first?.areaName?.first?.value, "São Paulo")
 //    }
+
 } 

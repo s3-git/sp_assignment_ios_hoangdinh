@@ -85,14 +85,9 @@ final class HomeViewModel: BaseViewModel {
                 self?.state = .loading
             })
             .flatMap { [weak self] query -> AnyPublisher<[SearchResult]?, NetworkError> in
-                guard let self = self else {
-                    return Just([])
-                        .setFailureType(to: NetworkError.self)
-                        .eraseToAnyPublisher()
-                }
                 
                 // Return empty results for empty query or query shorter than minimum length
-                guard !query.isEmpty, query.count >= AppConstants.Validation.minSearchLength else {
+                guard let self = self,!query.isEmpty, query.count >= AppConstants.Validation.minSearchLength else {
                     return Just([])
                         .setFailureType(to: NetworkError.self)
                         .eraseToAnyPublisher()
@@ -105,13 +100,8 @@ final class HomeViewModel: BaseViewModel {
             .sink(
                 weak: self,
                 receiveValue: { [weak self] _, cities in
-                    guard let cities = cities else {
-                        self?.state = .empty
-                        self?.cities = []
-                        return
-                    }
-                    self?.state = cities.isEmpty ? .empty : .success
-                    self?.cities = cities
+                    self?.state = (cities?.isEmpty ?? true) ? .empty : .success
+                    self?.cities = cities ?? []
                 },
                 receiveCompletion: { [weak self] _, completion in
                     if case .failure(let error) = completion {

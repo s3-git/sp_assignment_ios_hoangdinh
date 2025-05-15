@@ -109,6 +109,8 @@
 		73EBE37E2DD5E6DD008987FF /* NetworkError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73EBE37D2DD5E6DD008987FF /* NetworkError.swift */; };
 		73EBE37F2DD5E6DD008987FF /* NetworkError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73EBE37D2DD5E6DD008987FF /* NetworkError.swift */; };
 		73EBE3802DD5E6DD008987FF /* NetworkError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73EBE37D2DD5E6DD008987FF /* NetworkError.swift */; };
+		73EBE3962DD60265008987FF /* IntExtensionsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73EBE3952DD60260008987FF /* IntExtensionsTests.swift */; };
+		73EBE3992DD60C54008987FF /* CacheManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73EBE3972DD60C53008987FF /* CacheManagerTests.swift */; };
 		73F671E32DD34EE400F32DD5 /* AppCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7328A0082DD1F07A000E5622 /* AppCoordinator.swift */; };
 		73F671E42DD34EE400F32DD5 /* AppCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7328A0082DD1F07A000E5622 /* AppCoordinator.swift */; };
 		73F671E52DD34EF500F32DD5 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73289E312DCDD625000E5622 /* AppDelegate.swift */; };
@@ -203,6 +205,8 @@
 		73E20D7B2DD5C0E30056E405 /* getWeatherMockJsonResponse.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = getWeatherMockJsonResponse.json; sourceTree = "<group>"; };
 		73EBE3792DD5DCC2008987FF /* Int+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Int+Extensions.swift"; sourceTree = "<group>"; };
 		73EBE37D2DD5E6DD008987FF /* NetworkError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkError.swift; sourceTree = "<group>"; };
+		73EBE3952DD60260008987FF /* IntExtensionsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntExtensionsTests.swift; sourceTree = "<group>"; };
+		73EBE3972DD60C53008987FF /* CacheManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CacheManagerTests.swift; sourceTree = "<group>"; };
 		73FB207F2DD4653100845FD8 /* Toast.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Toast.swift; sourceTree = "<group>"; };
 		73FB20832DD46ED500845FD8 /* EmptyStateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmptyStateView.swift; sourceTree = "<group>"; };
 		73FB208B2DD46EFC00845FD8 /* LoadingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadingView.swift; sourceTree = "<group>"; };
@@ -544,6 +548,14 @@
 			path = Data;
 			sourceTree = "<group>";
 		};
+		73EBE3982DD60C53008987FF /* Storage */ = {
+			isa = PBXGroup;
+			children = (
+				73EBE3972DD60C53008987FF /* CacheManagerTests.swift */,
+			);
+			path = Storage;
+			sourceTree = "<group>";
+		};
 		73FB20952DD47B8C00845FD8 /* Base */ = {
 			isa = PBXGroup;
 			children = (
@@ -639,6 +651,7 @@
 			children = (
 				73FB20C02DD4AF7F00845FD8 /* Extensions */,
 				73FB20A22DD47B8C00845FD8 /* Base */,
+				73EBE3982DD60C53008987FF /* Storage */,
 				73FB20A52DD47B8C00845FD8 /* Network */,
 				73FB20A82DD47B8C00845FD8 /* Services */,
 				73FB20AB2DD47B8C00845FD8 /* ViewModels */,
@@ -649,6 +662,7 @@
 		73FB20C02DD4AF7F00845FD8 /* Extensions */ = {
 			isa = PBXGroup;
 			children = (
+				73EBE3952DD60260008987FF /* IntExtensionsTests.swift */,
 				73FB20BF2DD4AF7F00845FD8 /* CombineExtensionsTests.swift */,
 			);
 			path = Extensions;
@@ -843,6 +857,7 @@
 			files = (
 				73289FA62DCE14E1000E5622 /* AppConstants.swift in Sources */,
 				73F671E32DD34EE400F32DD5 /* AppCoordinator.swift in Sources */,
+				73EBE3962DD60265008987FF /* IntExtensionsTests.swift in Sources */,
 				73F671E52DD34EF500F32DD5 /* AppDelegate.swift in Sources */,
 				7328A0062DD1E918000E5622 /* CityView.swift in Sources */,
 				73FB20862DD46ED500845FD8 /* EmptyStateView.swift in Sources */,
@@ -876,6 +891,7 @@
 				73289FF42DD1B30D000E5622 /* SearchModel.swift in Sources */,
 				73289FB02DCE14E1000E5622 /* CacheManager.swift in Sources */,
 				73FB20C12DD4AF7F00845FD8 /* CombineExtensionsTests.swift in Sources */,
+				73EBE3992DD60C54008987FF /* CacheManagerTests.swift in Sources */,
 				73289FB12DCE14E1000E5622 /* KeyboardManager.swift in Sources */,
 				73289FB22DCE14E1000E5622 /* Combine+Extensions.swift in Sources */,
 				73289FB42DCE14E1000E5622 /* NetworkManager.swift in Sources */,

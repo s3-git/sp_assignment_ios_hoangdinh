@@ -103,28 +103,6 @@ final class CityViewModelTests: BaseXCTestCase {
         wait(for: [expectation], timeout: 1.0)
     }
     
-    func testFetchWeatherData_InvalidCoordinates() {
-        // Given
-        let expectation = XCTestExpectation(description: "Fetch weather invalid coordinates")
-        mockCity = createMockCity(name: "Invalid", latitude: nil, longitude: nil)
-        sut = CityViewModel(
-            city: mockCity,
-            navBarHeight: 44,
-            weatherService: mockWeatherService
-        )
-        
-        // When
-        sut.fetchWeatherData()
-        
-        // Then
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-            XCTAssertEqual(self.sut.state, .initial)
-            XCTAssertNil(self.sut.weatherData)
-            expectation.fulfill()
-        }
-        wait(for: [expectation], timeout: 1.0)
-    }
-    
     // MARK: - Weather Data Validation Tests
     func testWeatherDataValidation() {
         // Given

@@ -15,7 +15,7 @@ final class RecentCitiesServiceImpl: RecentCitiesServiceProtocol {
     func addRecentCity(_ city: SearchResult) {
         var recentCities = getRecentCities()
 
-        recentCities.removeAll { $0.areaName?.first?.value == city.areaName?.first?.value }
+        recentCities.removeAll { $0 == city }
 
         recentCities.insert(city, at: 0)
 
@@ -42,7 +42,7 @@ final class RecentCitiesServiceImpl: RecentCitiesServiceProtocol {
         var recentCities = getRecentCities()
         
         // Remove the city if it exists
-        recentCities.removeAll { $0.areaName?.first?.value == city.areaName?.first?.value }
+        recentCities.removeAll { $0 == city }
         
         // Save updated list
         save(recentCities)

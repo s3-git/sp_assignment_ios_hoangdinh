@@ -18,7 +18,7 @@ final class MockWeatherService: WeatherServiceProtocol, MockProtocol {
         lastSearchQuery = query
         
         return mockNetworkManager.request(WeatherRouter.searchCity(query: query))
-            .compactMap { (response: SearchModel) in
+            .map { (response: SearchModel) in
                 response.searchAPI?.result?.compactMap({ $0 })
             }
             .eraseToAnyPublisher()
@@ -28,7 +28,7 @@ final class MockWeatherService: WeatherServiceProtocol, MockProtocol {
         forceRefreshCalled = forceRefresh
         
         return mockNetworkManager.request(WeatherRouter.getWeather(query: query, forceRefresh: forceRefresh))
-            .compactMap { (response: WeatherModel) in
+            .map { (response: WeatherModel) in
                 response.data
             }
             .eraseToAnyPublisher()
