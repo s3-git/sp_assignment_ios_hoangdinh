@@ -21,7 +21,7 @@ struct CityView: View {
                     })
                 case .success:
                     if let weatherData = viewModel.weatherData {
-                        WeatherContentView(weatherData: weatherData, onRefresh: {
+                        WeatherContentView(city: viewModel.city, weatherData: weatherData, onRefresh: {
                             viewModel.fetchWeatherData(forceRefresh: true)
                         }).padding(.top, viewModel.navBarHeight)
                     } else {
@@ -53,12 +53,15 @@ struct CityView: View {
 
 struct WeatherContentView: View {
     // MARK: - Properties
+    private let city: SearchResult
     private let weatherData: WeatherData
     @State private var isRefreshing = false
     var onRefresh: () -> Void
     
     // MARK: - Initialization
-    init(weatherData: WeatherData, onRefresh: @escaping () -> Void) {
+
+    init(city: SearchResult, weatherData: WeatherData, onRefresh: @escaping () -> Void) {
+        self.city = city
         self.weatherData = weatherData
         self.onRefresh = onRefresh
     }
@@ -101,13 +104,13 @@ struct WeatherContentView: View {
                     .font(.system(size: 20))
                     .foregroundStyle(ThemeManager.Color.textColor.toColor)
                 
-                Text(weatherData.areaName)
+                Text(city.areaName?.first?.value ?? weatherData.areaName)
                     .foregroundStyle(ThemeManager.Color.textColor.toColor)
                     .font(Font(ThemeManager.Fonts.title))
                     .fontWeight(.bold)
             }
             
-            Text("\(weatherData.regionName) • \(weatherData.countryName)")
+            Text("\(city.region?.first?.value ?? weatherData.regionName) • \(city.country?.first?.value ?? weatherData.countryName)")
                 .font(Font(ThemeManager.Fonts.caption))
                 .foregroundStyle(ThemeManager.Color.textColor.toColor.opacity(0.7))
             
