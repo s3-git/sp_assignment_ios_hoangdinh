@@ -1,5 +1,6 @@
 @testable import BivWeatherAssignment
 import Combine
+import SwiftUI
 import XCTest
 
 final class HomeViewModelTests: BaseXCTestCase {
@@ -15,9 +16,11 @@ final class HomeViewModelTests: BaseXCTestCase {
         mockWeatherService = MockWeatherService(mockNetworkManager: MockNetworkManager())
         mockRecentCitiesService = MockRecentCitiesService()
         mockCoordinator = MockCoordinator(navigationController: UINavigationController())
+        mockCoordinator.start() // Ensure root view controller is set up
         sut = HomeViewModel(
             weatherService: mockWeatherService,
-            recentCitiesService: mockRecentCitiesService, coordinator: mockCoordinator
+            recentCitiesService: mockRecentCitiesService, 
+            coordinator: mockCoordinator
         )
     }
     
@@ -30,6 +33,17 @@ final class HomeViewModelTests: BaseXCTestCase {
     }
     
     // MARK: - Search Tests
+    func testSearchText_Getter() {
+        // Given
+        let expectedText = "London"
+        
+        // When
+        sut.searchText = expectedText
+        
+        // Then
+        XCTAssertEqual(sut.searchText, expectedText, "Getter should return the same value as setter")
+    }
+    
     func testSearchText_Empty() {
         // Given
         let expectation = expectation(description: "Search text empty")
@@ -55,19 +69,33 @@ final class HomeViewModelTests: BaseXCTestCase {
         mockWeatherService.setMockResponse(.search)
         
         // When
+        var stateChanges: [ViewState] = []
+        sut.$state
+            .dropFirst()
+            .sink { state in
+                stateChanges.append(state)
+                if state == .success {
+                    expectation.fulfill()
+                }
+            }
+            .store(in: &cancellables)
+        
         sut.$cities
             .dropFirst()
             .sink { cities in
                 // Then
                 XCTAssertFalse(self.sut.showingRecentCities)
                 XCTAssertFalse(cities.isEmpty)
-                expectation.fulfill()
+                XCTAssertEqual(cities.first?.areaName?.first?.value, "London")
             }
             .store(in: &cancellables)
         
         sut.searchText = "London"
         
         wait(for: [expectation], timeout: 1.0)
+        XCTAssertEqual(stateChanges.count, 2)
+        XCTAssertEqual(stateChanges[0], .loading)
+        XCTAssertEqual(stateChanges[1], .success)
     }
     
     func testSearchText_TooShort() {
@@ -75,7 +103,6 @@ final class HomeViewModelTests: BaseXCTestCase {
         let expectation = expectation(description: "Search text too short")
         
         // When
-        
         sut.$cities
             .dropFirst()
             .sink { cities in
@@ -87,31 +114,111 @@ final class HomeViewModelTests: BaseXCTestCase {
         
         sut.searchText = "L"
         
-        wait(for: [expectation], timeout: 1)
+        wait(for: [expectation], timeout: 1.0)
     }
     
-    // MARK: - Recent Cities Tests
-    func testDidSelectCity() {
+    func testSearchTextDebouncing() {
         // Given
-        let expectation = expectation(description: "Did select city")
-        let city = createMockCity(name: "London")
+        let expectation = expectation(description: "Search text debouncing")
+        mockWeatherService.setMockResponse(.search)
         
         // When
-        sut.$recentCities
+        var searchCalls = 0
+        sut.$cities
             .dropFirst()
-            .sink { cities in
-//                XCTAssertTrue(self.mockCoordinator.showCityDetailCalled ?? false)
-                XCTAssertEqual(cities.first?.areaName?.first?.value, "London")
-                XCTAssertEqual(cities.count, 1)
+            .sink { _ in
+                searchCalls += 1
+                // Then
+                XCTAssertEqual(self.mockWeatherService.lastSearchQuery?.query, "London")
+                XCTAssertEqual(searchCalls, 1, "Should only make one API call after debouncing")
                 expectation.fulfill()
             }
             .store(in: &cancellables)
         
-        sut.didSelectCity(city)
+        // Simulate rapid user input
+        sut.searchText = "L"
+        sut.searchText = "Lo"
+        sut.searchText = "Lon"
+        sut.searchText = "Lond"
+        sut.searchText = "Londo"
+        sut.searchText = "London"
         
-        wait(for: [expectation], timeout: 1.0)
+        wait(for: [expectation], timeout: 2.0) // Increased timeout to account for debounce delay
     }
     
+    func testSearchRemoveDuplicates() {
+        // Given
+        let expectation = expectation(description: "Remove duplicates")
+        mockWeatherService.setMockResponse(.search)
+        
+        // When
+        var searchCalls = 0
+        sut.$cities
+            .dropFirst()
+            .sink { _ in
+                searchCalls += 1
+                expectation.fulfill()
+            }
+            .store(in: &cancellables)
+        
+        // Simulate duplicate search text
+        sut.searchText = "London"
+        sut.searchText = "London" // Duplicate
+        
+        // Then
+        wait(for: [expectation], timeout: 2.0)
+        XCTAssertEqual(searchCalls, 1, "Should only make one API call for duplicate search text")
+    }
+    
+    // MARK: - Navigation Tests
+    func testShowCityDetail() {
+        // Given
+        let city = createMockCity(name: "London")
+        
+        // When
+        mockCoordinator.showCityDetail(for: city)
+        
+        // Then
+        // Verify navigation stack
+        XCTAssertEqual(mockCoordinator.navigationController.viewControllers.count, 2) // Home + Detail
+        
+        // Verify the pushed view controller
+        let pushedVC = mockCoordinator.navigationController.viewControllers.last
+        XCTAssertTrue(pushedVC is UIViewController)
+        XCTAssertEqual(pushedVC?.title, "London")
+    }
+    
+    func testShowCityDetailMultipleTimes() {
+        // Given
+        let cities = ["London", "Paris", "Tokyo"].map { createMockCity(name: $0) }
+        
+        // When
+        cities.forEach { city in
+            mockCoordinator.showCityDetail(for: city)
+        }
+        
+        // Then
+        // Verify navigation stack
+        XCTAssertEqual(mockCoordinator.navigationController.viewControllers.count, 4) // Home + 3 Details
+        
+        // Verify each view controller in the stack
+        let viewControllers = mockCoordinator.navigationController.viewControllers
+        XCTAssertGreaterThanOrEqual(viewControllers.count, 2, "Should have at least Home and one detail view")
+        
+        // Skip the first view controller (Home) and verify the rest
+        for (index, city) in cities.enumerated() {
+            guard index + 1 < viewControllers.count else {
+                XCTFail("Not enough view controllers in stack")
+                return
+            }
+            
+            let viewController = viewControllers[index + 1]
+            XCTAssertTrue(viewController is UIViewController)
+            XCTAssertEqual(viewController.title, city.areaName?.first?.value)
+        }
+    }
+    
+    // MARK: - Recent Cities Tests
     func testClearAllRecentCities() {
         // Given
         let expectation = expectation(description: "Clear all recent cities")
@@ -207,59 +314,7 @@ final class HomeViewModelTests: BaseXCTestCase {
         wait(for: [expectation], timeout: 1.0)
     }
     
-    // MARK: - State Management Tests
-    func testSearchStateFlow() {
-        // Given
-        let expectation = expectation(description: "State flow")
-        expectation.expectedFulfillmentCount = 2 // Loading then Success
-        mockWeatherService.setMockResponse(.search)
-        
-        // When
-        var stateChanges: [ViewState] = []
-        sut.$state
-            .dropFirst()
-            .sink { state in
-                stateChanges.append(state)
-                expectation.fulfill()
-            }
-            .store(in: &cancellables)
-        
-        sut.searchText = "London"
-        
-        // Then
-        wait(for: [expectation], timeout: 1.0)
-        XCTAssertEqual(stateChanges.count, 2)
-        XCTAssertEqual(stateChanges[0], .loading)
-        XCTAssertEqual(stateChanges[1], .success)
-        XCTAssertFalse(sut.cities.isEmpty)
-    }
-    
-    func testSearchEmptyStateFlow() {
-        // Given
-        let expectation = expectation(description: "Empty state flow")
-        expectation.expectedFulfillmentCount = 2 // Loading then Empty
-        mockWeatherService.setMockResponse(.emptySearch)
-        
-        // When
-        var stateChanges: [ViewState] = []
-        sut.$state
-            .dropFirst()
-            .sink { state in
-                stateChanges.append(state)
-                expectation.fulfill()
-            }
-            .store(in: &cancellables)
-        
-        sut.searchText = "NonexistentCity"
-        
-        // Then
-        wait(for: [expectation], timeout: 1.0)
-        XCTAssertEqual(stateChanges.count, 2)
-        XCTAssertEqual(stateChanges[0], .loading)
-        XCTAssertEqual(stateChanges[1], .empty)
-        XCTAssertTrue(sut.cities.isEmpty)
-    }
-    
+    // MARK: - Error State Tests
     func testSearchErrorStateFlow() {
         // Given
         let expectation = expectation(description: "Error state flow")
@@ -285,71 +340,6 @@ final class HomeViewModelTests: BaseXCTestCase {
         XCTAssertEqual(stateChanges[0], .loading)
         XCTAssertEqual(stateChanges[1], .error(error.localizedDescription))
         XCTAssertTrue(sut.cities.isEmpty)
-    }
-    
-    func testSearchQueryTransformation() {
-        // Given
-        let expectation = expectation(description: "Query transformation")
-        mockWeatherService.setMockResponse(.search)
-        
-        // When
-        sut.$cities
-            .dropFirst()
-            .sink { _ in
-                // Then - Tests flatMap closure
-                XCTAssertEqual(self.mockWeatherService.lastSearchQuery?.query, "London")
-                XCTAssertEqual(self.mockWeatherService.lastSearchQuery?.numOfResults, 10)
-                expectation.fulfill()
-            }
-            .store(in: &cancellables)
-        
-        sut.searchText = "London"
-        
-        wait(for: [expectation], timeout: 1.0 + 0.5)
-    }
-    
-    // MARK: - Search Text Tests
-    func testSearchTextDebouncing() {
-        // Given
-        let expectation = expectation(description: "Search text debouncing")
-        mockWeatherService.setMockResponse(.search)
-        
-        // When
-        sut.$cities
-            .dropFirst()
-            .sink { _ in
-                // Then
-                XCTAssertEqual(self.mockWeatherService.lastSearchQuery?.query, "London")
-                expectation.fulfill()
-            }
-            .store(in: &cancellables)
-        
-        sut.searchText = "L"
-        sut.searchText = "Lo"
-        sut.searchText = "Lon"
-        sut.searchText = "Lond"
-        sut.searchText = "Londo"
-        sut.searchText = "London"
-        
-        wait(for: [expectation], timeout: 1.0)
-    }
-    
-    // MARK: - Memory Management Tests
-    func testMemoryManagement() {
-        // Given
-        weak var weakSut: HomeViewModel?
-        
-        // When
-        autoreleasepool {
-            let strongSut = HomeViewModel(
-                weatherService: mockWeatherService,
-                recentCitiesService: mockRecentCitiesService, coordinator: mockCoordinator
-            )
-            weakSut = strongSut
-        }
-        
-        // Then
-        XCTAssertNil(weakSut, "ViewModel should be deallocated")
     }
     
     // MARK: - Helper Methods

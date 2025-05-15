@@ -21,7 +21,7 @@ struct WeatherRequestParameters {
 
     func toQueryItems() -> [URLQueryItem] {
         var items: [URLQueryItem] = [
-            .init(name: "q", value: query.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? query),
+            .init(name: "q", value: query),
             .init(name: "num_of_days", value: "\(numOfDays)"),
             .init(name: "showlocaltime", value: showLocalTime ? "yes" : "no"),
             .init(name: "includelocation", value: includeLocation ? "yes" : "no")

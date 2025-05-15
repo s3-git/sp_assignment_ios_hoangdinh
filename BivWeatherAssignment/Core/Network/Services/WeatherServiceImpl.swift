@@ -6,10 +6,10 @@ import Foundation
 
 final class WeatherServiceImpl: WeatherServiceProtocol {
     // MARK: - Properties
-    private let networkManager: NetworkManager
+    private let networkManager: NetworkManagerProtocol
 
     // MARK: - Initialization
-    init(networkManager: NetworkManager = NetworkManager()) {
+    init(networkManager: NetworkManagerProtocol = NetworkManager()) {
         self.networkManager = networkManager
     }
 

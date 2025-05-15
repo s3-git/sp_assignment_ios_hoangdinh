@@ -2,8 +2,6 @@
 import XCTest
 
 final class ModelTests: BaseXCTestCase {
-    // MARK: - Properties
-    private let networkHelper = NetworkTestHelper.shared
     
     // MARK: - WeatherData Tests
     func testWeatherDataDecoding() {
@@ -16,7 +14,7 @@ final class ModelTests: BaseXCTestCase {
         // Then
         XCTAssertNotNil(weatherModel)
         XCTAssertNotNil(weatherModel?.data)
-        XCTAssertEqual(weatherModel?.data?.request?.first?.query, "London")
+        XCTAssertEqual(weatherModel?.data?.request?.first?.query, "Lat 51.52 and Lon -0.11")
         XCTAssertEqual(weatherModel?.data?.nearestArea?.first?.areaName?.first?.value, "London")
     }
     
@@ -125,6 +123,80 @@ final class ModelTests: BaseXCTestCase {
         XCTAssertEqual(queryItems.first?.value, "London")
         XCTAssertEqual(queryItems.last?.name, "num_of_results")
         XCTAssertEqual(queryItems.last?.value, "10")
+    }
+    
+    func testWeatherSearchRequestParametersWithoutNumOfResults() {
+        // Given
+        let parameters = WeatherSearchRequestParameters(query: "Paris", numOfResults: nil)
+        
+        // When
+        let queryItems = parameters.toQueryItems()
+        
+        // Then
+        XCTAssertEqual(queryItems.count, 1)
+        XCTAssertEqual(queryItems.first?.name, "q")
+        XCTAssertEqual(queryItems.first?.value, "Paris")
+    }
+    
+    func testWeatherSearchRequestParametersWithSpecialCharacters() {
+        // Given
+        let queryName = "São Paulo, SP"
+        let parameters = WeatherSearchRequestParameters(query: "São Paulo, SP", numOfResults: 5)
+        
+        // When
+        let queryItems = parameters.toQueryItems()
+        
+        // Then
+        XCTAssertEqual(queryItems.count, 2)
+        XCTAssertEqual(queryItems.first?.name, "q")
+        XCTAssertEqual(queryItems.first?.value, queryName)
+        XCTAssertEqual(queryItems.last?.name, "num_of_results")
+        XCTAssertEqual(queryItems.last?.value, "5")
+    }
+    
+    func testWeatherSearchRequestParametersWithEmptyQuery() {
+        // Given
+        let parameters = WeatherSearchRequestParameters(query: "", numOfResults: 10)
+        
+        // When
+        let queryItems = parameters.toQueryItems()
+        
+        // Then
+        XCTAssertEqual(queryItems.count, 2)
+        XCTAssertEqual(queryItems.first?.name, "q")
+        XCTAssertEqual(queryItems.first?.value, "")
+        XCTAssertEqual(queryItems.last?.name, "num_of_results")
+        XCTAssertEqual(queryItems.last?.value, "10")
+    }
+    
+    func testWeatherSearchRequestParametersWithCoordinates() {
+        // Given
+        let coordinates = "51.5074,-0.1278"
+        let parameters = WeatherSearchRequestParameters(query: coordinates, numOfResults: nil)
+        
+        // When
+        let queryItems = parameters.toQueryItems()
+        
+        // Then
+        XCTAssertEqual(queryItems.count, 1)
+        XCTAssertEqual(queryItems.first?.name, "q")
+        XCTAssertEqual(queryItems.first?.value, coordinates)
+    }
+    
+    func testWeatherSearchRequestParametersWithSpaces() {
+        // Given
+        let cityName = "New York City"
+        let parameters = WeatherSearchRequestParameters(query: cityName, numOfResults: 3)
+        
+        // When
+        let queryItems = parameters.toQueryItems()
+        
+        // Then
+        XCTAssertEqual(queryItems.count, 2)
+        XCTAssertEqual(queryItems.first?.name, "q")
+        XCTAssertEqual(queryItems.first?.value, cityName)
+        XCTAssertEqual(queryItems.last?.name, "num_of_results")
+        XCTAssertEqual(queryItems.last?.value, "3")
     }
     
     // MARK: - Edge Cases Tests

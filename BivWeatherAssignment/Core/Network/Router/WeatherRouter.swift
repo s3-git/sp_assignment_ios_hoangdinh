@@ -61,7 +61,7 @@ enum WeatherRouter: Endpoint {
     // MARK: - URL Construction
     func asURL() -> URL? {
         var components = URLComponents(string: Environment.shared.baseURL + path)
-        components?.percentEncodedQueryItems = queryItems
+        components?.queryItems = queryItems
         return components?.url
     }
 }

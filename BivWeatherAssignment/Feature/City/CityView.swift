@@ -96,6 +96,7 @@ struct WeatherContentView: View {
             try? await Task.sleep(nanoseconds: 500_000_000) // 0.5 seconds
             isRefreshing = false
         }
+        .accessibilityIdentifier("weatherDetails")
     }
     
     // MARK: - Location and Weather View

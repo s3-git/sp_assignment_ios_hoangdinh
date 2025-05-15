@@ -1,0 +1,81 @@
+{
+    "search_api": {
+        "result": [
+            {
+                "areaName": [
+                    {
+                        "value": "London"
+                    }
+                ],
+                "country": [
+                    {
+                        "value": "United Kingdom"
+                    }
+                ],
+                "region": [
+                    {
+                        "value": "City of London, Greater London"
+                    }
+                ],
+                "latitude": "51.517",
+                "longitude": "-0.106",
+                "population": "7421228",
+                "weatherUrl": [
+                    {
+                        "value": "https://www.worldweatheronline.com/v2/weather.aspx?q=51.5171,-0.1062"
+                    }
+                ]
+            },
+            {
+                "areaName": [
+                    {
+                        "value": "London"
+                    }
+                ],
+                "country": [
+                    {
+                        "value": "Canada"
+                    }
+                ],
+                "region": [
+                    {
+                        "value": "Ontario"
+                    }
+                ],
+                "latitude": "42.983",
+                "longitude": "-81.250",
+                "population": "346765",
+                "weatherUrl": [
+                    {
+                        "value": "https://www.worldweatheronline.com/v2/weather.aspx?q=42.9833,-81.25"
+                    }
+                ]
+            },
+            {
+                "areaName": [
+                    {
+                        "value": "Londonderry"
+                    }
+                ],
+                "country": [
+                    {
+                        "value": "United States of America"
+                    }
+                ],
+                "region": [
+                    {
+                        "value": "New Hampshire"
+                    }
+                ],
+                "latitude": "42.865",
+                "longitude": "-71.374",
+                "population": "24474",
+                "weatherUrl": [
+                    {
+                        "value": "https://www.worldweatheronline.com/v2/weather.aspx?q=42.865,-71.3744"
+                    }
+                ]
+            }
+        ]
+    }
+}

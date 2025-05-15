@@ -5,6 +5,7 @@ final class RecentCitiesServiceTests: XCTestCase {
     // MARK: - Properties
     private var sut: RecentCitiesServiceProtocol!
     private var mockUserDefaults: UserDefaults!
+    private let recentCitiesKey = "recentCities"
     
     // MARK: - Test Setup
     override func setUp() {
@@ -12,7 +13,7 @@ final class RecentCitiesServiceTests: XCTestCase {
         // Create a new suite name for testing to avoid affecting real UserDefaults
         mockUserDefaults = UserDefaults(suiteName: #file)
         mockUserDefaults.removePersistentDomain(forName: #file)
-        sut = MockRecentCitiesService()
+        sut = RecentCitiesServiceImpl(userDefaults: mockUserDefaults)
     }
     
     override func tearDown() {
@@ -23,6 +24,46 @@ final class RecentCitiesServiceTests: XCTestCase {
     }
     
     // MARK: - Test Cases
+    
+    // MARK: - getRecentCities Tests
+    
+    func testGetRecentCities_ShouldReturnEmptyArrayWhenNoData() {
+        // When
+        let recentCities = sut.getRecentCities()
+        
+        // Then
+        XCTAssertTrue(recentCities.isEmpty)
+    }
+    
+    func testGetRecentCities_ShouldReturnEmptyArrayWhenInvalidData() {
+        // Given
+        mockUserDefaults.set("invalid data".data(using: .utf8)!, forKey: recentCitiesKey)
+        
+        // When
+        let recentCities = sut.getRecentCities()
+        
+        // Then
+        XCTAssertTrue(recentCities.isEmpty)
+    }
+    
+    func testGetRecentCities_ShouldReturnSavedCities() {
+        // Given
+        let cities = [
+            createMockCity(name: "London"),
+            createMockCity(name: "Paris")
+        ]
+        saveCities(cities)
+        
+        // When
+        let recentCities = sut.getRecentCities()
+        
+        // Then
+        XCTAssertEqual(recentCities.count, 2)
+        XCTAssertEqual(recentCities[0].areaName?.first?.value, "London")
+        XCTAssertEqual(recentCities[1].areaName?.first?.value, "Paris")
+    }
+    
+    // MARK: - addRecentCity Tests
     
     func testAddRecentCity_ShouldAddCityToTopOfList() {
         // Given
@@ -53,6 +94,7 @@ final class RecentCitiesServiceTests: XCTestCase {
         // Then
         let recentCities = sut.getRecentCities()
         XCTAssertEqual(recentCities.count, maxCities)
+        XCTAssertEqual(recentCities.first?.areaName?.first?.value, "City\(maxCities + 4)")
     }
     
     func testAddRecentCity_ShouldRemoveDuplicate() {
@@ -66,7 +108,58 @@ final class RecentCitiesServiceTests: XCTestCase {
         // Then
         let recentCities = sut.getRecentCities()
         XCTAssertEqual(recentCities.count, 1)
+        XCTAssertEqual(recentCities.first?.areaName?.first?.value, "London")
     }
+    
+    
+    // MARK: - removeRecentCity Tests
+    
+    func testRemoveRecentCity_ShouldRemoveSpecificCity() {
+        // Given
+        let city1 = createMockCity(name: "London")
+        let city2 = createMockCity(name: "Paris")
+        sut.addRecentCity(city1)
+        sut.addRecentCity(city2)
+        
+        // When
+        sut.removeRecentCity(city1)
+        
+        // Then
+        let recentCities = sut.getRecentCities()
+        XCTAssertEqual(recentCities.count, 1)
+        XCTAssertEqual(recentCities.first?.areaName?.first?.value, "Paris")
+    }
+    
+    func testRemoveRecentCity_ShouldDoNothingWhenCityNotExists() {
+        // Given
+        let city1 = createMockCity(name: "London")
+        let city2 = createMockCity(name: "Paris")
+        sut.addRecentCity(city1)
+        
+        // When
+        sut.removeRecentCity(city2)
+        
+        // Then
+        let recentCities = sut.getRecentCities()
+        XCTAssertEqual(recentCities.count, 1)
+        XCTAssertEqual(recentCities.first?.areaName?.first?.value, "London")
+    }
+    
+    func testRemoveRecentCity_ShouldHandleEncodingError() {
+        // Given
+        let city = createMockCity(name: "London")
+        sut.addRecentCity(city)
+        mockUserDefaults.set("invalid data".data(using: .utf8)!, forKey: recentCitiesKey)
+        
+        // When
+        sut.removeRecentCity(city)
+        
+        // Then
+        let recentCities = sut.getRecentCities()
+        XCTAssertTrue(recentCities.isEmpty)
+    }
+    
+    // MARK: - clearRecentCities Tests
     
     func testClearRecentCities_ShouldRemoveAllCities() {
         // Given
@@ -75,6 +168,15 @@ final class RecentCitiesServiceTests: XCTestCase {
         sut.addRecentCity(city1)
         sut.addRecentCity(city2)
         
+        // When
+        sut.clearRecentCities()
+        
+        // Then
+        let recentCities = sut.getRecentCities()
+        XCTAssertTrue(recentCities.isEmpty)
+    }
+    
+    func testClearRecentCities_ShouldDoNothingWhenNoCities() {
         // When
         sut.clearRecentCities()
         
@@ -95,4 +197,9 @@ final class RecentCitiesServiceTests: XCTestCase {
             weatherURL: [AreaName(value: "http://example.com")]
         )
     }
-}
+    
+    private func saveCities(_ cities: [SearchResult]) {
+        guard let data = try? JSONEncoder().encode(cities) else { return }
+        mockUserDefaults.set(data, forKey: recentCitiesKey)
+    }
+} 

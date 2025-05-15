@@ -175,7 +175,11 @@ enum StorageError: Error {
     }
 }
 
-enum AppError: LocalizedError {
+enum AppError: LocalizedError,Equatable {
+    static func == (lhs: AppError, rhs: AppError) -> Bool {
+        return lhs.errorDescription == rhs.errorDescription
+    }
+    
     // MARK: - Cases
     case network(NetworkError)
     case persistence(PersistenceError)

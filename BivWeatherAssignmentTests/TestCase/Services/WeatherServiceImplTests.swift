@@ -6,14 +6,14 @@ import XCTest
 /// Tests the weather service implementation including search, weather fetching, and caching functionality
 final class WeatherServiceImplTests: BaseXCTestCase {
     // MARK: - Properties
-    private var mockWeatherService: MockWeatherService!
+    private var mockWeatherService: WeatherServiceProtocol!
     private var mockNetworkManager: MockNetworkManager!
     
     // MARK: - Test Setup
     override func setUp() {
         super.setUp()
         mockNetworkManager = MockNetworkManager()
-        mockWeatherService = MockWeatherService(mockNetworkManager: mockNetworkManager)
+        mockWeatherService = WeatherServiceImpl(networkManager: mockNetworkManager)
     }
     
     override func tearDown() {
@@ -46,7 +46,7 @@ final class WeatherServiceImplTests: BaseXCTestCase {
         wait(for: [expectation], timeout: 1.0)
     }
     
-    func testSearchCities_WhenCityNotFound_ShouldReturnError() {
+    func testSearchCities_WhenError_ShouldReturnError() {
         // Given
         let expectedError: AppError = .search(.cityNotFound)
         let expectation = XCTestExpectation(description: "Search cities error")
@@ -58,13 +58,109 @@ final class WeatherServiceImplTests: BaseXCTestCase {
             .sink(receiveCompletion: { completion in
                 if case .failure(let error) = completion {
                     // Then
-                    XCTAssertEqual(error.localizedDescription, expectedError.localizedDescription, "Error should match expected error")
+                    XCTAssertEqual(error, expectedError, "Error should match expected error")
                 } else {
                     XCTFail("Search should fail with error")
                 }
                 expectation.fulfill()
             }, receiveValue: { _ in
                 XCTFail("Should not receive search results")
+            })
+            .store(in: &cancellables)
+        
+        wait(for: [expectation], timeout: 1.0)
+    }
+    
+    func testSearchCities_WhenEmptyResults_ShouldReturnEmptyArray() {
+        // Given
+        let expectation = XCTestExpectation(description: "Search cities empty results")
+        let query = WeatherSearchRequestParameters(query: "NonExistentCity123")
+        let mockResponse = networkHelper.createEmptySearchResponse()
+        mockNetworkManager.setMockResponse(.custom(mockResponse))
+        
+        // When
+        mockWeatherService.searchCities(query: query)
+            .sink(receiveCompletion: { completion in
+                if case .failure = completion {
+                    XCTFail("Search should not fail with empty results")
+                }
+                expectation.fulfill()
+            }, receiveValue: { results in
+                // Then
+                XCTAssertTrue(results.isEmpty, "Search results should be empty")
+            })
+            .store(in: &cancellables)
+        
+        wait(for: [expectation], timeout: 1.0)
+    }
+    
+    func testSearchCities_WhenNetworkError_ShouldReturnError() {
+        // Given
+        let expectation = XCTestExpectation(description: "Search cities network error")
+        let query = WeatherSearchRequestParameters(query: "London")
+        let netWorkErrorExpectation = AppError.network(.networkError(URLError(.notConnectedToInternet)))
+        mockNetworkManager.setMockResponse(.error(netWorkErrorExpectation))
+        
+        // When
+        mockWeatherService.searchCities(query: query)
+            .sink(receiveCompletion: { completion in
+                if case .failure(let error) = completion {
+                    // Then
+                    XCTAssertEqual(error, netWorkErrorExpectation)
+                } else {
+                    XCTFail("Search should fail with network error")
+                }
+                expectation.fulfill()
+            }, receiveValue: { _ in
+                XCTFail("Should not receive search results")
+            })
+            .store(in: &cancellables)
+        
+        wait(for: [expectation], timeout: 1.0)
+    }
+    
+    func testSearchCities_WhenResponseIsNil_ShouldReturnEmptyArray() {
+        // Given
+        let expectation = XCTestExpectation(description: "Search cities nil response")
+        let query = WeatherSearchRequestParameters(query: "London")
+        let mockResponse = networkHelper.createNilSearchResponse()
+        
+        mockNetworkManager.setMockResponse(.custom(mockResponse))
+        
+        // When
+        mockWeatherService.searchCities(query: query)
+            .sink(receiveCompletion: { completion in
+                if case .failure = completion {
+                    XCTFail("Search should not fail with nil response")
+                }
+                expectation.fulfill()
+            }, receiveValue: { results in
+                // Then
+                XCTAssertTrue(results.isEmpty, "Search results should be empty when response is nil")
+            })
+            .store(in: &cancellables)
+        
+        wait(for: [expectation], timeout: 1.0)
+    }
+    
+    func testSearchCities_WhenSearchAPIResultIsNil_ShouldReturnEmptyArray() {
+        // Given
+        let expectation = XCTestExpectation(description: "Search cities nil searchAPI result")
+        let query = WeatherSearchRequestParameters(query: "London")
+        let nilSearchAPIResult = SearchModel(searchAPI: SearchAPI(result: nil))
+        let encodedData = try? JSONEncoder().encode(nilSearchAPIResult)
+        mockNetworkManager.setMockResponse(.custom(encodedData))
+        
+        // When
+        mockWeatherService.searchCities(query: query)
+            .sink(receiveCompletion: { completion in
+                if case .failure = completion {
+                    XCTFail("Search should not fail with nil searchAPI result")
+                }
+                expectation.fulfill()
+            }, receiveValue: { results in
+                // Then
+                XCTAssertTrue(results.isEmpty, "Search results should be empty when searchAPI result is nil")
             })
             .store(in: &cancellables)
         
@@ -88,7 +184,7 @@ final class WeatherServiceImplTests: BaseXCTestCase {
             }, receiveValue: { weatherData in
                 // Then
                 XCTAssertNotNil(weatherData, "Weather data should not be nil")
-                XCTAssertEqual(weatherData.request?.first?.query, "London", "Weather data should match query")
+                XCTAssertEqual(weatherData.request?.first?.query, "Lat 51.52 and Lon -0.11", "Weather data should match query")
                 XCTAssertNotNil(weatherData.currentCondition?.first, "Current conditions should be present")
             })
             .store(in: &cancellables)
@@ -96,11 +192,38 @@ final class WeatherServiceImplTests: BaseXCTestCase {
         wait(for: [expectation], timeout: 1.0)
     }
     
-    func testGetWeather_WhenDataUnavailable_ShouldReturnError() {
+    func testGetWeather_WhenEmptyResponse_ShouldReturnEmptyWeatherData() {
         // Given
-        let expectedError = AppError.weather(.weatherDataUnavailable)
-        let expectation = XCTestExpectation(description: "Get weather error")
+        let expectation = XCTestExpectation(description: "Get weather empty response")
         let query = WeatherRequestParameters(query: "51.5074,-0.1278")
+        let mockResponse = networkHelper.createEmptyWeatherResponse()
+
+        mockNetworkManager.setMockResponse(.custom(mockResponse))
+        
+        // When
+        mockWeatherService.getWeather(query: query, forceRefresh: false)
+            .sink(receiveCompletion: { completion in
+                if case .failure = completion {
+                    XCTFail("Weather fetch should not fail with empty response")
+                }
+                expectation.fulfill()
+            }, receiveValue: { weatherData in
+                // Then
+                XCTAssertNotNil(weatherData, "Weather data should not be nil")
+                XCTAssertNil(weatherData.request, "Request data should be nil")
+                XCTAssertNil(weatherData.currentCondition, "Current conditions should be nil")
+            })
+            .store(in: &cancellables)
+        
+        wait(for: [expectation], timeout: 1.0)
+    }
+    
+    func testGetWeather_WhenNetworkError_ShouldReturnError() {
+        // Given
+        let expectation = XCTestExpectation(description: "Get weather network error")
+        let query = WeatherRequestParameters(query: "51.5074,-0.1278")
+        let expectedError: AppError = .network(.networkError(URLError(.notConnectedToInternet)))
+
         mockNetworkManager.setMockResponse(.error(expectedError))
         
         // When
@@ -108,9 +231,9 @@ final class WeatherServiceImplTests: BaseXCTestCase {
             .sink(receiveCompletion: { completion in
                 if case .failure(let error) = completion {
                     // Then
-                    XCTAssertEqual(error.localizedDescription, expectedError.localizedDescription, "Error should match expected error")
+                    XCTAssertEqual(error, expectedError)
                 } else {
-                    XCTFail("Weather fetch should fail with error")
+                    XCTFail("Weather fetch should fail with network error")
                 }
                 expectation.fulfill()
             }, receiveValue: { _ in
@@ -121,126 +244,78 @@ final class WeatherServiceImplTests: BaseXCTestCase {
         wait(for: [expectation], timeout: 1.0)
     }
     
-    // MARK: - Cache Tests
-    //    func testWeatherCache_WhenWithinCacheTime_ShouldReturnCachedData() {
-    //        // Given
-    //        let expectation = XCTestExpectation(description: "Get weather from cache")
-    //        let query = WeatherRequestParameters(query: "51.5074,-0.1278")
-    //        mockNetworkManager.setMockResponse(.weather)
-    //
-    //        // When
-    //        // First call to populate cache
-    //        mockWeatherService.getWeather(query: query, forceRefresh: false)
-    //            .sink(receiveCompletion: { _ in
-    //                // Second call within cache time
-    //                self.mockWeatherService.getWeather(query: query, forceRefresh: false)
-    //                    .sink(receiveCompletion: { completion in
-    //                        if case .failure = completion {
-    //                            XCTFail("Weather fetch should not fail")
-    //                        }
-    //                        expectation.fulfill()
-    //                    }, receiveValue: { weatherData in
-    //                        // Then
-    //                        XCTAssertNotNil(weatherData)
-    //                        XCTAssertEqual(self.mockNetworkManager.requestCount, 1, "Should only make one network request")
-    //                    })
-    //                    .store(in: &self.cancellables)
-    //            }, receiveValue: { _ in })
-    //            .store(in: &cancellables)
-    //
-    //        wait(for: [expectation], timeout: 1.0)
-    //    }
-    //
-    //    func testWeatherCache_WhenCacheExpired_ShouldMakeNewRequest() {
-    //        // Given
-    //        let expectation = XCTestExpectation(description: "Get weather after cache expiry")
-    //        let query = WeatherRequestParameters(query: "51.5074,-0.1278")
-    //        mockNetworkManager.setMockResponse(.weather)
-    //
-    //        // When
-    //        // First call to populate cache
-    //        mockWeatherService.getWeather(query: query, forceRefresh: false)
-    //            .sink(receiveCompletion: { _ in
-    //                // Simulate cache expiry
-    //                Thread.sleep(forTimeInterval: 61) // Cache time is 60 seconds
-    //
-    //                // Second call after cache expiry
-    //                self.mockWeatherService.getWeather(query: query, forceRefresh: false)
-    //                    .sink(receiveCompletion: { completion in
-    //                        if case .failure = completion {
-    //                            XCTFail("Weather fetch should not fail")
-    //                        }
-    //                        expectation.fulfill()
-    //                    }, receiveValue: { weatherData in
-    //                        // Then
-    //                        XCTAssertNotNil(weatherData)
-    //                        XCTAssertEqual(self.mockNetworkManager.requestCount, 2, "Should make two network requests")
-    //                    })
-    //                    .store(in: &self.cancellables)
-    //            }, receiveValue: { _ in })
-    //            .store(in: &cancellables)
-    //
-    //        wait(for: [expectation], timeout: 65.0)
-    //    }
-    //
-    //    func testWeatherCache_WhenForceRefresh_ShouldMakeNewRequest() {
-    //        // Given
-    //        let expectation = XCTestExpectation(description: "Get weather with force refresh")
-    //        let query = WeatherRequestParameters(query: "51.5074,-0.1278")
-    //        mockNetworkManager.setMockResponse(.weather)
-    //
-    //        // When
-    //        // First call to populate cache
-    //        mockWeatherService.getWeather(query: query, forceRefresh: false)
-    //            .sink(receiveCompletion: { _ in
-    //                // Second call with force refresh
-    //                self.mockWeatherService.getWeather(query: query, forceRefresh: true)
-    //                    .sink(receiveCompletion: { completion in
-    //                        if case .failure = completion {
-    //                            XCTFail("Weather fetch should not fail")
-    //                        }
-    //                        expectation.fulfill()
-    //                    }, receiveValue: { weatherData in
-    //                        // Then
-    //                        XCTAssertNotNil(weatherData)
-    //                        XCTAssertEqual(self.mockNetworkManager.requestCount, 2, "Should make two network requests")
-    //                    })
-    //                    .store(in: &self.cancellables)
-    //            }, receiveValue: { _ in })
-    //            .store(in: &cancellables)
-    //
-    //        wait(for: [expectation], timeout: 1.0)
-    //    }
-    //
-    //    func testWeatherCache_WhenDifferentQueries_ShouldNotUseCache() {
-    //        // Given
-    //        let expectation = XCTestExpectation(description: "Get weather for different queries")
-    //        let query1 = WeatherRequestParameters(query: "51.5074,-0.1278")
-    //        let query2 = WeatherRequestParameters(query: "40.7128,-74.0060")
-    //        mockNetworkManager.setMockResponse(.weather)
-    //
-    //        // When
-    //        // First call for query1
-    //        mockWeatherService.getWeather(query: query1, forceRefresh: false)
-    //            .sink(receiveCompletion: { _ in
-    //                // Second call for query2
-    //                self.mockWeatherService.getWeather(query: query2, forceRefresh: false)
-    //                    .sink(receiveCompletion: { completion in
-    //                        if case .failure = completion {
-    //                            XCTFail("Weather fetch should not fail")
-    //                        }
-    //                        expectation.fulfill()
-    //                    }, receiveValue: { weatherData in
-    //                        // Then
-    //                        XCTAssertNotNil(weatherData)
-    //                        XCTAssertEqual(self.mockNetworkManager.requestCount, 2, "Should make two network requests")
-    //                    })
-    //                    .store(in: &self.cancellables)
-    //            }, receiveValue: { _ in })
-    //            .store(in: &cancellables)
-    //
-    //        wait(for: [expectation], timeout: 1.0)
-    //    }
+    func testGetWeather_WhenForceRefresh_ShouldIgnoreCache() {
+        // Given
+        let expectation = XCTestExpectation(description: "Get weather force refresh")
+        let query = WeatherRequestParameters(query: "51.5074,-0.1278")
+        mockNetworkManager.setMockResponse(.weather)
+        
+        // When
+        mockWeatherService.getWeather(query: query, forceRefresh: true)
+            .sink(receiveCompletion: { completion in
+                if case .failure = completion {
+                    XCTFail("Weather fetch should not fail")
+                }
+                expectation.fulfill()
+            }, receiveValue: { weatherData in
+                // Then
+                XCTAssertNotNil(weatherData, "Weather data should not be nil")
+                XCTAssertTrue(self.mockNetworkManager.lastRequest?.cacheTime == 0, "Force refresh should be called")
+            })
+            .store(in: &cancellables)
+        
+        wait(for: [expectation], timeout: 1.0)
+    }
+    
+    func testGetWeather_WhenResponseIsNil_ShouldReturnEmptyWeatherData() {
+        // Given
+        let expectation = XCTestExpectation(description: "Get weather nil response")
+        let query = WeatherRequestParameters(query: "51.5074,-0.1278")
+        mockNetworkManager.setMockResponse(.custom(nil))
+        
+        // When
+        mockWeatherService.getWeather(query: query, forceRefresh: false)
+            .sink(receiveCompletion: { completion in
+                if case .failure = completion {
+                    XCTFail("Weather fetch should not fail with nil response")
+                }
+                expectation.fulfill()
+            }, receiveValue: { weatherData in
+                // Then
+                XCTAssertNotNil(weatherData, "Weather data should not be nil")
+                XCTAssertNil(weatherData.request, "Request data should be nil")
+                XCTAssertNil(weatherData.currentCondition, "Current conditions should be nil")
+            })
+            .store(in: &cancellables)
+        
+        wait(for: [expectation], timeout: 1.0)
+    }
+    
+    func testGetWeather_WhenDataIsNil_ShouldReturnEmptyWeatherData() {
+        // Given
+        let expectation = XCTestExpectation(description: "Get weather nil data")
+        let query = WeatherRequestParameters(query: "51.5074,-0.1278")
+        let nilWeatherData = WeatherModel(data: nil)
+        let encodedData = try? JSONEncoder().encode(nilWeatherData)
+        mockNetworkManager.setMockResponse(.custom(encodedData))
+        
+        // When
+        mockWeatherService.getWeather(query: query, forceRefresh: false)
+            .sink(receiveCompletion: { completion in
+                if case .failure = completion {
+                    XCTFail("Weather fetch should not fail with nil data")
+                }
+                expectation.fulfill()
+            }, receiveValue: { weatherData in
+                // Then
+                XCTAssertNotNil(weatherData, "Weather data should not be nil")
+                XCTAssertNil(weatherData.request, "Request data should be nil")
+                XCTAssertNil(weatherData.currentCondition, "Current conditions should be nil")
+            })
+            .store(in: &cancellables)
+        
+        wait(for: [expectation], timeout: 1.0)
+    }
     
     // MARK: - Cache Management Tests
     func testClearAllCaches() {
@@ -251,10 +326,8 @@ final class WeatherServiceImplTests: BaseXCTestCase {
         mockWeatherService.clearAllCaches()
         
         // Then
-        XCTAssertTrue(mockNetworkManager.isRemoveAllCacheCalled, "clearCache should be called on network manager")
+        XCTAssertTrue(mockNetworkManager.isRemoveAllCacheCalled)
         expectation.fulfill()
         wait(for: [expectation], timeout: 1.0)
     }
-    
-
 }

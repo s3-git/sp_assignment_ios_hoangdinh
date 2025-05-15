@@ -37,5 +37,6 @@ struct WeatherInfoCard<Content: View>: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(ThemeManager.shared.textColor.toColor.opacity(0.1))
         .clipShape(RoundedRectangle(cornerRadius: 16))
+        .accessibilityIdentifier(title)
     }
 }

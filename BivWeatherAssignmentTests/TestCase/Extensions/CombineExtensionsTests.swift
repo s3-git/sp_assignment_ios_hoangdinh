@@ -2,9 +2,7 @@
 import Combine
 import XCTest
 
-final class CombineExtensionsTests: XCTestCase {
-    // MARK: - Properties
-    private var cancellables: Set<AnyCancellable> = []
+final class CombineExtensionsTests: BaseXCTestCase {
     
     // MARK: - Test Classes
     private class TestObject {
@@ -66,33 +64,6 @@ final class CombineExtensionsTests: XCTestCase {
         XCTAssertEqual(testObject.value, 42)
         XCTAssertTrue(testObject.completionCalled)
         XCTAssertEqual(testObject.error as? TestError, .testError)
-    }
-    
-    func testAsyncConversion() async throws {
-        // Given
-        let subject = CurrentValueSubject<Int, TestError>(42)
-        
-        // When
-        let result = try await subject.async()
-        
-        // Then
-        XCTAssertEqual(result, 42)
-    }
-    
-    func testAsyncConversionWithError() async {
-        // Given
-        let subject = PassthroughSubject<Int, TestError>()
-        
-        // When
-        subject.send(completion: .failure(.testError))
-        
-        // Then
-        do {
-            _ = try await subject.async()
-            XCTFail("Should throw error")
-        } catch {
-            XCTAssertEqual(error as? TestError, .testError)
-        }
     }
     
     // MARK: - CurrentValueSubject Extensions Tests

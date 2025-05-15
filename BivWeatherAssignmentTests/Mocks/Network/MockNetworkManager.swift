@@ -12,11 +12,11 @@ final class MockNetworkManager: NetworkManagerProtocol, MockProtocol {
     
     // MARK: - Mock Data
     private var mockResponse: Data?
-    private let cacheManager: MockCacheManager
+    private let cacheManager: CacheManagerProtocol
     private let networkHelper = NetworkTestHelper.shared
     
     // MARK: - Initialization
-    init(cacheManager: MockCacheManager = MockCacheManager()) {
+    init(cacheManager: CacheManagerProtocol = MockCacheManager()) {
         self.cacheManager = cacheManager
     }
     
@@ -77,8 +77,6 @@ final class MockNetworkManager: NetworkManagerProtocol, MockProtocol {
                 mockError = error
             case .custom(let data):
                 mockResponse = data
-            case .emptySearch:
-                mockResponse = networkHelper.createEmptySearchResponse()
         }
     }
     
@@ -88,7 +86,6 @@ final class MockNetworkManager: NetworkManagerProtocol, MockProtocol {
         mockError = .network(.invalidResponse)
         lastRequest = nil
         mockResponse = nil
-        cacheManager.reset()
     }
 }
 
@@ -98,5 +95,4 @@ enum MockResponseType {
     case search
     case error(AppError)
     case custom(Data?)
-    case emptySearch
 }

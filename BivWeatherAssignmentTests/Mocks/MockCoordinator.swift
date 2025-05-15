@@ -1,29 +1,36 @@
 import Foundation
+import SwiftUI
 import UIKit
 
 /// Mock implementation of Coordinator for testing
 final class MockCoordinator: Coordinator, MockProtocol {
+    // MARK: - Properties
     let navigationController: UINavigationController
     
-    
-    
+    // MARK: - Initialization
     init(navigationController: UINavigationController) {
         self.navigationController = navigationController
     }
+    
+    // MARK: - Coordinator Methods
     func start() {
+        showHomeAsRoot()
     }
     
+    func showHomeAsRoot() {
+        let mockHomeVC = UIViewController()
+        mockHomeVC.title = "Home"
+        navigationController.setViewControllers([mockHomeVC], animated: false)
+    }
     
-    // MARK: - Properties
-    var showCityDetailCalled:Bool?
-
-    // MARK: - Coordinator
     func showCityDetail(for city: SearchResult) {
-        showCityDetailCalled = true
+        let mockDetailVC = UIViewController()
+        mockDetailVC.title = city.areaName?.first?.value
+        navigationController.pushViewController(mockDetailVC, animated: false)
     }
     
     // MARK: - MockProtocol
     func reset() {
-        showCityDetailCalled = false
+        navigationController.setViewControllers([], animated: false)
     }
 } 

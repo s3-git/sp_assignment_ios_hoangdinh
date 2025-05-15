@@ -57,20 +57,8 @@ final class CityCell: UITableViewCell {
         return label
     }()
 
-    private lazy var populationIcon: UIImageView = {
-        let imageView = UIImageView(image: UIImage(systemName: "person.3.fill"))
-        imageView.tintColor = ThemeManager.shared.textColor.withAlphaComponent(0.8)
-        imageView.contentMode = .scaleAspectFit
-        imageView.translatesAutoresizingMaskIntoConstraints = false
-        return imageView
-    }()
-
-    private lazy var populationLabel: UILabel = {
-        let label = UILabel()
-        label.font = ThemeManager.Fonts.caption
-        label.translatesAutoresizingMaskIntoConstraints = false
-        return label
-    }()
+    private var populationIcon: UIImageView?
+    private var populationLabel: UILabel?
 
     private lazy var removeButton: UIButton = {
         let button = UIButton(type: .system)
@@ -105,8 +93,6 @@ final class CityCell: UITableViewCell {
         containerView.addSubview(regionLabel)
         containerView.addSubview(countryLabel)
         containerView.addSubview(latLongLabel)
-        containerView.addSubview(populationIcon)
-        containerView.addSubview(populationLabel)
         containerView.addSubview(removeButton)
 
         // Setup constraints
@@ -137,21 +123,42 @@ final class CityCell: UITableViewCell {
             latLongLabel.leadingAnchor.constraint(equalTo: locationIcon.trailingAnchor, constant: ThemeManager.Spacing.medium),
             latLongLabel.trailingAnchor.constraint(equalTo: removeButton.leadingAnchor, constant: -ThemeManager.Spacing.medium),
 
-            populationIcon.topAnchor.constraint(equalTo: latLongLabel.bottomAnchor, constant: ThemeManager.Spacing.small),
-            populationIcon.leadingAnchor.constraint(equalTo: locationIcon.trailingAnchor, constant: ThemeManager.Spacing.medium),
-            populationIcon.widthAnchor.constraint(equalToConstant: 24),
-            populationIcon.heightAnchor.constraint(equalToConstant: 16),
-            populationIcon.bottomAnchor.constraint(equalTo: containerView.bottomAnchor, constant: -ThemeManager.Spacing.medium),
-
-            populationLabel.centerYAnchor.constraint(equalTo: populationIcon.centerYAnchor),
-            populationLabel.leadingAnchor.constraint(equalTo: populationIcon.trailingAnchor, constant: ThemeManager.Spacing.small),
-            populationLabel.trailingAnchor.constraint(equalTo: removeButton.leadingAnchor, constant: -ThemeManager.Spacing.medium),
-
             removeButton.centerYAnchor.constraint(equalTo: containerView.centerYAnchor),
             removeButton.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -ThemeManager.Spacing.medium),
             removeButton.widthAnchor.constraint(equalToConstant: 24),
             removeButton.heightAnchor.constraint(equalToConstant: 24)
         ])
+    }
+
+    private func setupPopulationViews() {
+        guard populationIcon == nil, populationLabel == nil else { return }
+        
+        let icon = UIImageView(image: UIImage(systemName: "person.3.fill"))
+        icon.tintColor = ThemeManager.shared.textColor.withAlphaComponent(0.8)
+        icon.contentMode = .scaleAspectFit
+        icon.translatesAutoresizingMaskIntoConstraints = false
+        
+        let label = UILabel()
+        label.font = ThemeManager.Fonts.caption
+        label.translatesAutoresizingMaskIntoConstraints = false
+        
+        containerView.addSubview(icon)
+        containerView.addSubview(label)
+        
+        NSLayoutConstraint.activate([
+            icon.topAnchor.constraint(equalTo: latLongLabel.bottomAnchor, constant: ThemeManager.Spacing.small),
+            icon.leadingAnchor.constraint(equalTo: locationIcon.trailingAnchor, constant: ThemeManager.Spacing.medium),
+            icon.widthAnchor.constraint(equalToConstant: 24),
+            icon.heightAnchor.constraint(equalToConstant: 16),
+            icon.bottomAnchor.constraint(equalTo: containerView.bottomAnchor, constant: -ThemeManager.Spacing.medium),
+            
+            label.centerYAnchor.constraint(equalTo: icon.centerYAnchor),
+            label.leadingAnchor.constraint(equalTo: icon.trailingAnchor, constant: ThemeManager.Spacing.small),
+            label.trailingAnchor.constraint(equalTo: removeButton.leadingAnchor, constant: -ThemeManager.Spacing.medium)
+        ])
+        
+        populationIcon = icon
+        populationLabel = label
     }
 
     /// Format population number with proper suffix (K, M, B)
@@ -206,12 +213,13 @@ final class CityCell: UITableViewCell {
 
         // Configure population
         if let population = Int(city.population ?? "") {
-            populationLabel.text = formatPopulation(population)
-            populationIcon.isHidden = false
-            populationLabel.isHidden = false
+            setupPopulationViews()
+            populationLabel?.text = formatPopulation(population)
+            populationIcon?.isHidden = false
+            populationLabel?.isHidden = false
         } else {
-            populationIcon.isHidden = true
-            populationLabel.isHidden = true
+            populationIcon?.isHidden = true
+            populationLabel?.isHidden = true
         }
 
         // Apply theme colors
@@ -221,8 +229,8 @@ final class CityCell: UITableViewCell {
         regionLabel.textColor = ThemeManager.shared.textColor.withAlphaComponent(0.8)
         countryLabel.textColor = ThemeManager.shared.textColor.withAlphaComponent(0.8)
         latLongLabel.textColor = ThemeManager.shared.textColor.withAlphaComponent(0.6)
-        populationIcon.tintColor = ThemeManager.shared.textColor.withAlphaComponent(0.8)
-        populationLabel.textColor = ThemeManager.shared.textColor.withAlphaComponent(0.8)
+        populationIcon?.tintColor = ThemeManager.shared.textColor.withAlphaComponent(0.8)
+        populationLabel?.textColor = ThemeManager.shared.textColor.withAlphaComponent(0.8)
     }
 
     override func prepareForReuse() {
@@ -231,9 +239,9 @@ final class CityCell: UITableViewCell {
         regionLabel.text = nil
         countryLabel.text = nil
         latLongLabel.text = nil
-        populationLabel.text = nil
-        populationIcon.isHidden = true
-        populationLabel.isHidden = true
+        populationLabel?.text = nil
+        populationIcon?.isHidden = true
+        populationLabel?.isHidden = true
         removeButton.isHidden = true
         removeButton.isUserInteractionEnabled = false
         isRecentCity = false

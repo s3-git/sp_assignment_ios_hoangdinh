@@ -13,19 +13,12 @@ final class MockCacheManager: CacheManagerProtocol, MockProtocol {
     
     // MARK: - Properties
     var shouldFail = false
-    var mockError: Error = NSError(domain: "MockError", code: -1, userInfo: nil)
-    var lastCachedKey: String?
-    var lastCachedData: Data?
-    var lastCacheExpiration: TimeInterval?
     
     // MARK: - Mock Data
     var cache: [String: (data: Data, expiration: Date)] = [:]
     
     // MARK: - CacheManagerProtocol
     func cacheResponse(_ data: Data, forKey key: String, expirationTime: TimeInterval) {
-        lastCachedKey = key
-        lastCachedData = data
-        lastCacheExpiration = expirationTime
         
         if !shouldFail {
             let expirationDate = Date().addingTimeInterval(expirationTime)
@@ -70,10 +63,6 @@ final class MockCacheManager: CacheManagerProtocol, MockProtocol {
     // MARK: - MockProtocol
     func reset() {
         shouldFail = false
-        mockError = NSError(domain: "MockError", code: -1, userInfo: nil)
-        lastCachedKey = nil
-        lastCachedData = nil
-        lastCacheExpiration = nil
         cache.removeAll()
     }
 }

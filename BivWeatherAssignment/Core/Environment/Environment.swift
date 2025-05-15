@@ -1,14 +1,18 @@
 import Foundation
 
 /// Environment configuration manager
-
-final class Environment {
+protocol EnvironmentProtocol {
+    var apiKey: String { get }
+    var baseURL: String { get }
+}
+final class Environment: EnvironmentProtocol {
     // MARK: - Singleton
     static let shared = Environment()
 
     // MARK: - Properties
-    private let plistName = "Environment"
+    private let plistName :String
     private var environmentDict: [String: Any]?
+    private let bundle: Bundle
 
     // MARK: - API Configuration
     var apiKey: String {
@@ -20,13 +24,15 @@ final class Environment {
     }
 
     // MARK: - Initialization
-    private init() {
-        loadPlist()
+    init(bundle: Bundle = .main,plistName:String = "Enviroment") {
+        self.bundle = bundle
+        self.plistName = plistName
+        self.loadPlist()
     }
 
     // MARK: - Private Methods
     private func loadPlist() {
-        guard let path = Bundle.main.path(forResource: plistName, ofType: "plist"),
+        guard let path = bundle.path(forResource: plistName, ofType: "plist"),
               let dict = NSDictionary(contentsOfFile: path) as? [String: Any] else {
             Logger.shared.error("Failed to load \(plistName).plist")
             return
