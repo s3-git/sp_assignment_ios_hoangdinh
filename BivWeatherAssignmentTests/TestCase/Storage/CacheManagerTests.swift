@@ -56,7 +56,6 @@ final class CacheManagerTests: XCTestCase {
         wait(for: [expectation], timeout: 0.3)
     }
     
-    
     func testClearCache() {
         // Given
         let testData1 = "test data 1".data(using: .utf8)!

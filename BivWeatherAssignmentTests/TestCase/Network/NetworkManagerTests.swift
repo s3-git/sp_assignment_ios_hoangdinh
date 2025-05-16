@@ -2,27 +2,27 @@
 import Combine
 import XCTest
 
-final class NetworkManagerTests: XCTestCase {
+final class NetworkManagerTests: BaseXCTestCase {
     // MARK: - Properties
     private var sut: NetworkManager!
     private var mockSession: MockURLSession!
     private var mockCacheManager: MockCacheManager!
-    private var cancellables: Set<AnyCancellable>!
     
     // MARK: - Test Lifecycle
     override func setUp() {
         super.setUp()
+        // Configure URLSession with caching
+        let configuration = URLSessionConfiguration.default
+        configuration.timeoutIntervalForRequest = AppConstants.Network.timeoutInterval
         mockSession = MockURLSession()
         mockCacheManager = MockCacheManager()
         sut = NetworkManager(session: mockSession, cacheManager: mockCacheManager)
-        cancellables = []
     }
     
     override func tearDown() {
         sut = nil
         mockSession = nil
         mockCacheManager = nil
-        cancellables = nil
         super.tearDown()
     }
     
@@ -196,6 +196,7 @@ final class NetworkManagerTests: XCTestCase {
         )
         
         // When
+        
         sut.request(mockEndpoint)
             .sink(
                 receiveCompletion: { completion in
@@ -302,6 +303,8 @@ private class MockURLSession: URLSession {
         init(closure: @escaping () -> Void) {
             self.closure = closure
         }
+        
+    
         
         override func resume() {
             closure()

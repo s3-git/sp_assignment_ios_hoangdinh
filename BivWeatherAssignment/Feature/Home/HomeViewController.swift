@@ -203,6 +203,7 @@ final class HomeViewController: BaseViewController {
     private func updateTableViewState() {
         let hasData = viewModel.showingRecentCities ? !viewModel.recentCities.isEmpty : !viewModel.cities.isEmpty
         emptyView.isHidden = hasData
+        emptyLabel.text = viewModel.showingRecentCities ? "No cities viewed yet" : "Empty search data"
         tableView.reloadData()
     }
 
