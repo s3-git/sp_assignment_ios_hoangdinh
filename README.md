@@ -39,24 +39,27 @@ A modern iOS weather application that allows users to search for cities and view
 ## Interface
 ### Search Screen
 <p align="center">
-
+ <img src="https://github.com/user-attachments/assets/95a99ff3-289b-4b09-916a-44c000b07eea" width="200">
+ <img src="https://github.com/user-attachments/assets/762b0cd1-77de-4893-8475-9df04f811082" width="200">
+ <img src="https://github.com/user-attachments/assets/972ea542-2ff8-40b4-a741-e6bde2b69d8b" width="200">
+ <img src="https://github.com/user-attachments/assets/d27003b9-72b0-4d60-b267-2c1ac2017ef2" width="200">
+ <img src="https://github.com/user-attachments/assets/c0d3f4e8-6da0-47bd-a7ba-0b0883324791" width="200">
 </p>
 
 ### City Screen
 <p align="center">
-
+ <img src="https://github.com/user-attachments/assets/33894eef-ee51-4c14-998c-ce0598b25f71" width="200">
 </p>
 
 ## Test Coverage
 ### Test Result
 <p align="center">
-
-
+ <img src="https://github.com/user-attachments/assets/a292c4c8-72c0-410d-b441-ed5ccc27694d" width="600">
 </p>
 
 ### Coverage
 <p align="center">
-
+ <img src="https://github.com/user-attachments/assets/45bc0ddf-f724-4a89-86e5-6cb620e861aa" width="600">
 </p>
 
 ## Architecture
