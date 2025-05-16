@@ -1,4 +1,3 @@
-![Simulator Screenshot - iPhone 16 Pro Max - 2025-05-16 at 09 54 21](https://github.com/user-attachments/assets/c73af493-dee2-4791-b7ea-d8295b094309)![Simulator Screenshot - iPhone 16 Pro Max - 2025-05-16 at 09 54 21](https://github.com/user-attachments/assets/61b445fd-afa1-42a1-a677-3a6473e83bfc)# Weather App
 
 A modern iOS weather application that allows users to search for cities and view their weather information. Built with a focus on MVVM architecture, maintainability, and performance.
 
@@ -45,7 +44,7 @@ A modern iOS weather application that allows users to search for cities and view
 
 ### City Screen
 <p align="center">
-![Uploading Simulator Screenshot - iPhone 16 Pro Max - 2025-05-16 at 09.54.21.png…]()
+
 </p>
 
 ## Test Coverage
